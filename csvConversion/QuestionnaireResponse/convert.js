@@ -7,8 +7,9 @@ const map = require("./map.json");
 
 var data = {
   csvData: [],
+  errors: {},
   QuestionnaireResponses: [],
-  fileDate: '',
+  fileDate: "",
   loadCsv: function(rawData) {
     var promise = new Promise(function(resolve, reject) {
       csv.parse(
@@ -28,18 +29,35 @@ var data = {
   convertToQR: function() {
     this.checkHeaders(this.csvData[0]);
     for (let i = 0; i < this.csvData.length; i++) {
-      var QR = { resourceType: "QuestionnaireResponse", id: this.fileDate + '-row' + i, item: [] };
+      var QR = {
+        resourceType: "QuestionnaireResponse",
+        id: this.fileDate + "-row" + i,
+        item: []
+      };
       var pathsChecked = {};
       Object.keys(this.csvData[i]).forEach(key => {
+        this.evaluateValue(this.csvData[i][key], map[key]["valueType"], i, key);
+        var tempValue = this.csvData[i][key];
+        if (map[key]["valueType"] == "choice") {
+          tempValue = this.convertValue(
+            tempValue,
+            map[key]["choiceMap"],
+            i,
+            key
+          );
+        }
         this.addQRItems(
           QR["item"],
           map[key]["path"],
           pathsChecked,
-          this.csvData[i][key],
-          map[key]['valueType'].charAt(0).toUpperCase() + map[key]['valueType'].slice(1)
+          tempValue,
+          map[key]["valueType"].charAt(0).toUpperCase() +
+            map[key]["valueType"].slice(1)
         );
       });
-      this.QuestionnaireResponses.push(QR);
+      if (!this.errors.hasOwnProperty(i)) {
+        this.QuestionnaireResponses.push(QR);
+      }
     }
   },
   checkHeaders: function(firstRow) {
@@ -55,6 +73,27 @@ var data = {
         "The following headers are not mapped: " + invalidHeaders.join()
       );
       throw new Error("Invalid Headers");
+    }
+  },
+  evaluateValue: function(value, valueType, row, key) {
+    //this function would evaluate value and push an error to this.errors if invalid
+  },
+  convertValue: function(value, valueMapLocation, row, key) {
+    //if there is an error in mapping the value (e.g. map missing, then push error), else convert
+    try {
+      var valueMap = require("./" + valueMapLocation);
+      if (valueMap[value] === undefined) {
+        throw new Error("Unmapped choice value");
+      }
+      return valueMap[value];
+    } catch (e) {
+      if (!this.errors.hasOwnProperty(row)) {
+        this.errors[row] = {};
+      }
+      if (!this.errors[row].hasOwnProperty(key)) {
+        this.errors[row][key] = {};
+      }
+      this.errors[row][key]["invalidValueMapping"] = true;
     }
   },
   addQRItems: function(tempObject, pathArray, pathsChecked, value, valueType) {
@@ -90,7 +129,7 @@ var data = {
       );
     } else {
       tempObject[indexPosition]["answer"] = {};
-      var valueName = "value" + valueType
+      var valueName = "value" + valueType;
       tempObject[indexPosition]["answer"][valueName] = value;
     }
   }
@@ -110,7 +149,7 @@ var promptSchema = {
 getFileName().then(result => {
   var rawData = bufferFile(result["fileName"] + ".csv");
   var uploadDate = new Date().toISOString();
-  data.fileDate = result["fileName"] + '-' + uploadDate;
+  data.fileDate = result["fileName"] + "-" + uploadDate;
   data
     .loadCsv(rawData)
     .then(output => {
@@ -118,8 +157,17 @@ getFileName().then(result => {
         throw new Error("CSV File is Invalid");
       }
       data.csvData = output;
-      data.convertToQR()
-      saveFile(result['fileName']+'_QuestionnaireResponse',JSON.stringify(data['QuestionnaireResponses'],null,3),'json');
+      data.convertToQR();
+      saveFile(
+        result["fileName"] + "_QuestionnaireResponse",
+        JSON.stringify(data["QuestionnaireResponses"], null, 3),
+        "json"
+      );
+      saveFile(
+        result["fileName"] + "_Errors",
+        JSON.stringify(data["errors"], null, 3),
+        "json"
+      );
     })
     .catch(e => {
       console.log(e);

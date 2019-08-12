@@ -11,7 +11,8 @@
 			{"linkid":"/Patient", "text":"Patient ID"},
 			{"linkid":"/Patient/gender", "text":"Gender"}
 		],
-		"valueType":"choice"
+		"valueType":"choice",
+		"choiceMap":"genderMap.json"
 	},
 	"FPStart": {
 		"path": [
