@@ -1,8 +1,8 @@
 {
-	"name":"Test Map 1",
+	"name":"Test Map 2",
 	"lastUpdated":"2019-08-16T04:16:52.772Z",
 	"created": "2019-08-16T04:16:52.772Z",
-	"uid":"map999",
+	"uid":"map002",
 	"questionnaireUID":"FPques",
 	"map": {
 		"DOB": {

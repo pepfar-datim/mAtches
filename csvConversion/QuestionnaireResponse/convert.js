@@ -36,23 +36,23 @@ var data = {
       };
       var pathsChecked = {};
       Object.keys(this.csvData[i]).forEach(key => {
-        this.evaluateValue(this.csvData[i][key], map[key]["valueType"], i, key);
+        this.evaluateValue(this.csvData[i][key], map['map'][key]["valueType"], i, key);
         var tempValue = this.csvData[i][key];
-        if (map[key]["valueType"] == "choice") {
+        if (map['map'][key]["valueType"] == "choice") {
           tempValue = this.convertValue(
             tempValue,
-            map[key]["choiceMap"],
+            map['map'][key]["choiceMap"],
             i,
             key
           );
         }
         this.addQRItems(
           QR["item"],
-          map[key]["path"],
+          map['map'][key]["path"],
           pathsChecked,
           tempValue,
-          map[key]["valueType"].charAt(0).toUpperCase() +
-            map[key]["valueType"].slice(1)
+          map['map'][key]["valueType"].charAt(0).toUpperCase() +
+            map['map'][key]["valueType"].slice(1)
         );
       });
       if (!this.errors.hasOwnProperty(i)) {
@@ -64,7 +64,7 @@ var data = {
     //we can prep using the first row because the csv parser requires csv to be internally consistent (each row must have as many entries as header row)
     var invalidHeaders = [];
     Object.keys(firstRow).forEach(key => {
-      if (!map.hasOwnProperty(key)) {
+      if (!map['map'].hasOwnProperty(key)) {
         invalidHeaders.push(key);
       }
     });
