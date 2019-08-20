@@ -19,7 +19,11 @@ app.get('/api/maps', api.getAll)
 
 app.get("/api/maps/:id", api.getSpecificResource);
 
-app.post('/api/maps/:id', api.createMap);
+app.post('/api/maps', api.createMap);
+
+app.put('/api/maps', api.updateMap);
+
+app.delete("/api/maps/:id", api.deleteMap);
 
 app.get('/api/questionnaires', api.getAll)
 
