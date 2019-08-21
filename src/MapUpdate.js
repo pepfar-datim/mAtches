@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import queryString from 'query-string'
 import  { Redirect } from 'react-router-dom'
+import HeaderBar from "./HeaderBar.js";
 import MapEdit from './MapEdit.js';
 import MapUpload from './MapUpload.js';
 
@@ -10,7 +11,7 @@ class MapUpdate extends Component {
     super(props);
     this.state = {
       //queryString delivers object for which hasOwnProperty is removed, so make copy for hack...
-      queryParams: JSON.parse(JSON.stringify(queryString.parse(props.location.search))), 
+      queryParams: JSON.parse(JSON.stringify(queryString.parse(this.props.location.search))), 
       mapID: props.match.params.id,
       map: {},
       questionnaireUID: '',
@@ -62,6 +63,7 @@ class MapUpdate extends Component {
     else{
       return (
         <div>
+          <HeaderBar config={this.props.config} />
           {this.state.mode=='edit' && (
             <MapEdit id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
           )}

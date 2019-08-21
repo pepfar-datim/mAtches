@@ -5,6 +5,10 @@ import Home from './Home.js';
 import MapDashboard from './MapDashboard.js';
 import MapUpdate from './MapUpdate.js';
 
+const config = {
+	name: "Tanzania Ministry of Health"	
+}
+
 class Main extends React.Component {
 
 	constructor(props) {
@@ -18,9 +22,19 @@ class Main extends React.Component {
 		return (
 			<div>
 		        <Switch>
-		          <Route exact path='/' component={Home}/>
-		          <Route exact path='/maps/:id' component={MapUpdate}/>
-		          <Route path='/maps' component={MapDashboard}/>
+		          <Route 
+		          	exact path='/'
+		          	render={(props) => <Home config={config} />}
+		          />
+		          <Route 
+		          	exact path='/maps/:id'
+		          	//component={MapUpdate}
+		          	render={(props) => <MapUpdate  {...props} config={config} />}
+		          />
+		          <Route 
+		          	exact path='/maps'
+		          	render={(props) => <MapDashboard config={config} />}
+		          />		          		          		          
 		        </Switch>
 			</div>
 		);

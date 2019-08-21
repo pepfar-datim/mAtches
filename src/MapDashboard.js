@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import HeaderBar from "./HeaderBar.js";
 
 class MapDashboard extends Component {
   // Initialize the state
@@ -29,6 +30,7 @@ class MapDashboard extends Component {
 
     return (
       <div>
+        <HeaderBar config={this.props.config} />
         <h1>List of Maps</h1>
         {/* Check to see if any items are found*/}
         {maps.length ? (

@@ -4,6 +4,8 @@
   "description": "proof of concept for mAppr",
   "main": "index.js",
   "dependencies": {
+    "@material-ui/core": "^4.3.2",
+    "@material-ui/icons": "^4.2.1",
     "express": "^4.17.1",
     "path": "^0.12.7",
     "pg": "^7.12.1",
