@@ -1,5 +1,3 @@
-const path = require('path');
-const fs = require('fs');
 const helpers = require('./helpers.js')
 const Pool = require('pg').Pool;
 
@@ -23,8 +21,13 @@ const getAll = (request, response) => {
 
 const getSpecificResource = (request, response) => {
     var type = request.path.split('/')[2];
-    const resourceJSON = require(path.join(__dirname + "/public/" + type + "/" + request.params.id + ".json"))
-    response.json(resourceJSON);
+    var getStatement = "SELECT * FROM " + type + " WHERE uid = '"+request.params.id+"';"
+    pool.query(getStatement, (error, results) => {
+      if (error) {
+        throw error
+      }
+      response.status(200).json(results.rows[0])
+    })
 }
 
 const checkForProp = (value, table, column, uidExclude) => {
@@ -34,6 +37,7 @@ const checkForProp = (value, table, column, uidExclude) => {
       checkStatement += " AND uid != '" + uidExclude + "'"
     }
     checkStatement += ";"
+    console.log(checkStatement)
     pool.query(checkStatement, (error, results) => {
       if (error) {
         throw error
@@ -53,7 +57,7 @@ const addToDB = (payload, uid) => {
     if (!payload.hasOwnProperty('lastUpdated')) {
       payload.lastUpdated = now;
     }
-    var insertStatement = "INSERT INTO maps (name, created, updated, uid, questionnaireUID) VALUES ('" + payload.name + "','"+payload.created + "','" + payload.lastUpdated + "','" + uid + "','" + payload.questionnaireUID +"');";
+    var insertStatement = "INSERT INTO maps (name, created, updated, uid, questionnaireUID, map) VALUES ('" + payload.name.replace(/'/gi,"''") + "','"+payload.created + "','" + payload.lastUpdated + "','" + uid + "','" + payload.questionnaireUID + "','" + JSON.stringify(payload.map).replace(/'/gi,"''") + "');";
     pool.query(insertStatement, (error, results) => {
       if (error) {
         throw error
@@ -72,28 +76,12 @@ const updateDB = (payload, uid) => {
     }
     payload.lastUpdated = now;
 
-    var updateStatement = "UPDATE maps SET name='"+payload.name+"', created='"+payload.created+"', updated='"+payload.lastUpdated+"', questionnaireUID='"+payload.questionnaireUID+"' WHERE uid='"+uid+"';"
+    var updateStatement = "UPDATE maps SET name='"+payload.name.replace(/'/gi,"''")+"', created='"+payload.created+"', updated='"+payload.lastUpdated+"', questionnaireUID='"+payload.questionnaireUID+"', map='"+JSON.stringify(payload.map).replace(/'/gi,"''")+"' WHERE uid='"+uid+"';"
     pool.query(updateStatement, (error, results) => {
       if (error) {
         throw error
       }
       resolve(results.rowCount > 0)
-    })
-  })
-  return promise
-}
-
-const uploadResource = (payload, uid) => {
-  var promise = new Promise(function(resolve, reject) {  
-    console.log('uploading for ' + uid);
-    fs.writeFile('public/maps/' + uid + ".json", JSON.stringify(payload), (err) => {
-      if (err) {
-        console.log(err);
-        resolve(err)
-      }
-      else {
-        resolve(true)
-      }
     })
   })
   return promise
@@ -108,7 +96,7 @@ const validateMapPayload = (payload, uid) => {
       resolve('Questionnaire UID is required')
     }
 
-    checkForProp(payload.name, 'maps', 'name', uid).then(nameConflict => {
+    checkForProp(payload.name.replace(/'/gi,"''"), 'maps', 'name', uid).then(nameConflict => {
       if (nameConflict) {
         resolve('Name (' + payload.name + ') already exists')
       }
@@ -124,7 +112,7 @@ const validateMapPayload = (payload, uid) => {
   return promise
 }
 
-const createMap = (request,response) => {
+const createMap = (request, response) => {
   var map = request.body;
   var uid = helpers.generateUID(); //should define as random at first and then redefine
   if (request.body.hasOwnProperty('uid')) {
@@ -139,27 +127,21 @@ const createMap = (request,response) => {
         if(validity === true){
           addToDB(request.body, uid).then(success => {
             if (success) {
-              uploadResource(request.body, uid).then(uploadSuccess =>{
-                if (uploadSuccess === true) {
-                  response.status('200').end('Uploaded map for: ' + uid + '\n');
-                }
-                else {
-                  response.status('400').end('Could not upload map for + ' + uid + '\n' + uploadSuccess +'\n');
-                }                
-              });
+              response.status('200').end('Uploaded map for: ' + uid + '\n');              
             }
             else {
               response.status('400').end('Problem with database upload\n');
-            }
-          })
+            }          
+          });
         }
         else {
           response.status('400').end('Problem with payload: ' + validity + '\n');
-        }
+        }          
       })
     }
   })
 }
+
 
 const updateMap = (request, response) => {
   var map = request.body;
@@ -171,14 +153,7 @@ const updateMap = (request, response) => {
     if (validity === true) {
       updateDB(request.body, uid).then(success => {
         if (success) {
-          uploadResource(request.body, uid).then(uploadSuccess =>{
-            if (uploadSuccess === true) {
-              response.status('200').end('Updated map with uid of: ' + uid + '\n');
-            }
-            else {
-              response.status('400').end('Could not update map with uid of: ' + uid + '\n' + uploadSuccess +'\n');
-            }
-          })
+          response.status('200').end('Updated map with uid of: ' + uid + '\n');
         }
         else {
          response.status('400').end('Problem updating database for ' + uid + '. Map with this id may not exist\n'); 
@@ -199,14 +174,7 @@ const deleteMap = (request, response) => {
       response.status(400).end('Failed to delete from database. Map with uid of ' + uid + ' may not exist\n')
     }
     else {
-      fs.unlink('public/maps/' + uid + ".json", (err) => {
-        if (err) {
-          response.status('400').end('Could not find map with uid of: ' + uid + '\n');
-        }
-        else {
-          response.status('200').end('Deleted map with uid of: ' + uid + '\n'); 
-        }
-      })      
+      response.status('200').end('Deleted map with uid of: ' + uid + '\n'); 
     }
   })
 }

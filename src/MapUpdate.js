@@ -37,11 +37,12 @@ class MapUpdate extends Component {
     .then(res => res.json())
     .then(map => {
       this.setState({"map": map })
-      var questionnaireUID = map.questionnaireUID;
+      var questionnaireUID = map.questionnaireuid;
       this.setState({"questionnaireUID":questionnaireUID});  
       return questionnaireUID
     })
     .then(questionnaireUID =>{
+      console.log(questionnaireUID)
       this.getSpecificQuestionnaire(questionnaireUID)
     })  
   }
