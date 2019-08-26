@@ -7,7 +7,7 @@ import IconButton from "@material-ui/core/IconButton";
 import SettingsIcon from "@material-ui/icons/Settings";
 import MenuIcon from "@material-ui/icons/Menu";
 import HelpIcon from "@material-ui/icons/Help";
-import LanguageIcon from "@material-ui/icons/Language";
+import MapIcon from "@material-ui/icons/Public";
 
 const useStyles = makeStyles({
 	root: {
@@ -24,7 +24,7 @@ function HeaderBar(props) {
 		<div>
 			<AppBar position="static" color="default">
 				<Toolbar>
-					<LanguageIcon/>
+					<MapIcon/>
 					<Typography style={{padding: "20px"}} variant="h5" color="inherit">
 						mAppr
 					</Typography>
@@ -40,6 +40,7 @@ function HeaderBar(props) {
 							className={classes.menuButton}
 							color="inherit"
 							aria-label="menu"
+							onClick={() => { window.location = '/maps/' }}
 						>
 							<MenuIcon />
 						</IconButton>

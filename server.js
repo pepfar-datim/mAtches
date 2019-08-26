@@ -23,11 +23,15 @@ app.post('/api/maps', api.createMap);
 
 app.put('/api/maps', api.updateMap);
 
-app.delete("/api/maps/:id", api.deleteMap);
+app.delete("/api/maps/:id", api.deleteSpecificResource);
 
 app.get('/api/questionnaires', api.getAll)
 
 app.get("/api/questionnaires/:id", api.getSpecificResource);
+
+app.post('/api/questionnaires', api.createQuestionnaire);
+
+app.delete("/api/questionnaires/:id", api.deleteSpecificResource);
 
 app.get('*', (req, res) => {
  res.sendFile(HTML_FILE); // EDIT

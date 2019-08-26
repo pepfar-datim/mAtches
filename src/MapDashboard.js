@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import HeaderBar from "./HeaderBar.js";
+import MapList from "./MapList.js";
+import MapAdd from "./MapAdd.js";
 
 class MapDashboard extends Component {
   // Initialize the state
@@ -13,6 +15,7 @@ class MapDashboard extends Component {
   // Fetch the list on first mount
   componentDidMount() {
     this.getMaps();
+    this.getQuestionnaires();
   }
 
   // Retrieves the list of items from the Express app
@@ -21,28 +24,33 @@ class MapDashboard extends Component {
     .then(res => res.json())
     .then(maps => {
       this.setState({"maps": maps })
+    })  
+  }
 
+  getQuestionnaires() {
+    fetch('/api/questionnaires')
+    .then(res => res.json())
+    .then(questionnaires => {
+      var questionnaireHash = questionnaires.reduce(function(mappedQs, q) {
+        if (!mappedQs.hasOwnProperty(q['uid'])){
+          mappedQs[q['uid']] = q['name'];
+          return mappedQs
+        }
+      },{})
+      this.setState({"questionnaireHash": questionnaireHash })
     })  
   }
 
   render() {
-    const { maps } = this.state;
-
     return (
       <div>
         <HeaderBar config={this.props.config} />
-        <h1>List of Maps</h1>
-        {/* Check to see if any items are found*/}
-        {maps.length ? (
-          <div>
-            <p>{JSON.stringify(this.state.maps)}</p>
+        {(this.state.questionnaireHash && this.state.maps) &&
+          <div>  
+            <MapList maps={this.state.maps} questionnaireHash={this.state.questionnaireHash}/>        
+            <MapAdd questionnaireHash={this.state.questionnaireHash}/>
           </div>
-        ) : (
-          <div>
-            <h2>No Maps Found</h2>
-          </div>
-        )
-      }
+        }
       </div>
     );
   }

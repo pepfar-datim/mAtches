@@ -42,7 +42,6 @@ class MapUpdate extends Component {
       return questionnaireUID
     })
     .then(questionnaireUID =>{
-      console.log(questionnaireUID)
       this.getSpecificQuestionnaire(questionnaireUID)
     })  
   }
@@ -56,9 +55,14 @@ class MapUpdate extends Component {
   }
   
   render() {
-    if(this.state.mode=='invalid'){
-        return(        
-          <Redirect to={'/maps/' + this.state.mapID + '?mode=edit'} />
+    if(this.state.mode==='invalid'){
+        //adding Header/MapEdit components is a hack...because redirect fails to rerender components...(not ideal approach)
+        return(
+          <div>        
+            <Redirect to={'/maps/' + this.state.mapID + '?mode=edit'} />
+            <HeaderBar config={this.props.config} />
+            <MapEdit id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
+          </div>
         )
     }
     else{

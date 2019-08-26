@@ -166,23 +166,51 @@ const updateMap = (request, response) => {
   })
 }      
 
-const deleteMap = (request, response) => {
+//generalized for questionnaires...however this is just for development convenience.
+//a real method to delete questionnaire needs to remove maps tied to questionnaire (or fail until maps are removed)
+const deleteSpecificResource = (request, response) => {
   var uid = request.params.id;
+  var type = request.path.split('/')[2];
+  var indType = type.substring(0,type.length - 1);
   //delete from database
-  pool.query("DELETE FROM maps WHERE uid='" + uid +"';", (error, results) => {
+  pool.query("DELETE FROM " + type + " WHERE uid='" + uid +"';", (error, results) => {
     if (error) {
-      response.status(400).end('Failed to delete from database. Map with uid of ' + uid + ' may not exist\n')
+      response.status(400).end('Failed to delete from database; ' + indType + ' with uid of ' + uid + ' may not exist\n')
     }
     else {
-      response.status('200').end('Deleted map with uid of: ' + uid + '\n'); 
+      response.status('200').end('Deleted ' + indType + ' with uid of: ' + uid + '\n'); 
     }
   })
 }
 
+//there are no validation checks here because users will not being interacting with this route
+//call is added for convenience of developing/deploying
+const createQuestionnaire = (request, response) => {
+  var payload = request.body
+  var uid = helpers.generateUID(); //should define as random at first and then redefine
+  if (payload.hasOwnProperty('uid')) {
+    uid = payload.uid;
+  }  
+  var now = new Date().toISOString();
+  if (!payload.hasOwnProperty('created')) {
+    payload.created = now;
+  }
+  if (!payload.hasOwnProperty('lastUpdated')) {
+    payload.lastUpdated = now;
+  }
+  var insertStatement = "INSERT INTO questionnaires (name, created, updated, uid, questionnaire) VALUES ('" + payload.name.replace(/'/gi,"''") + "','"+payload.created + "','" + payload.lastUpdated + "','" + uid + "','" + JSON.stringify(payload.questionnaire).replace(/'/gi,"''") + "');";
+  pool.query(insertStatement, (error, results) => {
+    if (error) {
+      response.status('400').end(error +'\n')
+    }
+    response.status('200').end('Uploaded questionnaire for: ' + uid + '\n')
+  })
+}
 module.exports = {
   getAll,
   getSpecificResource,
   createMap,
   updateMap,
-  deleteMap
+  deleteSpecificResource,
+  createQuestionnaire
 }
