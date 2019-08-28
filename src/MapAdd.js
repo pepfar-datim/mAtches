@@ -27,15 +27,48 @@ handleQuestionnaireChange(event){
   this.setState({questionnaire: event.target.value})
 }
 
-handleNameChange(event){
-  //make call to api (on timeout) to check name
-  this.setState({name: event.target.value})
+handleNameChange(event) {
+  var tempName = event.target.value;
+  if (this.state.timeout) {clearTimeout(this.state.timeout)}
+  this.setState({
+    checking: true,
+    name: tempName,
+    timeout: setTimeout(() => {
+      this.checkName(tempName, this);
+    }, 1000) 
+  });
 }
 
-handleAdd(event){
-  //if not invalid name push
+checkName(name, _this){
+  fetch('/api/maps/names/' + encodeURI(name))
+  .then(res => res.json())
+  .then(nameFound => {
+    _this.setState({
+      invalidName: nameFound,
+      checking: false
+    })
+  })
+}
+
+handleAdd(){
   if (!this.state.invalidName) {
-    //push, if comes back with 200, reroute to new edit of new map
+    var payload = {
+      "map": {},
+      "name": this.state.name,
+      "questionnaireUID": this.state.questionnaire
+    }
+    fetch('/api/maps',{
+      method:'POST', 
+      body:JSON.stringify(payload),
+      headers: {
+        'Content-Type': 'application/json',
+      },      
+    })
+  .then(res => res.json())
+  .then(response => {
+    response = JSON.parse(response) //not sure why this is necessary and why it's a string after .json() step above
+    window.location = '/maps/' + response.uid + '?mode=edit'
+  })
   }
   
 }
@@ -45,38 +78,41 @@ render() {
   return (
     <div style={{ padding: "20px" }}>
       <Paper style={{ backgroundColor: "lightBlue" }}>
-        <Typography style={{ padding: "20px" }} variant="h6">
-          Create a new map
-        </Typography>
-        <FormControl style={{width:'200px'}} >
-          <InputLabel shrink htmlFor="questionnaire-select">
-            Questionnaire
-          </InputLabel>
-          <Select value={this.state.questionnaire} displayEmpty name="questionnaire" onChange={this.handleQuestionnaireChange.bind(this)}>
-            {Object.keys(questionnaireHash).map((uid, index) =>
-                <MenuItem value={uid}>{questionnaireHash[uid]}</MenuItem>
-            )}     
-          </Select>
-        </FormControl>
-        <br />
-        <TextField
-          style={{width:'200px'}}
-          id="standard-name"
-          label="Name"
-          value={this.state.name}
-          margin="normal"
-          onChange={this.handleNameChange.bind(this)}
-        />
-        <br />
-        <IconButton
-          edge="start"
-          aria-label="menu"
-          onClick={() => {
-            console.log("adding a map");
-          }}
-        >
-          <AddCircleOutlinedIcon />
-        </IconButton>
+        <div style={{ padding: "20px" }}>
+          <Typography variant="h6" style={{ paddingBottom: "20px" }}>
+            Create a new map
+          </Typography>
+          <FormControl style={{width:'200px'}} >
+            <InputLabel shrink htmlFor="questionnaire-select">
+              Questionnaire
+            </InputLabel>
+            <Select value={this.state.questionnaire} displayEmpty name="questionnaire" onChange={this.handleQuestionnaireChange.bind(this)}>
+              {Object.keys(questionnaireHash).map((uid, index) =>
+                  <MenuItem value={uid}>{questionnaireHash[uid]}</MenuItem>
+              )}     
+            </Select>
+          </FormControl>
+          <br />
+          <TextField
+            style={{width:'200px'}}
+            id="standard-name"
+            label="Name"
+            value={this.state.name}
+            margin="normal"
+            onChange={this.handleNameChange.bind(this)}
+            error={this.state.invalidName}
+            helperText={this.state.invalidName && 'Name already used'}
+          />
+          <br />
+          <IconButton
+            edge="start"
+            aria-label="menu"
+            disabled={this.state.invalidName || this.state.checking || !this.state.name || !this.state.questionnaire}
+            onClick={this.handleAdd.bind(this)}
+          >
+            <AddCircleOutlinedIcon />
+          </IconButton>
+        </div>
       </Paper>
     </div>
   );
