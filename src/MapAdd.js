@@ -55,7 +55,7 @@ handleAdd(){
     var payload = {
       "map": {},
       "name": this.state.name,
-      "questionnaireUID": this.state.questionnaire
+      "questionnaireuid": this.state.questionnaire
     }
     fetch('/api/maps',{
       method:'POST', 

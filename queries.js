@@ -9,9 +9,42 @@ const pool = new Pool({
   port: 5432,
 })
 
+const allowableQuery = {
+  "maps": {
+    "uid": true,
+    "name": true
+  },
+  "questionnaires": {
+    "uid": true,
+    "name": true    
+  }
+}
+
+const checkTable = (table) => {
+  return allowableQuery.hasOwnProperty(table)
+}
+
+const checkColumn = (table, column) => {
+  var valid = false;
+  if (allowableQuery.hasOwnProperty(table)) {
+    if (allowableQuery[table].hasOwnProperty(column)) {
+      valid = true;
+    }
+  }
+  return valid
+}
+
 const getAll = (request, response) => {
   var type = request.path.split('/')[2];
-  pool.query('SELECT * FROM ' + type + ' ORDER BY id ASC', (error, results) => {
+  if (!checkTable(type)) {
+     response.status(403).end('Invalid\n') 
+  }
+
+  const query = {
+    text: "SELECT * FROM " + type + " ORDER BY id ASC;"
+  }
+  
+  pool.query(query, (error, results) => {
     if (error) {
       throw error
     }
@@ -19,26 +52,59 @@ const getAll = (request, response) => {
   })
 }
 
+const checkName = (request, response) => {
+  var type = request.path.split('/')[2];
+  if (!checkTable(type)) {
+     response.status(403).end('Invalid\n') 
+  }
+
+  const query = {
+    text: "SELECT * FROM " + type + " WHERE name=$1;",
+    values: [request.params.name]
+  }
+
+  pool.query(query, (error, results) => {
+    if (error) {
+      response.status(400).end(error)
+    }
+    response.status(200).send(results.rows.length>0)
+  })
+
+}
+
 const getSpecificResource = (request, response) => {
-    var type = request.path.split('/')[2];
-    var getStatement = "SELECT * FROM " + type + " WHERE uid = '"+request.params.id+"';"
-    pool.query(getStatement, (error, results) => {
-      if (error) {
-        throw error
-      }
-      response.status(200).json(results.rows[0])
-    })
+  var type = request.path.split('/')[2];
+  if (!checkTable(type)) {
+     response.status(403).end('Invalid\n') 
+  }  
+  const query = {
+    text: "SELECT * FROM " + type + " WHERE uid=$1",
+    values: [request.params.id]
+  }
+  pool.query(query, (error, results) => {
+    if (error) {
+      response.status(400).end(error)
+    }
+    response.status(200).json(results.rows[0])
+  })
 }
 
 const checkForProp = (value, table, column, uidExclude) => {
   var promise = new Promise(function(resolve, reject) {
-    var checkStatement = "SELECT * FROM " + table + " WHERE " + column + "='" + value +"'";
-    if (uidExclude) {
-      checkStatement += " AND uid != '" + uidExclude + "'"
+    if (!checkTable(table)) {resolve(true)}
+    if (!checkColumn(table, column)) {resolve(true)}
+
+    var query = {
+      text: "SELECT * FROM " + table + " WHERE " + column + "=$1;",
+      values: [value]
     }
-    checkStatement += ";"
-    console.log(checkStatement)
-    pool.query(checkStatement, (error, results) => {
+
+    if (uidExclude) {
+      query.text = "SELECT * FROM " + table + " WHERE " + column + "=$1 AND uid!=$2;";
+      query.values = [value, uidExclude];
+    }
+    
+    pool.query(query, (error, results) => {
       if (error) {
         throw error
       }
@@ -54,11 +120,16 @@ const addToDB = (payload, uid) => {
     if (!payload.hasOwnProperty('created')) {
       payload.created = now;
     }
-    if (!payload.hasOwnProperty('lastUpdated')) {
-      payload.lastUpdated = now;
+    if (!payload.hasOwnProperty('updated')) {
+      payload.updated = now;
     }
-    var insertStatement = "INSERT INTO maps (name, created, updated, uid, questionnaireUID, map) VALUES ('" + payload.name.replace(/'/gi,"''") + "','"+payload.created + "','" + payload.lastUpdated + "','" + uid + "','" + payload.questionnaireUID + "','" + JSON.stringify(payload.map).replace(/'/gi,"''") + "');";
-    pool.query(insertStatement, (error, results) => {
+
+    const query = {
+      text: "INSERT INTO maps (name, created, updated, uid, questionnaireuid, map) VALUES ($1, $2, $3, $4, $5, $6);",
+      values: [payload.name, payload.created, payload.updated, uid, payload.questionnaireuid, JSON.stringify(payload.map)]
+    }
+
+    pool.query(query, (error, results) => {
       if (error) {
         throw error
       }
@@ -74,10 +145,14 @@ const updateDB = (payload, uid) => {
     if (!payload.hasOwnProperty('created')) {
       payload.created = now;
     }
-    payload.lastUpdated = now;
+    payload.updated = now;
 
-    var updateStatement = "UPDATE maps SET name='"+payload.name.replace(/'/gi,"''")+"', created='"+payload.created+"', updated='"+payload.lastUpdated+"', questionnaireUID='"+payload.questionnaireUID+"', map='"+JSON.stringify(payload.map).replace(/'/gi,"''")+"' WHERE uid='"+uid+"';"
-    pool.query(updateStatement, (error, results) => {
+    const query = {
+      text: "UPDATE maps SET name=$1, created=$2, updated=$3, questionnaireuid=$4, map=$5 WHERE uid=$6;",
+      values: [payload.name,payload.created,payload.updated,payload.questionnaireuid,JSON.stringify(payload.map),uid]
+    }
+
+    pool.query(query, (error, results) => {
       if (error) {
         throw error
       }
@@ -92,17 +167,17 @@ const validateMapPayload = (payload, uid) => {
     if (!payload.hasOwnProperty('name')) {
       resolve('Name is required')
     }
-    if (!payload.hasOwnProperty('questionnaireUID')) {
+    if (!payload.hasOwnProperty('questionnaireuid')) {
       resolve('Questionnaire UID is required')
     }
 
     checkForProp(payload.name.replace(/'/gi,"''"), 'maps', 'name', uid).then(nameConflict => {
       if (nameConflict) {
-        resolve('Name (' + payload.name + ') already exists')
+        resolve('Name (' + payload.name + ') already exists(, or request is invalid)')
       }
-      checkForProp(payload.questionnaireUID, 'questionnaires', 'uid').then(questFound => {
+      checkForProp(payload.questionnaireuid, 'questionnaires', 'uid').then(questFound => {
         if (!questFound) {
-          resolve('questionnaireUID (' + payload.questionnaireUID + ') is invalid')
+          resolve('questionnaireuid (' + payload.questionnaireuid + ') is invalid(, or request is invalid)')
         }
         resolve(true)
       })
@@ -120,22 +195,22 @@ const createMap = (request, response) => {
   }  
   checkForProp(uid, 'maps', 'uid').then(idConflict => {
     if (idConflict) {
-      response.status('400').end('The uid provided/generated (' + uid + ') already exists. Please update and try again.\n')
+      response.status(400).end('The uid provided/generated (' + uid + ') already exists. Please update and try again.\n')
     }
     else {
       validateMapPayload(request.body, uid).then(validity => {
         if(validity === true){
           addToDB(request.body, uid).then(success => {
             if (success) {
-              response.status('200').end('Uploaded map for: ' + uid + '\n');              
+              response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');              
             }
             else {
-              response.status('400').end('Problem with database upload\n');
+              response.status(400).end('Problem with database upload\n');
             }          
           });
         }
         else {
-          response.status('400').end('Problem with payload: ' + validity + '\n');
+          response.status(400).end('Problem with payload: ' + validity + '\n');
         }          
       })
     }
@@ -146,22 +221,22 @@ const createMap = (request, response) => {
 const updateMap = (request, response) => {
   var map = request.body;
   if (!request.body.hasOwnProperty('uid')) {
-    response.status('400').end('Missing uid\n');
+    response.status(400).end('Missing uid\n');
   }
   var uid = request.body.uid;
   validateMapPayload(request.body, uid).then(validity => {
     if (validity === true) {
       updateDB(request.body, uid).then(success => {
         if (success) {
-          response.status('200').end('Updated map with uid of: ' + uid + '\n');
+          response.status(200).end('Updated map with uid of: ' + uid + '\n');
         }
         else {
-         response.status('400').end('Problem updating database for ' + uid + '. Map with this id may not exist\n'); 
+         response.status(400).end('Problem updating database for ' + uid + '. Map with this id may not exist\n'); 
         }
       })
     }
     else {
-      response.status('400').end('Problem with payload: ' + validity + '\n');
+      response.status(400).end('Problem with payload: ' + validity + '\n');
     }
   })
 }      
@@ -169,16 +244,30 @@ const updateMap = (request, response) => {
 //generalized for questionnaires...however this is just for development convenience.
 //a real method to delete questionnaire needs to remove maps tied to questionnaire (or fail until maps are removed)
 const deleteSpecificResource = (request, response) => {
-  var uid = request.params.id;
   var type = request.path.split('/')[2];
+  if (!checkTable(type)) {
+     response.status(403).end('Invalid\n') 
+  }  
   var indType = type.substring(0,type.length - 1);
+  var uid = request.params.id;
   //delete from database
-  pool.query("DELETE FROM " + type + " WHERE uid='" + uid +"';", (error, results) => {
+
+  const query = {
+    text: "DELETE FROM " + type + " WHERE uid=$1;",
+    values: [uid]
+  }
+
+  pool.query(query, (error, results) => {
     if (error) {
-      response.status(400).end('Failed to delete from database; ' + indType + ' with uid of ' + uid + ' may not exist\n')
+      response.status(400).end('Failed to delete from database')
     }
     else {
-      response.status('200').end('Deleted ' + indType + ' with uid of: ' + uid + '\n'); 
+      if (results.rowCount>0) {
+        response.status(200).end('Deleted ' + indType + ' with uid of: ' + uid + '\n'); 
+      }
+      else {
+        response.status(400).end('Failed to delete from database')
+      }
     }
   })
 }
@@ -195,19 +284,26 @@ const createQuestionnaire = (request, response) => {
   if (!payload.hasOwnProperty('created')) {
     payload.created = now;
   }
-  if (!payload.hasOwnProperty('lastUpdated')) {
-    payload.lastUpdated = now;
+  if (!payload.hasOwnProperty('updated')) {
+    payload.updated = now;
   }
-  var insertStatement = "INSERT INTO questionnaires (name, created, updated, uid, questionnaire) VALUES ('" + payload.name.replace(/'/gi,"''") + "','"+payload.created + "','" + payload.lastUpdated + "','" + uid + "','" + JSON.stringify(payload.questionnaire).replace(/'/gi,"''") + "');";
-  pool.query(insertStatement, (error, results) => {
+
+  const query = {
+    text: "INSERT INTO questionnaires (name, created, updated, uid, questionnaire) VALUES ($1, $2, $3, $4, $5);",
+    values: [payload.name, payload.created, payload.updated, uid, payload.questionnaire]
+  }  
+
+  pool.query(query, (error, results) => {
     if (error) {
-      response.status('400').end(error +'\n')
+      response.status(400).end(error +'\n')
     }
-    response.status('200').end('Uploaded questionnaire for: ' + uid + '\n')
+    response.status(200).end('Uploaded questionnaire for: ' + uid + '\n')
   })
 }
+
 module.exports = {
   getAll,
+  checkName,
   getSpecificResource,
   createMap,
   updateMap,
