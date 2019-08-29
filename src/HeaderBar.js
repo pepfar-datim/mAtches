@@ -9,6 +9,8 @@ import MenuIcon from "@material-ui/icons/Menu";
 import HelpIcon from "@material-ui/icons/Help";
 import MapIcon from "@material-ui/icons/Public";
 
+import config from '../config.json'
+
 const useStyles = makeStyles({
 	root: {
 		padding: "0px",
@@ -17,7 +19,7 @@ const useStyles = makeStyles({
 	}
 });
 
-function HeaderBar(props) {
+function HeaderBar() {
 	const classes = useStyles();
 
 	return (
@@ -32,7 +34,7 @@ function HeaderBar(props) {
 						variant="h6"
 						color="inherit"
 					>
-						{props.config.name}
+						{config.name}
 					</Typography>
 					<div style={{ position: "absolute", right: "0px" }}>
 						<IconButton
@@ -40,7 +42,7 @@ function HeaderBar(props) {
 							className={classes.menuButton}
 							color="inherit"
 							aria-label="menu"
-							onClick={() => { window.location = '/maps/' }}
+							onClick={() => { window.location = config.base + 'maps/' }}
 						>
 							<MenuIcon />
 						</IconButton>

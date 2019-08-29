@@ -3,6 +3,8 @@ import HeaderBar from "./HeaderBar.js";
 import MapList from "./MapList.js";
 import MapAdd from "./MapAdd.js";
 
+import config from '../config.json'
+
 class MapDashboard extends Component {
   // Initialize the state
   constructor(props){
@@ -20,7 +22,7 @@ class MapDashboard extends Component {
 
   // Retrieves the list of items from the Express app
   getMaps() {
-    fetch('/api/maps')
+    fetch(config.base + 'api/maps')
     .then(res => res.json())
     .then(maps => {
       this.setState({"maps": maps })
@@ -28,7 +30,7 @@ class MapDashboard extends Component {
   }
 
   getQuestionnaires() {
-    fetch('/api/questionnaires')
+    fetch(config.base + 'api/questionnaires')
     .then(res => res.json())
     .then(questionnaires => {
       var questionnaireHash = questionnaires.reduce(function(mappedQs, q) {
@@ -44,7 +46,7 @@ class MapDashboard extends Component {
   render() {
     return (
       <div>
-        <HeaderBar config={this.props.config} />
+        <HeaderBar />
         {(this.state.questionnaireHash && this.state.maps) &&
           <div>  
             <MapList maps={this.state.maps} questionnaireHash={this.state.questionnaireHash}/>        

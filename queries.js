@@ -1,6 +1,9 @@
 const helpers = require('./helpers.js')
 const Pool = require('pg').Pool;
 
+const config = require('./config.json')
+splitNumber = config.base.split('/').length;
+
 const pool = new Pool({
   user: 'me',
   host: 'localhost',
@@ -35,7 +38,7 @@ const checkColumn = (table, column) => {
 }
 
 const getAll = (request, response) => {
-  var type = request.path.split('/')[2];
+  var type = request.path.split('/')[splitNumber];
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n') 
   }
@@ -53,7 +56,7 @@ const getAll = (request, response) => {
 }
 
 const checkName = (request, response) => {
-  var type = request.path.split('/')[2];
+  var type = request.path.split('/')[splitNumber];
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n') 
   }
@@ -73,7 +76,7 @@ const checkName = (request, response) => {
 }
 
 const getSpecificResource = (request, response) => {
-  var type = request.path.split('/')[2];
+  var type = request.path.split('/')[splitNumber];
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n') 
   }  
@@ -244,7 +247,7 @@ const updateMap = (request, response) => {
 //generalized for questionnaires...however this is just for development convenience.
 //a real method to delete questionnaire needs to remove maps tied to questionnaire (or fail until maps are removed)
 const deleteSpecificResource = (request, response) => {
-  var type = request.path.split('/')[2];
+  var type = request.path.split('/')[splitNumber];
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n') 
   }  

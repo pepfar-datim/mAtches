@@ -12,6 +12,8 @@ import IconButton from "@material-ui/core/IconButton";
 
 import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
 
+import config from '../config.json'
+
 class MapAdd extends Component {
   // Initialize the state
   constructor(props){
@@ -40,7 +42,7 @@ handleNameChange(event) {
 }
 
 checkName(name, _this){
-  fetch('/api/maps/names/' + encodeURI(name))
+  fetch(config.base + 'api/maps/names/' + encodeURI(name))
   .then(res => res.json())
   .then(nameFound => {
     _this.setState({
@@ -57,7 +59,7 @@ handleAdd(){
       "name": this.state.name,
       "questionnaireuid": this.state.questionnaire
     }
-    fetch('/api/maps',{
+    fetch(config.base + 'api/maps',{
       method:'POST', 
       body:JSON.stringify(payload),
       headers: {
@@ -67,7 +69,7 @@ handleAdd(){
   .then(res => res.json())
   .then(response => {
     response = JSON.parse(response) //not sure why this is necessary and why it's a string after .json() step above
-    window.location = '/maps/' + response.uid + '?mode=edit'
+    window.location = config.base + 'maps/' + response.uid + '?mode=edit'
   })
   }
   

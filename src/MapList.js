@@ -1,6 +1,8 @@
 import React from "react";
 import MaterialTable from 'material-table'
 
+import config from '../config.json'
+
 import { forwardRef } from 'react';
 
 import AddBox from '@material-ui/icons/AddBox';
@@ -60,12 +62,12 @@ function MapList(props) {
 		          {
 		            icon: tableIcons.Edit,
 		            tooltip: 'Edit Map',
-		            onClick: (event, rowData) => {window.location = '/maps/' + rowData.uid + "?mode=edit"}
+		            onClick: (event, rowData) => {window.location = config.base + 'maps/' + rowData.uid + "?mode=edit"}
 		          },
 		          rowData => ({
 		            icon: tableIcons.Upload,
 		            tooltip: 'Upload to map',
-		            onClick: (event, rowData) => {window.location = '/maps/' + rowData.uid + "?mode=upload"},
+		            onClick: (event, rowData) => {window.location = config.base + 'maps/' + rowData.uid + "?mode=upload"},
 		            disabled: rowData.map === null
 		          }),
 		          {

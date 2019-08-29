@@ -5,9 +5,8 @@ import Home from './Home.js';
 import MapDashboard from './MapDashboard.js';
 import MapUpdate from './MapUpdate.js';
 
-const config = {
-	name: "Tanzania Ministry of Health"	
-}
+import config from '../config.json'
+const basePath = config.base;
 
 class Main extends React.Component {
 
@@ -23,17 +22,17 @@ class Main extends React.Component {
 			<div>
 		        <Switch>
 		          <Route 
-		          	exact path='/'
-		          	render={(props) => <Home config={config} />}
+		          	exact path={basePath}
+		          	render={(props) => <Home />}
 		          />
 		          <Route 
-		          	exact path='/maps/:id'
+		          	exact path={basePath + 'maps/:id'}
 		          	//component={MapUpdate}
-		          	render={(props) => <MapUpdate  {...props} config={config} />}
+		          	render={(props) => <MapUpdate  {...props} />}
 		          />
 		          <Route 
-		          	exact path='/maps'
-		          	render={(props) => <MapDashboard config={config} />}
+		          	exact path={basePath + 'maps'}
+		          	render={(props) => <MapDashboard />}
 		          />		          		          		          
 		        </Switch>
 			</div>

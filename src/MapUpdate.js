@@ -5,6 +5,8 @@ import HeaderBar from "./HeaderBar.js";
 import MapEdit from './MapEdit.js';
 import MapUpload from './MapUpload.js';
 
+import config from '../config.json'
+
 class MapUpdate extends Component {
   // Initialize the state
   constructor(props){
@@ -33,7 +35,7 @@ class MapUpdate extends Component {
 
   // Retrieves the list of items from the Express app
   getSpecificMap(id) {
-    fetch('/api/maps/' + id)
+    fetch(config.base + 'api/maps/' + id)
     .then(res => res.json())
     .then(map => {
       this.setState({"map": map })
@@ -47,7 +49,7 @@ class MapUpdate extends Component {
   }
   
   getSpecificQuestionnaire(id) {
-    fetch('/api/questionnaires/' + id)
+    fetch(config.base +'api/questionnaires/' + id)
     .then(res => res.json())
     .then(questionnaire => {
       this.setState({"questionnaire": questionnaire})
@@ -59,8 +61,8 @@ class MapUpdate extends Component {
         //adding Header/MapEdit components is a hack...because redirect fails to rerender components...(not ideal approach)
         return(
           <div>        
-            <Redirect to={'/maps/' + this.state.mapID + '?mode=edit'} />
-            <HeaderBar config={this.props.config} />
+            <Redirect to={config.base + 'maps/' + this.state.mapID + '?mode=edit'} />
+            <HeaderBar />
             <MapEdit id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
           </div>
         )
@@ -68,7 +70,7 @@ class MapUpdate extends Component {
     else{
       return (
         <div>
-          <HeaderBar config={this.props.config} />
+          <HeaderBar />
           {this.state.mode=='edit' && (
             <MapEdit id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
           )}
