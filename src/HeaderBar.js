@@ -24,7 +24,7 @@ function HeaderBar() {
 
 	return (
 		<div>
-			<AppBar position="static" color="default">
+			<AppBar position="relative" color="default">
 				<Toolbar>
 					<MapIcon/>
 					<Typography style={{padding: "20px"}} variant="h5" color="inherit">

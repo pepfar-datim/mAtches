@@ -70,12 +70,18 @@ class MapUpdate extends Component {
     else{
       return (
         <div>
-          <HeaderBar />
+          
           {this.state.mode=='edit' && (
-            <MapEdit id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
+            <div>
+              <HeaderBar />
+              <MapEdit id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
+            </div>
           )}
           {this.state.mode=='upload' && (
-            <MapUpload id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
+            <div>
+              <HeaderBar />
+              <MapUpload id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
+            </div>
           )}      
         </div>
       );
