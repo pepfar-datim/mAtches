@@ -19,7 +19,7 @@ import MailIcon from '@material-ui/icons/Mail';
 
 import { sizing } from '@material-ui/system';
 
-import HeaderBar from "./HeaderBar.js";
+import UploadCard from "./UploadCard.js";
 
 const drawerWidth = 200;
 
@@ -52,6 +52,7 @@ function MapUpload(props) {
                 <Typography variant="h6">
                   <strong>{id}</strong>
                 </Typography>
+                <br />
                 <Typography wrap="noWrap">
                   Where was the patient born? And why were they born there and not some other place?
                 </Typography>
@@ -66,13 +67,7 @@ function MapUpload(props) {
           </Card>
       </Grid>
       <Grid item xs >
-          <Card style={{backgroundColor: "lightGrey", height: "100%", "minHeight": "750px"}}>
- 
-              <Typography variant="h6">
-                Upload Data
-              </Typography>
-            
-          </Card>
+        <UploadCard map={map} questionnaire={questionnaire}/>
       </Grid>
     </Grid>      
     </div>
