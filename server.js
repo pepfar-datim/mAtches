@@ -7,8 +7,10 @@ const port = 5001
 
 const DIST_DIR = path.join(__dirname, './dist');
 const HTML_FILE = path.join(DIST_DIR, 'index.html');
-const ERROR_FILE = path.join(__dirname, 'error.html');
+const ERROR_FILE = path.join(DIST_DIR, 'error.html');
 app.use(bodyParser.json())
+app.use(bodyParser.text())
+
 app.use(
   bodyParser.urlencoded({
     extended: true,
@@ -28,6 +30,8 @@ app.get(basePath + 'api/maps/:id', api.getSpecificResource);
 app.post(basePath + 'api/maps', api.createMap);
 
 app.put(basePath + 'api/maps', api.updateMap);
+
+app.post(basePath + 'api/maps/:id/upload', api.uploadData);
 
 app.delete(basePath + 'api/maps/:id', api.deleteSpecificResource);
 

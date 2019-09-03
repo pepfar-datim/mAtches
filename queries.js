@@ -1,7 +1,10 @@
 const helpers = require('./helpers.js')
 const Pool = require('pg').Pool;
+const csv = require('csv');
 
 const config = require('./config.json')
+var convert = require('./convert.js')
+var convertToFHIR = convert.convertToFHIR;
 splitNumber = config.base.split('/').length;
 
 const pool = new Pool({
@@ -304,6 +307,26 @@ const createQuestionnaire = (request, response) => {
   })
 }
 
+const uploadData = (request, response) => {
+  
+  const query = {
+    text: "SELECT map FROM maps WHERE uid=$1",
+    values: [request.params.id]
+  }
+  pool.query(query, (error, results) => {
+    if (error) {
+      response.status(400).end(error)
+    }
+      var map = results.rows[0];
+      console.log(map)
+      convertToFHIR(request.body, map, request.params.id).then(result =>{
+        console.log(result);      
+        response.status(200).send('Uploading data to ' + request.params.id)
+    }) 
+  });
+  
+}
+
 module.exports = {
   getAll,
   checkName,
@@ -311,5 +334,6 @@ module.exports = {
   createMap,
   updateMap,
   deleteSpecificResource,
-  createQuestionnaire
+  createQuestionnaire,
+  uploadData
 }
