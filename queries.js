@@ -318,10 +318,8 @@ const uploadData = (request, response) => {
       response.status(400).end(error)
     }
       var map = results.rows[0];
-      console.log(map)
       convertToFHIR(request.body, map, request.params.id).then(result =>{
-        console.log(result);      
-        response.status(200).send('Uploading data to ' + request.params.id)
+        response.status(200).json(result)
     }) 
   });
   

@@ -4,8 +4,11 @@ import Typography from '@material-ui/core/Typography';
 import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/TextField";
 
-
 import PublishIcon from '@material-ui/icons/Publish';
+
+import ValidationCard from './ValidationCard.js'
+
+import config from '../config.json'
 
 import validateFile from './services/validateFile.js'
 
@@ -14,20 +17,49 @@ class UploadCard extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			fileName: ''
+			fileName: '',
 		};
 	}
- 	
+ 	setInitialState() {
+ 		this.setState({
+ 			finishedUploading:false,
+ 			data: [],
+ 			errors: {},
+ 			invalidHeaders: [],
+ 			missingHeaders: [],
+ 		})
+ 	}
  	uploadAction(e) {
       	this.refs.fileInput.click(e);
-      	//this.setState({fileName: 'oh hi!'})
  	}
 
  	upload(ev) {
  		ev.preventDefault();
+ 		this.setInitialState();
+ 		validateFile(ev,this).then(csvFile =>{
+	 		if (csvFile.validity) {
+	    		fetch(config.base + 'api/maps/' + this.props.map.uid + '/upload', {
+	        		method:'POST', body:csvFile.text, headers: {'Content-Type': 'text/plain; charset=UTF-8'}
+	    		})
+	    		.then(results => results.json())
+	    		.then(response => {
+	    			if(response.hasOwnProperty('errors')){
+	    				this.setState({errors: response.errors})	
+	    			}
+	    			if(response.hasOwnProperty('data')){
+	    				this.setState({data: response.data})	
+	    			}
+	    			this.setState({finishedUploading: true})
+	    		})
 
- 		var validity = validateFile(ev,this);
- 		this.setState({validFile: validity})
+	 		}
+	 		else {
+	 			this.setState({finishedUploading: true, invalidHeaders: csvFile.invalidHeaders, missingHeaders: csvFile.missingHeaders})	
+	 		}
+
+ 		});
+ 		
+ 		
  	}
 
 	render() {
@@ -53,16 +85,16 @@ class UploadCard extends React.Component {
 						<form style={{visibility: "hidden"}}>
 						  <input type="file" ref="fileInput"  accept=".csv" onChange={(ev) => { this.upload(ev)}} />
 						</form>
+						{this.state.finishedUploading &&
+							<ValidationCard 
+								errors={this.state.errors}
+								invalidHeaders={this.state.invalidHeaders}
+								missingHeaders={this.state.missingHeaders}
+								success={this.state.data.length>0}
+								data={this.state.data}
+							/>
+						}
 	          		</div>
-	          		{(this.state.validFile) &&
-		          		<div>
-		          			<Typography variant="body1">
-		            			File Invalid
-		          			</Typography>
-		          			<p>{this.state.invalidHeaders}</p>
-		          			<p>{this.state.missingHeaders}</p>    	
-		          		</div>
-		          	}
 	        	</div>            
 			</Card>
 		);

@@ -18,8 +18,9 @@ function validateFile(e,_this) {
 		readFileContent(files[0]).then((csvText) => {
 			var columnRow = csvText.split('\n')[0];
 			var columns = columnRow.split(',');
-			checkHeaders(columns, JSON.parse(JSON.stringify(_this.props.map.map)), _this);
-			resolve(true)
+			var result = checkHeaders(columns, JSON.parse(JSON.stringify(_this.props.map.map)));
+			result.text=csvText;
+			resolve(result)
 		})
 	    
 	})
@@ -34,7 +35,7 @@ function readFileContent(file) {
   });
 }
 
-function checkHeaders(columns, map, _this) {
+function checkHeaders(columns, map) {
 	let i = 0
 	let invalidHeaders = [];
 	for (let i = 0; i < columns.length; i++) {
@@ -45,6 +46,11 @@ function checkHeaders(columns, map, _this) {
 			delete map[columns[i]]
 		}
 	}
-	_this.setState({invalidHeaders: invalidHeaders, missingHeaders: Object.keys(map)})
+	var validity = true;
+	if (invalidHeaders.length>0 || Object.keys(map).length>0) {
+		validity = false;
+	}
+	
+	return({validity: validity, invalidHeaders: invalidHeaders, missingHeaders: Object.keys(map)})
 }
 export default validateFile;

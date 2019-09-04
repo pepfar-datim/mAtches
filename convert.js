@@ -1,10 +1,6 @@
 const csv = require("csv");
 
 var data = {
-  csvData: [],
-  errors: {},
-  QuestionnaireResponses: [],
-  map: {},
   mapDate: "",
   loadCsv: function(rawData) {
     var promise = new Promise(function(resolve, reject) {
@@ -122,6 +118,9 @@ var data = {
 
 const convertToFHIR = (csvText, map, mapID) => {
   data.map = map.map;
+  data.csvData = [];
+  data.errors = {};
+  data.QuestionnaireResponses = [];
   var end = {status: 400, message: "Something went wrong"};
   var promise = new Promise(function(resolve, reject) {
     var uploadDate = new Date().toISOString();
@@ -133,9 +132,16 @@ const convertToFHIR = (csvText, map, mapID) => {
       else {
         data.csvData = output;
         data.convertToQR();
-        end = {status: 200, message: "Converted", errors: data.errors, data: data.QuestionnaireResponses};  
+        end = {status: 200, message: "Converted"};
+
+        if(Object.keys(data.errors).length>0) {
+          end.errors=data.errors
+        }
+        else {
+          end.data=data.QuestionnaireResponses;
+        }
+        resolve(end)
       }
-      resolve(end)
     })
   })
   return promise
