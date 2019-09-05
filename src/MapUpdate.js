@@ -7,6 +7,8 @@ import MapUpload from './MapUpload.js';
 
 import config from '../config.json'
 
+import validateMap from './services/validateMap.js'
+
 class MapUpdate extends Component {
   // Initialize the state
   constructor(props){
@@ -52,7 +54,10 @@ class MapUpdate extends Component {
     fetch(config.base +'api/questionnaires/' + id)
     .then(res => res.json())
     .then(questionnaire => {
-      this.setState({"questionnaire": questionnaire})
+      this.setState({"questionnaire": questionnaire});
+      var mapCheck = {}
+      mapCheck = validateMap(this.state.map, questionnaire)
+      this.setState({mapCheck: mapCheck})
     })
   }
   
@@ -80,7 +85,7 @@ class MapUpdate extends Component {
           {this.state.mode=='upload' && (
             <div>
               <HeaderBar />
-              <MapUpload id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
+              <MapUpload id={this.state.mapID} map={this.state.map} questionnaireName={this.state.questionnaire.name} mapCheck={this.state.mapCheck}/>
             </div>
           )}      
         </div>

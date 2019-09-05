@@ -39,9 +39,8 @@ const useStyles = makeStyles(theme => ({
 function MapUpload(props) {
   const classes = useStyles();
 
-  var map = props.map;
-  var id = props.id;
-  var questionnaire=props.questionnaire;
+  var map = props.map;  
+  var mapCheck = props.mapCheck;  
 
   return (
     <div style={{"padding": "20px"}}>
@@ -50,12 +49,22 @@ function MapUpload(props) {
           <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
               <div style={{"padding": "20px"}}>            
                 <Typography variant="h6">
-                  <strong>{id}</strong>
+                  <strong>{map.name}</strong>
                 </Typography>
+                <Typography variant="body1">
+                  ({props.questionnaireName})
+                </Typography>                
                 <br />
-                <Typography wrap="noWrap">
-                  Where was the patient born? And why were they born there and not some other place?
-                </Typography>
+                {props.mapCheck &&
+                <div>
+                  <Typography wrap="noWrap">
+                    <strong>{mapCheck['flatQuestionnaire']['/Patient/id']['text']}</strong>
+                  </Typography>
+                  <Typography wrap="noWrap">
+                    {mapCheck['flatQuestionnaire']['/Patient/id']['header']}
+                  </Typography>                  
+                </div>
+                }
                 <Typography>
                   <br/>
                   Question 1<br/>
@@ -67,7 +76,7 @@ function MapUpload(props) {
           </Card>
       </Grid>
       <Grid item xs >
-        <UploadCard map={map} questionnaire={questionnaire}/>
+        <UploadCard map={map}/>
       </Grid>
     </Grid>      
     </div>
