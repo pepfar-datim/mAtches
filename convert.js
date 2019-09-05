@@ -1,7 +1,6 @@
 const csv = require("csv");
 
 var data = {
-  mapDate: "",
   loadCsv: function(rawData) {
     var promise = new Promise(function(resolve, reject) {
       csv.parse(
@@ -25,6 +24,8 @@ var data = {
       var QR = {
         resourceType: "QuestionnaireResponse",
         id: this.mapDate + "-row" + i,
+        status: "completed",
+        questionnaire: this.questionnaireURL,
         item: []
       };
       var pathsChecked = {};
@@ -111,16 +112,23 @@ var data = {
     } else {
       tempObject[indexPosition]["answer"] = {};
       var valueName = "value" + valueType;
-      tempObject[indexPosition]["answer"][valueName] = value;
+      if (valueName == "valueChoice") {
+        tempObject[indexPosition]["answer"]["valueCoding"] = {choice: value}  
+      }
+      else {
+        tempObject[indexPosition]["answer"][valueName] = value;  
+      }  
     }
   }
 };
 
-const convertToFHIR = (csvText, map, mapID) => {
+const convertToFHIR = (csvText, map, mapID, questionnaireURL) => {
   data.map = map.map;
   data.csvData = [];
   data.errors = {};
   data.QuestionnaireResponses = [];
+  data.questionnaireURL = questionnaireURL;
+
   var end = {status: 400, message: "Something went wrong"};
   var promise = new Promise(function(resolve, reject) {
     var uploadDate = new Date().toISOString();

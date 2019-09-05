@@ -310,17 +310,19 @@ const createQuestionnaire = (request, response) => {
 const uploadData = (request, response) => {
   
   const query = {
-    text: "SELECT map FROM maps WHERE uid=$1",
+    text: "SELECT m.map, q.questionnaire FROM maps m LEFT JOIN questionnaires q ON m.questionnaireuid=q.uid WHERE m.uid=$1",
     values: [request.params.id]
   }
   pool.query(query, (error, results) => {
     if (error) {
       response.status(400).end(error)
     }
-      var map = results.rows[0];
-      convertToFHIR(request.body, map, request.params.id).then(result =>{
+      console.log(results.rows[0]);
+      var map = {map: results.rows[0]['map']};
+      var questionnaireURL = results.rows[0]['questionnaire']['url'];
+      convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
         response.status(200).json(result)
-    }) 
+    })
   });
   
 }
