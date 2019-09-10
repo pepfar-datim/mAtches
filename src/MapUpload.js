@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import Card from '@material-ui/core/Card';
@@ -12,20 +12,19 @@ import { sizing } from '@material-ui/system';
 import UploadCard from "./UploadCard.js";
 import config from '../config.json'
 
+import loadMapQuestionnaire from './services/loadMapQuestionnaire.js'
+
 const drawerWidth = 200;
 
-const useStyles = makeStyles(theme => ({
+const classes = {
   root: {
     flexGrow: 1,
   },
   paper: {
     height: "500px",
     width: "500px",
-  },
-  control: {
-    padding: theme.spacing(2),
-  },
-}));
+  }
+};
 
 function formatQuestions(mapCheck) {
   return Object.keys(mapCheck['flatQuestionnaire']).map(function (k, i) {
@@ -44,52 +43,62 @@ function formatQuestions(mapCheck) {
 }
 
 
-function MapUpload(props) {
-  const classes = useStyles();
+class MapUpload extends Component {
 
-  var map = props.map;  
-  var mapCheck = props.mapCheck;
+  constructor(props){
+    super(props);
+    this.state = {
+      map: {"name":"","uid":""},
+      questionnaire: {"name":""},
+      mapCheck: {"flatQuestionnaire":{}}
+    }    
+  }
+
+  componentDidMount() {
+    loadMapQuestionnaire(this.props.id, config, this);
+  }
+
+  render() {    
+    return (
+        <div style={{"padding": "20px"}}>
+        <Grid container className={classes.root} wrap="nowrap" spacing={2}>
+          <Grid item xs={3} style={{maxWidth: "300px"}}>
+              <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
+                  <div style={{"padding": "20px"}}>            
+                    <Typography variant="h6">
+                      <strong>Map name: </strong>{this.state.map.name}
+                    </Typography>
+                    <Typography variant="body1">
+                      <strong>Questionnaire: </strong>{this.state.questionnaire.name}
+                    </Typography>                
+                    <IconButton
+                      edge="start"
+                      color="inherit"
+                      aria-label="menu"
+                      onClick = {() => {window.location = config.base + 'maps/' + this.state.map.uid + "?mode=edit"}}
+                    >
+                      <Edit />
+                    </IconButton>
+                    <br />
+                    <br />
+                    <br />
+                    {this.state.mapCheck &&
+                    <div>
+                      {formatQuestions(this.state.mapCheck)}
+                    </div>
+                    }  
+                  </div>        
+              </Card>
+          </Grid>
+          <Grid item xs >
+            <UploadCard map={this.state.map}/>
+          </Grid>
+        </Grid>      
+        </div>
 
 
-  return (
-    <div style={{"padding": "20px"}}>
-    <Grid container className={classes.root} wrap="nowrap" spacing={2}>
-      <Grid item xs={3} style={{maxWidth: "300px"}}>
-          <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
-              <div style={{"padding": "20px"}}>            
-                <Typography variant="h6">
-                  <strong>Map name: </strong>{props.map.name}
-                </Typography>
-                <Typography variant="body1">
-                  <strong>Questionnaire: </strong>{props.questionnaireName}
-                </Typography>                
-                <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="menu"
-                  onClick = {() => {window.location = config.base + 'maps/' + map.uid + "?mode=edit"}}
-                >
-                  <Edit />
-                </IconButton>
-                <br />
-                <br />
-                <br />
-                {props.mapCheck &&
-                <div>
-                  {formatQuestions(props.mapCheck)}
-                </div>
-                }  
-              </div>        
-          </Card>
-      </Grid>
-      <Grid item xs >
-        <UploadCard map={map}/>
-      </Grid>
-    </Grid>      
-    </div>
-
-
-  );
+    );
+  }
 }
 
 export default MapUpload;
