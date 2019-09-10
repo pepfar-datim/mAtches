@@ -58,10 +58,10 @@ function MapUpload(props) {
           <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
               <div style={{"padding": "20px"}}>            
                 <Typography variant="h6">
-                  <strong>{map.name}</strong>
+                  <strong>Map name: </strong>{props.map.name}
                 </Typography>
                 <Typography variant="body1">
-                  ({props.questionnaireName})
+                  <strong>Questionnaire: </strong>{props.questionnaireName}
                 </Typography>                
                 <IconButton
                   edge="start"
@@ -71,6 +71,7 @@ function MapUpload(props) {
                 >
                   <Edit />
                 </IconButton>
+                <br />
                 <br />
                 <br />
                 {props.mapCheck &&
