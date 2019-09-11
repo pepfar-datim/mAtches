@@ -35,12 +35,23 @@ const classes = {
   }
 };
 
+function pushMapBack (tempMap) {
+  fetch(config.base + 'api/maps',{
+  method:'PUT', 
+  body:JSON.stringify(tempMap),
+  headers: {
+    'Content-Type': 'application/json',
+  },      
+})
+}
 
 function handleDelete(header) {
 
   var tempMap = this.state['map'];
   delete tempMap['map'][header];
   this.setState({map: tempMap})
+  pushMapBack(tempMap);
+
 }
 
 function handleNameChange(event) {
@@ -63,6 +74,8 @@ function handleAdd() {
   var tempMap = this.state['map'];
   tempMap['map'][this.state.newHeaderName] = {}
   this.setState({map:tempMap, newHeaderName: ''})
+  pushMapBack(tempMap);
+
 }
 
 class MapEdit extends Component {
@@ -99,13 +112,17 @@ formatHeaders(currentMap, _this) {
   handleAssociationChange(event) {
     var tempMap = this.state.map; 
     var tempCheck = this.state.mapCheck;
-    console.log(tempCheck['flatQuestionnaire']);
-    console.log(tempMap);
+    if (tempMap['map'][event.target.value].hasOwnProperty('path')) {
+      var position = tempMap['map'][event.target.value]['path'].length - 1;
+      var qLocation = tempMap['map'][event.target.value]['path'][position]['linkid'];
+      tempCheck['flatQuestionnaire'][qLocation]['header'] = '';
+    }
     tempCheck['flatQuestionnaire'][event.target.name]['header'] = event.target.value;
     tempMap['map'][event.target.value]['path'] = tempCheck['flatQuestionnaire'][event.target.name]['path'].slice();
-    tempMap['map'][event.target.value]['valueType'] = tempCheck['flatQuestionnaire'][event.target.name]['valueType']
+    tempMap['map'][event.target.value]['valueType'] = tempCheck['flatQuestionnaire'][event.target.name]['valueType'];
     
     this.setState({mapCheck: tempCheck, map: tempMap})
+    pushMapBack(tempMap);
   }
 
   render() {

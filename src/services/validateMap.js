@@ -15,7 +15,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
 		for (let i=0; i<obj.length; i++) {
 			if (obj[i].hasOwnProperty('item')) {
 				var tempPath = path.slice(); //make temp copy to avoid pass by reference
-				tempPath.push(obj[i]['linkId'])
+				tempPath.push({"linkid": obj[i]['linkId'], "text": obj[i]['text']})
 				fq = generateFlatQuestionnaire(obj[i]['item'], fq, tempPath.slice())
 			}
 			else {				
@@ -23,7 +23,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
 					fq[obj[i]['linkId']] = {}
 				}
 				var tempPath = path.slice(); //make temp copy to avoid pass by reference
-				tempPath.push(obj[i]['linkId']);
+				tempPath.push({"linkid": obj[i]['linkId'], "text": obj[i]['text']});
 				fq[obj[i]['linkId']]['text'] = obj[i]['text'];
 				fq[obj[i]['linkId']]['valueType'] = obj[i]['type'];
 				fq[obj[i]['linkId']]['path'] = tempPath;
