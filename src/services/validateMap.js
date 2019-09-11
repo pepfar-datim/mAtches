@@ -1,8 +1,8 @@
 function validateMap(map, questionnaire) {
 	
 	var flatQuestionnaire = {};
-	
-	flatQuestionnaire = generateFlatQuestionnaire(questionnaire['questionnaire']['item'], flatQuestionnaire);
+	var path = [];
+	flatQuestionnaire = generateFlatQuestionnaire(questionnaire['questionnaire']['item'], flatQuestionnaire, path.slice());
 	
 	var validityCheck = {flatQuestionnaire: flatQuestionnaire};
 	validityCheck = populateWithMap(map['map'], validityCheck)
@@ -10,17 +10,24 @@ function validateMap(map, questionnaire) {
 	return validityCheck
 }
 
-function generateFlatQuestionnaire(obj, fq) {
+function generateFlatQuestionnaire(obj, fq, path) {
 	if (Array.isArray(obj)) {
 		for (let i=0; i<obj.length; i++) {
 			if (obj[i].hasOwnProperty('item')) {
-				fq = generateFlatQuestionnaire(obj[i]['item'], fq)
+				var tempPath = path.slice(); //make temp copy to avoid pass by reference
+				tempPath.push(obj[i]['linkId'])
+				fq = generateFlatQuestionnaire(obj[i]['item'], fq, tempPath.slice())
 			}
-			else {
+			else {				
 				if(!fq.hasOwnProperty(obj[i]['linkId'])) {
 					fq[obj[i]['linkId']] = {}
 				}
-				fq[obj[i]['linkId']]['text'] = obj[i]['text']		
+				var tempPath = path.slice(); //make temp copy to avoid pass by reference
+				tempPath.push(obj[i]['linkId']);
+				fq[obj[i]['linkId']]['text'] = obj[i]['text'];
+				fq[obj[i]['linkId']]['valueType'] = obj[i]['type'];
+				fq[obj[i]['linkId']]['path'] = tempPath;
+
 			}
 		}
 	}

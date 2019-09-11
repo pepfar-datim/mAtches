@@ -88,13 +88,25 @@ formatHeaders(currentMap, _this) {
       questionnaire: {"name":""},
       mapCheck: {"flatQuestionnaire":{}},
       newHeaderName: ''
-    }    
+    }
+    this.handleAssociationChange = this.handleAssociationChange.bind(this);        
   }
 
   componentDidMount() {
     loadMapQuestionnaire(this.props.id, config, this);
   }
 
+  handleAssociationChange(event) {
+    var tempMap = this.state.map; 
+    var tempCheck = this.state.mapCheck;
+    console.log(tempCheck['flatQuestionnaire']);
+    console.log(tempMap);
+    tempCheck['flatQuestionnaire'][event.target.name]['header'] = event.target.value;
+    tempMap['map'][event.target.value]['path'] = tempCheck['flatQuestionnaire'][event.target.name]['path'].slice();
+    tempMap['map'][event.target.value]['valueType'] = tempCheck['flatQuestionnaire'][event.target.name]['valueType']
+    
+    this.setState({mapCheck: tempCheck, map: tempMap})
+  }
 
   render() {
     return (
@@ -142,7 +154,11 @@ formatHeaders(currentMap, _this) {
             </Card>
         </Grid>
         <Grid item xs >
-          <EditCard mapCheck={this.state.mapCheck} map={this.state.map}/>
+          <EditCard 
+            mapCheck={this.state.mapCheck} 
+            map={this.state.map}
+            onAssociation={this.handleAssociationChange}
+            />
         </Grid>
       </Grid>      
       </div>

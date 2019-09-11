@@ -24,13 +24,13 @@ function formatMenuItems(currentMap) {
 
 }
 
-function formatSelect(header,map) {
+function formatSelect(header,key,map,associationFunction) {
     return(
 		<FormControl style={{minWidth: "120px", paddingTop: "10px"}}>
 		<Select
 		  value={header || ''}
-		  onChange={handleChange}
-		  name="age"
+		  onChange={associationFunction}
+		  name={key}
 		>
 			{formatMenuItems(map)}
 		</Select>
@@ -38,14 +38,14 @@ function formatSelect(header,map) {
     )
 }
 
-function formatQuestions(mapCheck,map) {
+function formatQuestions(mapCheck,map, associationFunction) {
   return Object.keys(mapCheck['flatQuestionnaire']).map(function (k, i) {
     return(
       <div key={'question-'+i} style={{paddingBottom: "40px"}}>
         <Typography wrap="noWrap">
           <strong>{mapCheck['flatQuestionnaire'][k]['text']}</strong>
         </Typography>
-		{formatSelect(mapCheck['flatQuestionnaire'][k]['header'],map)}        
+		{formatSelect(mapCheck['flatQuestionnaire'][k]['header'],k,map,associationFunction)}        
       </div>
 
     )
@@ -70,7 +70,7 @@ class EditCard extends React.Component {
 	          		<div style={{padding: "5px"}}>
 	                {this.props.mapCheck && this.props.map &&
 	                <div>
-	                  {formatQuestions(this.props.mapCheck, this.props.map['map'])}
+	                  {formatQuestions(this.props.mapCheck, this.props.map['map'], this.props.onAssociation)}
 	                </div>
 	                }  
 	          		</div>
