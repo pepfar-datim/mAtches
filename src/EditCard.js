@@ -8,8 +8,11 @@ import MenuItem from '@material-ui/core/MenuItem';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
+import Button from '@material-ui/core/Button';
 
 import PublishIcon from '@material-ui/icons/Publish';
+
+import config from '../config.json'
 
 function handleChange(event) {
 	console.log(event)
@@ -60,9 +63,13 @@ class EditCard extends React.Component {
 		};
 	}
 
+redirectToUpload () {
+	window.location = config.base + 'maps/' + this.props.map.uid + '?mode=upload'
+}
+
 	render() {
 		return(
-	      	<Card style={{backgroundColor: "lightGrey", height: "100%", "minHeight": "750px"}}>
+	      	<Card style={{position: "relative", backgroundColor: "lightGrey", height: "100%", "minHeight": "750px"}}>
 	        	<div style={{"padding": "20px"}}>
 	          		<Typography variant="h6" style={{marginBottom: "5px"}}>
 	            		<strong>Map Source Headers to Target Questions</strong>
@@ -72,9 +79,18 @@ class EditCard extends React.Component {
 	                <div>
 	                  {formatQuestions(this.props.mapCheck, this.props.map['map'], this.props.onAssociation)}
 	                </div>
+
 	                }  
 	          		</div>
-	        	</div>            
+	        	</div>
+					<div>
+						<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: "darkSeaGreen"}}
+							onClick={this.redirectToUpload.bind(this)}
+						>
+						Upload Data
+						<PublishIcon style={{margin: "5px"}} />
+						</Button>						
+					</div>   	        	            
 			</Card>
 		);
 	}
