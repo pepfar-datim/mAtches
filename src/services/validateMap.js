@@ -36,6 +36,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
 
 function populateWithMap(map, vc) {
 	for (var key in map) {
+	//Need to add handling for when user has created a header,but it hasn't been associated with anything (otherwise problems on reload)		
 		var tempId = map[key]['path'][map[key]['path'].length - 1]['linkid'];
 		if (!vc['flatQuestionnaire'].hasOwnProperty(tempId)) {
 			vc['invalidMap'] = true;
