@@ -95,108 +95,115 @@ formatHeaders(currentMap, _this) {
   })  
 }
 
-  constructor(props){
-    super(props);
-    this.state = {
-      map: {"name":"","uid":""},
-      questionnaire: {"name":""},
-      mapCheck: {"flatQuestionnaire":{}},
-      newHeaderName: '',
-      editValueMap: false 
+constructor(props){
+  super(props);
+  this.state = {
+    map: {"name":"","uid":""},
+    questionnaire: {"name":""},
+    mapCheck: {"flatQuestionnaire":{}},
+    newHeaderName: '',
+    editValueMap: false,
+    header: ''
+  }
+  this.handleAssociationChange = this.handleAssociationChange.bind(this);
+  this.handleValueMap = this.handleValueMap.bind(this);
+  this.handleValueMapClose = this.handleValueMapClose.bind(this);        
+}
+
+componentDidMount() {
+  loadMapQuestionnaire(this.props.id, config, this);
+}
+
+handleAssociationChange(event) {
+  var tempMap = this.state.map; 
+  var tempCheck = this.state.mapCheck;
+  if (tempMap['map'][event.target.value].hasOwnProperty('path')) {
+    var position = tempMap['map'][event.target.value]['path'].length - 1;
+    var qLocation = tempMap['map'][event.target.value]['path'][position]['linkid'];
+    tempCheck['flatQuestionnaire'][qLocation]['header'] = '';
+  }
+  tempCheck['flatQuestionnaire'][event.target.name]['header'] = event.target.value;
+  tempMap['map'][event.target.value]['path'] = tempCheck['flatQuestionnaire'][event.target.name]['path'].slice();
+  tempMap['map'][event.target.value]['valueType'] = tempCheck['flatQuestionnaire'][event.target.name]['valueType'];
+  
+  this.setState({mapCheck: tempCheck, map: tempMap})
+  pushMapBack(tempMap);
+}
+
+handleValueMap(tempHeader) {
+  this.setState({editValueMap: true, header: tempHeader})
+}
+
+handleValueMapClose(event) {
+  this.setState({editValueMap: false})
+}
+
+render() {
+  return (
+    <div style={{"padding": "20px"}}>
+    {this.state.editValueMap &&
+          <ValueMapCard 
+            map={this.state.map}
+            header={this.state.header}
+            onValueMapClose={this.handleValueMapClose}
+ 
+          />
     }
-    this.handleAssociationChange = this.handleAssociationChange.bind(this);
-    this.handleValueMap = this.handleValueMap.bind(this);        
+    {!this.state.editValueMap &&            
+    <Grid container className={classes.root} wrap="nowrap" spacing={2}>
+      <Grid item xs={3} style={{maxWidth: "300px"}}>
+          <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
+              <div style={{"padding": "20px"}}>            
+                <Typography variant="h6">
+                  <strong>Map name: </strong>{this.state.map.name}
+                </Typography>
+                <Typography variant="body1">
+                  <strong>Questionnaire: </strong>{this.state.questionnaire.name}
+                </Typography>
+                <br /> 
+                <br />
+                <Typography variant="h6">
+                  <strong>Source Headers</strong>
+                </Typography>              
+                <br />
+                <TextField
+                  style={{width:'120px'}}
+                  id="standard-name"
+                  label="Add a Header"
+                  value={this.state.newHeaderName}
+                  margin="normal"
+                  onChange={handleNameChange.bind(this)}
+                />
+                <br />
+                <IconButton
+                  edge="start"
+                  aria-label="menu"
+                  onClick={handleAdd.bind(this)}
+                >
+                  <AddCircleOutlinedIcon />
+                </IconButton>
+                <br />
+                <br />
+                {this.state.map['map'] &&
+                <div>
+                  {this.formatHeaders(this.state.map['map'], this)}
+                </div>
+                }  
+              </div>        
+          </Card>
+      </Grid>
+      <Grid item xs >
+          <EditCard 
+            mapCheck={this.state.mapCheck} 
+            map={this.state.map}
+            onAssociation={this.handleAssociationChange}
+            onValueMap={this.handleValueMap}
+          />
+        
+      </Grid>
+    </Grid>      
   }
-
-  componentDidMount() {
-    loadMapQuestionnaire(this.props.id, config, this);
-  }
-
-  handleAssociationChange(event) {
-    var tempMap = this.state.map; 
-    var tempCheck = this.state.mapCheck;
-    if (tempMap['map'][event.target.value].hasOwnProperty('path')) {
-      var position = tempMap['map'][event.target.value]['path'].length - 1;
-      var qLocation = tempMap['map'][event.target.value]['path'][position]['linkid'];
-      tempCheck['flatQuestionnaire'][qLocation]['header'] = '';
-    }
-    tempCheck['flatQuestionnaire'][event.target.name]['header'] = event.target.value;
-    tempMap['map'][event.target.value]['path'] = tempCheck['flatQuestionnaire'][event.target.name]['path'].slice();
-    tempMap['map'][event.target.value]['valueType'] = tempCheck['flatQuestionnaire'][event.target.name]['valueType'];
-    
-    this.setState({mapCheck: tempCheck, map: tempMap})
-    pushMapBack(tempMap);
-  }
-
-  handleValueMap(event) {
-    console.log('clicking value map')
-    this.setState({editValueMap: true})
-  }
-
-  render() {
-    return (
-      <div style={{"padding": "20px"}}>
-      <Grid container className={classes.root} wrap="nowrap" spacing={2}>
-        <Grid item xs={3} style={{maxWidth: "300px"}}>
-            <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
-                <div style={{"padding": "20px"}}>            
-                  <Typography variant="h6">
-                    <strong>Map name: </strong>{this.state.map.name}
-                  </Typography>
-                  <Typography variant="body1">
-                    <strong>Questionnaire: </strong>{this.state.questionnaire.name}
-                  </Typography>
-                  <br /> 
-                  <br />
-                  <Typography variant="h6">
-                    <strong>Source Headers</strong>
-                  </Typography>              
-                  <br />
-                  <TextField
-                    style={{width:'120px'}}
-                    id="standard-name"
-                    label="Add a Header"
-                    value={this.state.newHeaderName}
-                    margin="normal"
-                    onChange={handleNameChange.bind(this)}
-                  />
-                  <br />
-                  <IconButton
-                    edge="start"
-                    aria-label="menu"
-                    onClick={handleAdd.bind(this)}
-                  >
-                    <AddCircleOutlinedIcon />
-                  </IconButton>
-                  <br />
-                  <br />
-                  {this.state.map['map'] &&
-                  <div>
-                    {this.formatHeaders(this.state.map['map'], this)}
-                  </div>
-                  }  
-                </div>        
-            </Card>
-        </Grid>
-        <Grid item xs >
-          {!this.state.editValueMap &&
-            <EditCard 
-              mapCheck={this.state.mapCheck} 
-              map={this.state.map}
-              onAssociation={this.handleAssociationChange}
-              onValueMap={this.handleValueMap}
-            />
-          }
-          {this.state.editValueMap &&
-            <ValueMapCard 
-              map={this.state.map}
-              indicator={'ID'}
-              onAssociation={this.handleAssociationChange}
-            />
-          }          
-        </Grid>
-      </Grid>      
-      </div>
+    </div>
 
 
     );
