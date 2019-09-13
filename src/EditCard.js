@@ -11,6 +11,7 @@ import Select from '@material-ui/core/Select';
 import Button from '@material-ui/core/Button';
 
 import PublishIcon from '@material-ui/icons/Publish';
+import MapIcon from '@material-ui/icons/Map';
 
 import config from '../config.json'
 
@@ -41,14 +42,24 @@ function formatSelect(header,key,map,associationFunction) {
     )
 }
 
-function formatQuestions(mapCheck,map, associationFunction) {
+function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
   return Object.keys(mapCheck['flatQuestionnaire']).map(function (k, i) {
     return(
       <div key={'question-'+i} style={{paddingBottom: "40px"}}>
         <Typography wrap="noWrap">
           <strong>{mapCheck['flatQuestionnaire'][k]['text']}</strong>
         </Typography>
-		{formatSelect(mapCheck['flatQuestionnaire'][k]['header'],k,map,associationFunction)}        
+		{formatSelect(mapCheck['flatQuestionnaire'][k]['header'],k,map,associationFunction)}
+		<br />
+		{(mapCheck['flatQuestionnaire'][k]['valueType'] == 'choice') &&
+			<Button variant="contained" style={{textTransform: "none", marginTop: "10px", backgroundColor: "whiteSmoke"}}
+				onClick={valueMapFunction}
+			>
+			Map values
+			<MapIcon style={{margin: "5px"}} />			
+			</Button>
+
+		}
       </div>
 
     )
@@ -77,7 +88,7 @@ redirectToUpload () {
 	          		<div style={{padding: "5px"}}>
 	                {this.props.mapCheck && this.props.map &&
 	                <div>
-	                  {formatQuestions(this.props.mapCheck, this.props.map['map'], this.props.onAssociation)}
+	                  {formatQuestions(this.props.mapCheck, this.props.map['map'], this.props.onAssociation, this.props.onValueMap)}
 	                </div>
 
 	                }  

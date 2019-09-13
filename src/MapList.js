@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import MaterialTable from 'material-table'
 
 import config from '../config.json'
@@ -43,9 +43,30 @@ Upload: forwardRef((props, ref) => <Upload {...props} ref={ref} />),
 ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
 };
 
-function MapList(props) {
-	var maps = props.maps;
-	var questionnaireHash = props.questionnaireHash;
+class MapList extends Component {
+  // Initialize the state
+  constructor(props){
+    super(props);
+    this.state = {
+      maps: []
+    }
+  }
+
+  // Fetch the list on first mount
+  componentDidMount() {
+    this.getMaps();
+  }
+
+  // Retrieves the list of items from the Express app
+  getMaps() {
+    fetch(config.base + 'api/maps')
+    .then(res => res.json())
+    .then(maps => {
+      this.setState({"maps": maps })
+    })  
+  }
+
+	render() {
 	return (
 		<div style={{padding: '20px'}}>
 	        <MaterialTable
@@ -54,10 +75,10 @@ function MapList(props) {
 		        icons={tableIcons}
 		        columns={[
 		          { title: 'Name', field: 'name' },
-		          { title: 'Questionnaire', field: 'questionnaireuid', lookup: questionnaireHash },
+		          { title: 'Questionnaire', field: 'questionnaireuid', lookup: this.props.questionnaireHash },
 		          { title: 'Updated', field: 'updated', type: 'numeric' }
 		        ]}
-		        data={maps}
+		        data={this.state.maps}
 		        actions={[
 		          {
 		            icon: tableIcons.Edit,
@@ -73,6 +94,19 @@ function MapList(props) {
 		          {
 		            icon: tableIcons.Delete,
 		            tooltip: 'Delete Map',
+		            onClick: (event, rowData) => {
+	    				var tempIndex = rowData.tableData.id;
+
+		            	fetch(config.base + 'api/maps/' + rowData.uid , {
+	        				method:'DELETE'
+	    				})
+	    				.then(res => {
+	    					if(res.status == 200) {
+	    						//should remove from table, but proving problematic 
+	    					}
+	    				})
+
+		            },
 		          },		          
 		        ]}		                
 		        options={{
@@ -84,6 +118,7 @@ function MapList(props) {
 	        />
 	    </div>
 	);
+}	
 }
 
 export default MapList;

@@ -18,6 +18,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import { sizing } from '@material-ui/system';
 
 import EditCard from "./EditCard.js";
+import ValueMapCard from "./ValueMapCard.js";
 import config from '../config.json'
 
 import loadMapQuestionnaire from './services/loadMapQuestionnaire.js'
@@ -100,9 +101,11 @@ formatHeaders(currentMap, _this) {
       map: {"name":"","uid":""},
       questionnaire: {"name":""},
       mapCheck: {"flatQuestionnaire":{}},
-      newHeaderName: ''
+      newHeaderName: '',
+      editValueMap: false 
     }
-    this.handleAssociationChange = this.handleAssociationChange.bind(this);        
+    this.handleAssociationChange = this.handleAssociationChange.bind(this);
+    this.handleValueMap = this.handleValueMap.bind(this);        
   }
 
   componentDidMount() {
@@ -123,6 +126,11 @@ formatHeaders(currentMap, _this) {
     
     this.setState({mapCheck: tempCheck, map: tempMap})
     pushMapBack(tempMap);
+  }
+
+  handleValueMap(event) {
+    console.log('clicking value map')
+    this.setState({editValueMap: true})
   }
 
   render() {
@@ -171,11 +179,21 @@ formatHeaders(currentMap, _this) {
             </Card>
         </Grid>
         <Grid item xs >
-          <EditCard 
-            mapCheck={this.state.mapCheck} 
-            map={this.state.map}
-            onAssociation={this.handleAssociationChange}
+          {!this.state.editValueMap &&
+            <EditCard 
+              mapCheck={this.state.mapCheck} 
+              map={this.state.map}
+              onAssociation={this.handleAssociationChange}
+              onValueMap={this.handleValueMap}
             />
+          }
+          {this.state.editValueMap &&
+            <ValueMapCard 
+              map={this.state.map}
+              indicator={'ID'}
+              onAssociation={this.handleAssociationChange}
+            />
+          }          
         </Grid>
       </Grid>      
       </div>

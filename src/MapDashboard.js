@@ -49,7 +49,7 @@ class MapDashboard extends Component {
         <HeaderBar />
         {(this.state.questionnaireHash && this.state.maps) &&
           <div>  
-            <MapList maps={this.state.maps} questionnaireHash={this.state.questionnaireHash}/>        
+            <MapList questionnaireHash={this.state.questionnaireHash}/>        
             <MapAdd questionnaireHash={this.state.questionnaireHash}/>
           </div>
         }
