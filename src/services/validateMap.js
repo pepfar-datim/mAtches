@@ -25,6 +25,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
 				var tempPath = path.slice(); //make temp copy to avoid pass by reference
 				tempPath.push({"linkid": obj[i]['linkId'], "text": obj[i]['text']});
 				fq[obj[i]['linkId']]['text'] = obj[i]['text'];
+				if (obj[i].hasOwnProperty('answerValueSet')) {fq[obj[i]['linkId']]['answerValueSet'] = obj[i]['answerValueSet']['concept']}
 				fq[obj[i]['linkId']]['valueType'] = obj[i]['type'];
 				fq[obj[i]['linkId']]['path'] = tempPath;
 

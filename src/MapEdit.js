@@ -103,7 +103,8 @@ constructor(props){
     mapCheck: {"flatQuestionnaire":{}},
     newHeaderName: '',
     editValueMap: false,
-    header: ''
+    header: '',
+    mapID: ''
   }
   this.handleAssociationChange = this.handleAssociationChange.bind(this);
   this.handleValueMap = this.handleValueMap.bind(this);
@@ -130,8 +131,8 @@ handleAssociationChange(event) {
   pushMapBack(tempMap);
 }
 
-handleValueMap(tempHeader) {
-  this.setState({editValueMap: true, header: tempHeader})
+handleValueMap(tempHeader, tempID) {
+  this.setState({editValueMap: true, header: tempHeader, mapID: tempID})
 }
 
 handleValueMapClose(event) {
@@ -146,6 +147,8 @@ render() {
             map={this.state.map}
             header={this.state.header}
             onValueMapClose={this.handleValueMapClose}
+            mapCheck={this.state.mapCheck}
+            mapID={this.state.mapID}
  
           />
     }

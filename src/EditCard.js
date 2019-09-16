@@ -53,7 +53,7 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
 		<br />
 		{(mapCheck['flatQuestionnaire'][k]['valueType'] == 'choice') &&
 			<Button variant="contained" style={{textTransform: "none", marginTop: "10px", backgroundColor: "whiteSmoke"}}
-				onClick={() => { valueMapFunction(mapCheck['flatQuestionnaire'][k]['header'])}}
+				onClick={() => { valueMapFunction(mapCheck['flatQuestionnaire'][k]['header'],k)}}
 			>
 			Map values
 			<MapIcon style={{margin: "5px"}} />			
