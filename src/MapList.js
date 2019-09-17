@@ -101,8 +101,10 @@ class MapList extends Component {
 	        				method:'DELETE'
 	    				})
 	    				.then(res => {
-	    					if(res.status == 200) {
-	    						//should remove from table, but proving problematic 
+	    					if(res.status == 200) {	    						
+	    						var tempMaps = this.state.maps
+	    						tempMaps.splice(tempIndex,1);
+	    						this.setState({maps: tempMaps})
 	    					}
 	    				})
 
