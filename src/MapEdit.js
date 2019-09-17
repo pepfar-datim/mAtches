@@ -135,8 +135,11 @@ handleValueMap(tempHeader, tempID) {
   this.setState({editValueMap: true, header: tempHeader, mapID: tempID})
 }
 
-handleValueMapClose(event) {
-  this.setState({editValueMap: false})
+handleValueMapClose(event, choiceMap, header) {  
+  var tempMap = this.state.map;
+  tempMap['map'][header]['choiceMap'] = choiceMap;
+  pushMapBack(tempMap);
+  this.setState({editValueMap: false, map: tempMap})
 }
 
 render() {

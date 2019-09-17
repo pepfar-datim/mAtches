@@ -18,40 +18,6 @@ import ChipInput from 'material-ui-chip-input'
 
 import config from '../config.json'
 
-function formatValueMap(valueSet) {
- 	return valueSet.map(function (o, i) {
-		return(
-			<div>
-				<Typography variant="h6" style={{marginBottom: "5px"}}>
-					<strong>{o['Display']}</strong>
-					<br />
-					{formatChips(o['maps'])}
-				</Typography>
-				<br />
-			</div>
-		)	
-	})
-
-}
-
-function handleAddChip(chip) {
-	console.log('adding ' + chip);
-}
-
-function handleDeleteChip(chip) {
-	console.log('deleting ' + chip);
-}
-
-function formatChips(mapValues) {
-		return(
-			<ChipInput
-				value={mapValues}
-				onAdd={(chip) => {handleAddChip(chip)}}
-				onDelete={(chip) => {handleDeleteChip(chip)}}
-			/>
-		)
-}
-
 function generateChoiceMap(headerDefinitions, tempValueSet) {
 	var tempChoiceMap = {};
 	if (headerDefinitions.hasOwnProperty('choiceMap')) {
@@ -91,6 +57,10 @@ class ValueMapCard extends React.Component {
 			choiceMap: {},
 			valueSet: [],
 		};
+		this.formatValueMap = this.formatValueMap.bind(this);
+		this.formatChips = this.formatChips.bind(this);
+		this.handleAddChip = this.handleAddChip.bind(this);
+		this.handleDeleteChip = this.handleDeleteChip.bind(this);
 	}
 
 	componentDidMount() {
@@ -100,24 +70,69 @@ class ValueMapCard extends React.Component {
 		this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
 	}
 
+	formatValueMap(valueSet) {
+	 	return valueSet.map( (o, i) => {
+			return(
+				<div>
+					<Typography variant="h6" style={{marginBottom: "5px"}}>
+						<strong>{o['Display']}</strong>
+						<br />
+						{this.formatChips(o['maps'], i, o['Code'])}
+					</Typography>
+					<br />
+				</div>
+			)	
+		})
+
+	}	
+
+	formatChips(mapValues, index, code) {
+		return(
+			<div>
+				<ChipInput
+					value={mapValues}
+					onAdd={(chip) => {this.handleAddChip(chip, index, code)}}
+					onDelete={(chip) => {this.handleDeleteChip(chip, index, code)}}
+				/>
+			</div>
+		)
+	}
+
+	handleAddChip(chip, index, code) {
+		chip = chip.trim();
+		if (!this.state.choiceMap.hasOwnProperty(chip)) {
+			var tempChoiceMap = this.state.choiceMap;
+			var tempValueSet = this.state.valueSet;
+			tempChoiceMap[chip] = code;
+			tempValueSet[index]['maps'].push(chip);
+			this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
+		}
+	}
+
+	handleDeleteChip(chip, index, code) {
+		var tempChoiceMap = this.state.choiceMap;
+		var tempValueSet = this.state.valueSet;
+		delete tempChoiceMap[chip];
+		var filteredValueSet = tempValueSet[index]['maps'].filter(v => v != chip);
+		tempValueSet[index]['maps'] = filteredValueSet;
+		this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
+
+	}	
+
 	render() {
 		return(
 	      	<Card style={{position: "relative", backgroundColor: "lightYellow", height: "100%", "minHeight": "750px"}}>
 	        	<div style={{"padding": "20px"}}>
 	          		<Typography variant="h6" style={{marginBottom: "5px"}}>
-	            		<strong>Map Values</strong>
+	            		<strong>Map Values</strong> for {this.props.header}
 	            		<br />
-	            		Header: {this.props.header}
 	          		</Typography>
-	          		<Typography variant="body1" style={{marginBottom: "5px"}}>
-	          		{JSON.stringify(this.state.choiceMap)}
-	          		{JSON.stringify(this.state.valueSet)}
-	          		</Typography>
+
 	          		<div style={{margin: "20px"}}>
-	          			{formatValueMap(this.state.valueSet)}
+	          			{this.formatValueMap(this.state.valueSet)}
 	          		</div>
 					<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: "lightBlue"}}
-						onClick={this.props.onValueMapClose}
+						onClick={(e) => this.props.onValueMapClose(e, this.state.choiceMap, this.props.header)}
 					>
 					Save and Close
 					<SaveIcon style={{margin: "5px"}} />
