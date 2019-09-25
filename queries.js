@@ -317,7 +317,6 @@ const uploadData = (request, response) => {
     if (error) {
       response.status(400).end(error)
     }
-      console.log(results.rows[0]);
       var map = {map: results.rows[0]['map']};
       var questionnaireURL = results.rows[0]['questionnaire']['url'];
       convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
