@@ -2,17 +2,40 @@ import React from 'react';
 import Card from '@material-ui/core/Card';
 import Typography from '@material-ui/core/Typography';
 
+function formatErrors(errors) {
+	return Object.keys(errors).map(key =>{
+		return (
+			<div>
+				<Typography variant="h6" style={{paddingLeft: "10px", paddingTop: "20px"}}>
+					{key}
+				</Typography>
+				{errors[key].hasOwnProperty('invalidValueMapping') &&
+					<Typography variant="body1" style={{paddingLeft: "20px", paddingTop: "5px"}}>
+						Values are not Mapped on the following rows: {errors[key]['invalidValueMapping'].join(', ')}
+					</Typography>
+				}
+				{errors[key].hasOwnProperty('invalidValueType') &&
+					<Typography variant="body1" style={{paddingLeft: "20px", paddingTop: "5px"}}>
+						Values are Invalid on the following rows: {errors[key]['invalidValueType'].join(', ')}
+					</Typography>
+				}
+			</div>
+		)		
+	})
+
+}
+
 function ValidationCard(props) {
 
 	var cardColor = props.success ? 'darkSeaGreen' : 'lightSalmon';
-	var successText = props.success ? 'Success!' : 'Invalid File';
+	var successText = props.success ? 'Success!' : (Object.keys(props.errors).length > 0 ? 'Invalid File: Value Errors' : 'Invalid File: Header Errors');
 
 
 return (
 		<Card height="100%" style={{backgroundColor: cardColor, width: "100%"}}>
 			<div style={{padding: "20px"}}>
 				<Typography variant="h6">
-					{successText}
+					<strong>{successText}</strong>
 				</Typography>
 				{props.data.length>0 &&
 					<Typography variant="body1">
@@ -21,18 +44,18 @@ return (
 				}
 				{props.invalidHeaders.length>0 &&
 					<Typography variant="body1">
-						Invalid headers: {props.invalidHeaders}
+						Headers in csv file, missing from map: {props.invalidHeaders.join(', ')}
 					</Typography>
 				}
 				{props.missingHeaders.length>0 &&
 					<Typography variant="body1">
-						Missing headers: {props.missingHeaders}
+						Headers in map, missing from csv file: {props.missingHeaders.join(', ')}
 					</Typography>
 				}							
 				{Object.keys(props.errors).length>0 &&
-					<Typography variant="body1">
-						Errors: {JSON.stringify(props.errors)}
-					</Typography>
+					<div>
+						{formatErrors(props.errors)}
+					</div>
 				}		
 			</div>
 		</Card>
