@@ -1,11 +1,12 @@
 const csv = require("csv");
+const moment = require("moment");
 
 var data = {
   loadCsv: function(rawData) {
     var promise = new Promise(function(resolve, reject) {
       csv.parse(
         rawData,
-        {
+        { 
           columns: true,
           trim: true,
           skip_empty_lines: true
@@ -30,7 +31,6 @@ var data = {
       };
       var pathsChecked = {};
       Object.keys(this.csvData[i]).forEach(key => {
-        this.evaluateValue(this.csvData[i][key], this.map[key]["valueType"], i, key);
         var tempValue = this.csvData[i][key];
         if (this.map[key]["valueType"] == "choice") {
           tempValue = this.convertValue(
@@ -39,6 +39,9 @@ var data = {
             i,
             key
           );
+        }
+        else {
+          tempValue = this.evaluateValue(this.csvData[i][key], this.map[key]["valueType"], i, key);
         }
         this.addQRItems(
           QR["item"],
@@ -49,13 +52,53 @@ var data = {
             this.map[key]["valueType"].slice(1)
         );
       });
-      if (!this.errors.hasOwnProperty(i)) {
+      if (!this.rowErrors.hasOwnProperty(i)) {
         this.QuestionnaireResponses.push(QR);
       }
     }
   },
   evaluateValue: function(value, valueType, row, key) {
-    //this function would evaluate value and push an error to this.errors if invalid
+    try {
+      //console.log(row +' '+key+' '+valueType)
+      switch (valueType) {
+        case 'integer':          
+          if (Number.isInteger(parseFloat(value.trim()))) {
+            return parseInt(value.trim());
+          }
+          else {
+            this.addError(row, key, 'invalidValueType');
+          }
+        case 'dateTime':
+          if(moment(value, moment.ISO_8601, true).isValid()) {
+            return value
+          }
+          else {
+            this.addError(row, key, 'invalidValueType');
+          }
+        case 'date':
+          if(moment(value, moment.ISO_8601, true).isValid()) {
+            return value
+          }
+          else {
+            this.addError(row, key, 'invalidValueType');
+          }          
+      }
+    } catch (e) {
+      console.log(e)
+      this.addError(row, key, 'invalidValueType');
+    }
+  },
+  addError: function(row, key, type) {
+      if (!this.rowErrors.hasOwnProperty(row)) {
+        this.rowErrors[row] = true;
+      }
+      if (!this.errors.hasOwnProperty(key)) {
+        this.errors[key] = {};
+      }
+      if (!this.errors[key].hasOwnProperty(type)) {
+        this.errors[key][type] = [];
+      }      
+      this.errors[key][type].push(row)
   },
   convertValue: function(value, valueMapLocation, row, key) {
     //if there is an error in mapping the value (e.g. map missing, then push error), else convert
@@ -69,13 +112,7 @@ var data = {
       }
       return valueMap[value];
     } catch (e) {
-      if (!this.errors.hasOwnProperty(row)) {
-        this.errors[row] = {};
-      }
-      if (!this.errors[row].hasOwnProperty(key)) {
-        this.errors[row][key] = {};
-      }
-      this.errors[row][key]["invalidValueMapping"] = true;
+      this.addError(row, key, 'invalidValueMapping');
     }
   },
   addQRItems: function(tempObject, pathArray, pathsChecked, value, valueType) {
@@ -126,6 +163,7 @@ const convertToFHIR = (csvText, map, mapID, questionnaireURL) => {
   data.map = map.map;
   data.csvData = [];
   data.errors = {};
+  data.rowErrors = {};
   data.QuestionnaireResponses = [];
   data.questionnaireURL = questionnaireURL;
 
