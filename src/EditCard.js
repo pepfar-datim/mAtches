@@ -78,8 +78,10 @@ class EditCard extends React.Component {
 redirectToUpload () {
 	window.location = config.base + 'maps/' + this.props.map.uid + '?mode=upload'
 }
-
+	
 	render() {
+		var buttonDisabled = Object.keys(this.props.unmappedHeaders).length > 0 || !this.props.mapValidity;
+		var buttonColor = buttonDisabled ?  "darkGrey" : "darkSeaGreen"
 		return(
 	      	<Card style={{position: "relative", backgroundColor: "lightGrey", height: "100%", "minHeight": "750px"}}>
 	        	<div style={{"padding": "20px"}}>
@@ -96,8 +98,9 @@ redirectToUpload () {
 	          		</div>
 	        	</div>
 					<div>
-						<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: "darkSeaGreen"}}
+						<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: buttonColor}}
 							onClick={this.redirectToUpload.bind(this)}
+							disabled={buttonDisabled}
 						>
 						Upload Data
 						<PublishIcon style={{margin: "5px"}} />

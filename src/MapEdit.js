@@ -46,11 +46,38 @@ function pushMapBack (tempMap) {
 })
 }
 
+function removeAssociationQuestionnaire(tempCheck, mapping, header) {
+  if (mapping.hasOwnProperty('path')) {
+    var position = mapping['path'].length - 1;
+    var qLocation = mapping['path'][position]['linkid'];
+    tempCheck['flatQuestionnaire'][qLocation]['header'] = '';
+  }
+  return tempCheck
+}
+
+function checkValidity(flatQuestionnaire) {
+  var mapValidity = true;
+  for (var i in flatQuestionnaire) {
+    if (flatQuestionnaire[i]['header'] == "") {
+      mapValidity = false;
+      break
+    }
+  }
+  return mapValidity
+}
+
 function handleDelete(header) {
 
-  var tempMap = this.state['map'];
+  var tempMap = this.state.map;
+  var tempCheck = this.state.mapCheck;
+  var tempUnmappedHeaders = this.state.unmappedHeaders;
+  tempCheck = removeAssociationQuestionnaire(tempCheck, tempMap['map'][header], header);
   delete tempMap['map'][header];
-  this.setState({map: tempMap})
+  delete tempUnmappedHeaders[header];
+  if (Object.keys(tempUnmappedHeaders).length == 0) {
+    var mapValidity = checkValidity(tempCheck['flatQuestionnaire']);
+  }
+  this.setState({map: tempMap, mapCheck: tempCheck, unmappedHeaders: tempUnmappedHeaders, mapValidity: mapValidity})
   pushMapBack(tempMap);
 
 }
@@ -72,9 +99,11 @@ function checkName(tempName) {
 }
 
 function handleAdd() {
-  var tempMap = this.state['map'];
+  var tempMap = this.state.map;
   tempMap['map'][this.state.newHeaderName] = {}
-  this.setState({map:tempMap, newHeaderName: ''})
+  var tempUnmappedHeaders = this.state.unmappedHeaders;
+  tempUnmappedHeaders[this.state.newHeaderName] = {};
+  this.setState({map:tempMap, newHeaderName: '', unmappedHeaders: tempUnmappedHeaders});
   pushMapBack(tempMap);
 
 }
@@ -104,7 +133,9 @@ constructor(props){
     newHeaderName: '',
     editValueMap: false,
     header: '',
-    mapID: ''
+    mapID: '',
+    unmappedHeaders: {},
+    mapValidity: true
   }
   this.handleAssociationChange = this.handleAssociationChange.bind(this);
   this.handleValueMap = this.handleValueMap.bind(this);
@@ -118,16 +149,17 @@ componentDidMount() {
 handleAssociationChange(event) {
   var tempMap = this.state.map; 
   var tempCheck = this.state.mapCheck;
-  if (tempMap['map'][event.target.value].hasOwnProperty('path')) {
-    var position = tempMap['map'][event.target.value]['path'].length - 1;
-    var qLocation = tempMap['map'][event.target.value]['path'][position]['linkid'];
-    tempCheck['flatQuestionnaire'][qLocation]['header'] = '';
-  }
+  var tempUnmappedHeaders = this.state.unmappedHeaders;
+  tempCheck = removeAssociationQuestionnaire(tempCheck, tempMap['map'][event.target.value], event.target.value);
   tempCheck['flatQuestionnaire'][event.target.name]['header'] = event.target.value;
   tempMap['map'][event.target.value]['path'] = tempCheck['flatQuestionnaire'][event.target.name]['path'].slice();
   tempMap['map'][event.target.value]['valueType'] = tempCheck['flatQuestionnaire'][event.target.name]['valueType'];
-  
-  this.setState({mapCheck: tempCheck, map: tempMap})
+  delete tempUnmappedHeaders[event.target.value]
+  if (Object.keys(tempUnmappedHeaders).length == 0) {
+    console.log('checking validity')
+    var mapValidity = checkValidity(tempCheck['flatQuestionnaire']);
+  }  
+  this.setState({mapCheck: tempCheck, map: tempMap, unmappedHeaders: tempUnmappedHeaders, mapValidity: mapValidity})
   pushMapBack(tempMap);
 }
 
@@ -204,6 +236,8 @@ render() {
             map={this.state.map}
             onAssociation={this.handleAssociationChange}
             onValueMap={this.handleValueMap}
+            unmappedHeaders={this.state.unmappedHeaders}
+            mapValidity={this.state.mapValidity}
           />
         
       </Grid>
