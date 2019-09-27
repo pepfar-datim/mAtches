@@ -89,7 +89,7 @@ class MapList extends Component {
 		            icon: tableIcons.Upload,
 		            tooltip: 'Upload to map',
 		            onClick: (event, rowData) => {window.location = config.base + 'maps/' + rowData.uid + "?mode=upload"},
-		            disabled: rowData.map === null
+		            disabled:  rowData.complete == false || rowData.map === null
 		          }),
 		          {
 		            icon: tableIcons.Delete,

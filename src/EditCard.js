@@ -98,13 +98,13 @@ redirectToUpload () {
 	          		</div>
 	        	</div>
 					<div>
-						<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: buttonColor}}
-							onClick={this.redirectToUpload.bind(this)}
-							disabled={buttonDisabled}
-						>
-						Upload Data
-						<PublishIcon style={{margin: "5px"}} />
-						</Button>						
+					<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: buttonColor}}
+						onClick={this.redirectToUpload.bind(this)}
+						disabled={buttonDisabled}
+					>
+					Upload Data
+					<PublishIcon style={{margin: "5px"}} />
+					</Button>			
 					</div>   	        	            
 			</Card>
 		);

@@ -5,6 +5,7 @@ CREATE TABLE maps(
 	updated timestamp,
 	uid varchar(6),
 	questionnaireUID varchar(100),
+	complete boolean,
 	map json
 );
 

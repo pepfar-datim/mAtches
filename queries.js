@@ -129,10 +129,12 @@ const addToDB = (payload, uid) => {
     if (!payload.hasOwnProperty('updated')) {
       payload.updated = now;
     }
-
+    if (!payload.hasOwnProperty('complete')) {
+      payload.complete = false;
+    }
     const query = {
-      text: "INSERT INTO maps (name, created, updated, uid, questionnaireuid, map) VALUES ($1, $2, $3, $4, $5, $6);",
-      values: [payload.name, payload.created, payload.updated, uid, payload.questionnaireuid, JSON.stringify(payload.map)]
+      text: "INSERT INTO maps (name, created, updated, uid, questionnaireuid, complete, map) VALUES ($1, $2, $3, $4, $5, $6, $7);",
+      values: [payload.name, payload.created, payload.updated, uid, payload.questionnaireuid, payload.complete, JSON.stringify(payload.map)]
     }
 
     pool.query(query, (error, results) => {
@@ -152,10 +154,12 @@ const updateDB = (payload, uid) => {
       payload.created = now;
     }
     payload.updated = now;
-
+    if (!payload.hasOwnProperty('complete')) {
+      payload.complete = false;
+    }
     const query = {
-      text: "UPDATE maps SET name=$1, created=$2, updated=$3, questionnaireuid=$4, map=$5 WHERE uid=$6;",
-      values: [payload.name,payload.created,payload.updated,payload.questionnaireuid,JSON.stringify(payload.map),uid]
+      text: "UPDATE maps SET name=$1, created=$2, updated=$3, questionnaireuid=$4, complete=$5, map=$6 WHERE uid=$7;",
+      values: [payload.name,payload.created,payload.updated,payload.questionnaireuid,payload.complete,JSON.stringify(payload.map),uid]
     }
 
     pool.query(query, (error, results) => {

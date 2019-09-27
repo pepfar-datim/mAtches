@@ -8,7 +8,7 @@ function getSpecificMap(id, config, _this) {
 	fetch(config.base + 'api/maps/' + id)
 	.then(res => res.json())
 	.then(map => {
-	  _this.setState({"map": map })
+	  _this.setState({"map": map, "mapValidity": map.complete })
 	  var questionnaireUID = map.questionnaireuid;
 	  _this.setState({"questionnaireUID":questionnaireUID});  
 	  return questionnaireUID

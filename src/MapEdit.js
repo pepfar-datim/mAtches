@@ -36,7 +36,8 @@ const classes = {
   }
 };
 
-function pushMapBack (tempMap) {
+function pushMapBack (tempMap, mapValidity) {
+  tempMap['complete'] = mapValidity;
   fetch(config.base + 'api/maps',{
   method:'PUT', 
   body:JSON.stringify(tempMap),
@@ -55,12 +56,28 @@ function removeAssociationQuestionnaire(tempCheck, mapping, header) {
   return tempCheck
 }
 
-function checkValidity(flatQuestionnaire) {
+function checkValidity(flatQuestionnaire, mappings) {
   var mapValidity = true;
   for (var i in flatQuestionnaire) {
+    if (!flatQuestionnaire[i].hasOwnProperty('header')) {
+      mapValidity = false;
+      break
+    }
     if (flatQuestionnaire[i]['header'] == "") {
       mapValidity = false;
       break
+    }
+  }
+  for (var i in mappings) {
+    if (mappings[i]['valueType'] == 'choice') {
+      if (!mappings[i].hasOwnProperty('choiceMap')) {
+        mapValidity = false;
+        break        
+      }
+      if (Object.keys(mappings[i]['choiceMap']).length == 0) {
+        mapValidity = false;
+        break
+      }
     }
   }
   return mapValidity
@@ -74,11 +91,12 @@ function handleDelete(header) {
   tempCheck = removeAssociationQuestionnaire(tempCheck, tempMap['map'][header], header);
   delete tempMap['map'][header];
   delete tempUnmappedHeaders[header];
+  var mapValidity = false //mapValidity false if there are unmapped headers
   if (Object.keys(tempUnmappedHeaders).length == 0) {
-    var mapValidity = checkValidity(tempCheck['flatQuestionnaire']);
+    mapValidity = checkValidity(tempCheck['flatQuestionnaire'], tempMap['map']);
   }
   this.setState({map: tempMap, mapCheck: tempCheck, unmappedHeaders: tempUnmappedHeaders, mapValidity: mapValidity})
-  pushMapBack(tempMap);
+  pushMapBack(tempMap, mapValidity);
 
 }
 
@@ -95,16 +113,19 @@ function handleNameChange(event) {
 }
 
 function checkName(tempName) {
-  console.log('name should be checked');
+  //could add warning here if name already exists
 }
 
 function handleAdd() {
   var tempMap = this.state.map;
-  tempMap['map'][this.state.newHeaderName] = {}
-  var tempUnmappedHeaders = this.state.unmappedHeaders;
-  tempUnmappedHeaders[this.state.newHeaderName] = {};
-  this.setState({map:tempMap, newHeaderName: '', unmappedHeaders: tempUnmappedHeaders});
-  pushMapBack(tempMap);
+  if (!tempMap.map.hasOwnProperty(this.state.newHeaderName)) {
+    tempMap['map'][this.state.newHeaderName] = {}
+    var tempUnmappedHeaders = this.state.unmappedHeaders;
+    tempUnmappedHeaders[this.state.newHeaderName] = {};
+    var mapValidity = false //map validity is false when you add a header because it's not associated yet
+    this.setState({map:tempMap, newHeaderName: '', unmappedHeaders: tempUnmappedHeaders, mapValidity: mapValidity});
+    pushMapBack(tempMap, mapValidity); 
+  }
 
 }
 
@@ -134,12 +155,11 @@ constructor(props){
     editValueMap: false,
     header: '',
     mapID: '',
-    unmappedHeaders: {},
-    mapValidity: true
+    unmappedHeaders: {}
   }
   this.handleAssociationChange = this.handleAssociationChange.bind(this);
   this.handleValueMap = this.handleValueMap.bind(this);
-  this.handleValueMapClose = this.handleValueMapClose.bind(this);        
+  this.handleValueMapClose = this.handleValueMapClose.bind(this);
 }
 
 componentDidMount() {
@@ -154,13 +174,13 @@ handleAssociationChange(event) {
   tempCheck['flatQuestionnaire'][event.target.name]['header'] = event.target.value;
   tempMap['map'][event.target.value]['path'] = tempCheck['flatQuestionnaire'][event.target.name]['path'].slice();
   tempMap['map'][event.target.value]['valueType'] = tempCheck['flatQuestionnaire'][event.target.name]['valueType'];
-  delete tempUnmappedHeaders[event.target.value]
+  delete tempUnmappedHeaders[event.target.value];
+  var mapValidity = false; //assume false until proven otherwise
   if (Object.keys(tempUnmappedHeaders).length == 0) {
-    console.log('checking validity')
-    var mapValidity = checkValidity(tempCheck['flatQuestionnaire']);
+    mapValidity = checkValidity(tempCheck['flatQuestionnaire'], tempMap['map']);
   }  
   this.setState({mapCheck: tempCheck, map: tempMap, unmappedHeaders: tempUnmappedHeaders, mapValidity: mapValidity})
-  pushMapBack(tempMap);
+  pushMapBack(tempMap, mapValidity);
 }
 
 handleValueMap(tempHeader, tempID) {
@@ -170,8 +190,12 @@ handleValueMap(tempHeader, tempID) {
 handleValueMapClose(event, choiceMap, header) {  
   var tempMap = this.state.map;
   tempMap['map'][header]['choiceMap'] = choiceMap;
-  pushMapBack(tempMap);
-  this.setState({editValueMap: false, map: tempMap})
+  var mapValidity = false; //assume false until proven otherwise
+  if (Object.keys(this.state.unmappedHeaders).length == 0) {
+    mapValidity = checkValidity(this.state.mapCheck['flatQuestionnaire'], tempMap['map']);
+  }
+  this.setState({editValueMap: false, map: tempMap, mapValidity: mapValidity});
+  pushMapBack(tempMap, mapValidity);
 }
 
 render() {
@@ -187,7 +211,7 @@ render() {
  
           />
     }
-    {!this.state.editValueMap &&            
+    {!this.state.editValueMap && this.state.mapValidity != undefined &&          
     <Grid container className={classes.root} wrap="nowrap" spacing={2}>
       <Grid item xs={3} style={{maxWidth: "300px"}}>
           <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">

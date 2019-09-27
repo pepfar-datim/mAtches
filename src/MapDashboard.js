@@ -10,23 +10,12 @@ class MapDashboard extends Component {
   constructor(props){
     super(props);
     this.state = {
-      maps: []
     }
   }
 
   // Fetch the list on first mount
   componentDidMount() {
-    this.getMaps();
     this.getQuestionnaires();
-  }
-
-  // Retrieves the list of items from the Express app
-  getMaps() {
-    fetch(config.base + 'api/maps')
-    .then(res => res.json())
-    .then(maps => {
-      this.setState({"maps": maps })
-    })  
   }
 
   getQuestionnaires() {
@@ -47,7 +36,7 @@ class MapDashboard extends Component {
     return (
       <div>
         <HeaderBar />
-        {(this.state.questionnaireHash && this.state.maps) &&
+        {this.state.questionnaireHash &&
           <div>  
             <MapList questionnaireHash={this.state.questionnaireHash}/>        
             <MapAdd questionnaireHash={this.state.questionnaireHash}/>
