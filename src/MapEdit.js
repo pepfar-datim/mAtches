@@ -13,6 +13,7 @@ import Input from "@material-ui/core/Input";
 import InputLabel from "@material-ui/core/InputLabel";
 
 import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
+import PublishIcon from '@material-ui/icons/Publish';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { sizing } from '@material-ui/system';
@@ -116,17 +117,38 @@ function checkName(tempName) {
   //could add warning here if name already exists
 }
 
+function processAdd(tempMap, tempUnmappedHeaders, tempHeader) {
+  if (!tempMap.map.hasOwnProperty(tempHeader)) {
+    tempMap['map'][tempHeader] = {};
+    if (!tempUnmappedHeaders.hasOwnProperty(tempHeader)) {
+      tempUnmappedHeaders[tempHeader] = {};    
+    }
+  }
+  return [tempMap, tempUnmappedHeaders]
+}
+
 function handleAdd() {
   var tempMap = this.state.map;
-  if (!tempMap.map.hasOwnProperty(this.state.newHeaderName)) {
-    tempMap['map'][this.state.newHeaderName] = {}
+  var tempHeader = this.state.newHeaderName;
+  if (!tempMap.map.hasOwnProperty(tempHeader)) {
     var tempUnmappedHeaders = this.state.unmappedHeaders;
-    tempUnmappedHeaders[this.state.newHeaderName] = {};
+    var addResult = processAdd(tempMap, tempUnmappedHeaders, tempHeader);
+    tempMap = addResult[0];
+    tempUnmappedHeaders = addResult[1];
     var mapValidity = false //map validity is false when you add a header because it's not associated yet
     this.setState({map:tempMap, newHeaderName: '', unmappedHeaders: tempUnmappedHeaders, mapValidity: mapValidity});
     pushMapBack(tempMap, mapValidity); 
   }
 
+}
+
+function readFileContent(file) {
+  const reader = new FileReader();
+  return new Promise((resolve, reject) => {
+    reader.onload = event => resolve(event.target.result);
+    reader.onerror = error => reject(error);
+    reader.readAsText(file);
+  });
 }
 
 class MapEdit extends Component {
@@ -198,6 +220,44 @@ handleValueMapClose(event, choiceMap, header) {
   pushMapBack(tempMap, mapValidity);
 }
 
+uploadAction(e) {
+  this.refs.fileInput.click(e);
+}
+
+upload(e) {
+  e.preventDefault();
+    let files;
+
+      if (e.dataTransfer && e.dataTransfer.files) {
+        files = e.dataTransfer.files;
+      } else if (e.target) {
+        files = e.target.files;
+      }
+    
+    if (typeof files !== "object" || files.length === 0){
+      console.log('problem with file')
+    }
+    
+    readFileContent(files[0]).then((csvText) => {
+      var columnRow = csvText.split('\n')[0];
+      var columns = columnRow.split(',');
+      var tempMap = this.state.map;
+      var originalMap = JSON.parse(JSON.stringify(tempMap));
+      var tempUnmappedHeaders = this.state.unmappedHeaders;
+      var mapValidity = true;
+      for (let i =0; i<columns.length; i++) {
+        var addResult = processAdd(tempMap, tempUnmappedHeaders, columns[i]);
+        tempMap = addResult[0];
+        tempUnmappedHeaders = addResult[1];
+      }
+      if (tempMap != originalMap) {
+        this.setState({map: tempMap, unmappedHeaders: tempUnmappedHeaders})
+        pushMapBack(tempMap, mapValidity);
+      }
+    })
+}
+
+
 render() {
   return (
     <div style={{"padding": "20px"}}>
@@ -228,6 +288,27 @@ render() {
                   <strong>Source Headers</strong>
                 </Typography>              
                 <br />
+                <div>
+                  <Typography variant="body1">
+                    Upload Headers from CSV
+                  </Typography>             
+                    <TextField disabled={true} label={this.state.filename} value={this.state.fileName} />
+                  <IconButton
+                  edge="start"
+                  color="inherit"
+                  aria-label="menu"
+                  onClick={(e) => { this.uploadAction(e)}}
+                  >
+                  <PublishIcon />
+                  </IconButton>
+                  <form style={{visibility: "hidden"}}>
+                  <input type="file" ref="fileInput"  accept=".csv" onChange={(ev) => { this.upload(ev)}} />
+                  </form>
+                  <br />
+                  <Typography variant="body1">
+                    OR Add Headers Manually
+                  </Typography>
+                </div>                   
                 <TextField
                   style={{width:'120px'}}
                   id="standard-name"
