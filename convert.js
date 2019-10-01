@@ -89,7 +89,7 @@ var data = {
       this.addError(row, key, 'invalidValueType');
     }
   },
-  addError: function(row, key, type) {
+  addError: function(row, key, type, value) {
       if (!this.rowErrors.hasOwnProperty(row)) {
         this.rowErrors[row] = true;
       }
@@ -98,8 +98,17 @@ var data = {
       }
       if (!this.errors[key].hasOwnProperty(type)) {
         this.errors[key][type] = [];
-      }      
-      this.errors[key][type].push(row)
+        if (type == 'invalidValueMapping') {
+         this.errors[key][type] = {};
+        }
+      }
+      if (type == 'invalidValueMapping') {
+       this.errors[key][type][value] = {};
+      }
+      else {
+        this.errors[key][type].push(row)  
+      }     
+      
   },
   convertValue: function(value, valueMapLocation, row, key) {
     //if there is an error in mapping the value (e.g. map missing, then push error), else convert
@@ -113,7 +122,7 @@ var data = {
       }
       return valueMap[value];
     } catch (e) {
-      this.addError(row, key, 'invalidValueMapping');
+      this.addError(row, key, 'invalidValueMapping', value);
     }
   },
   addQRItems: function(tempObject, pathArray, pathsChecked, value, valueType) {
