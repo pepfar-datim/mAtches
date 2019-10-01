@@ -37,6 +37,7 @@ class UploadCard extends React.Component {
  		ev.preventDefault();
  		this.setInitialState();
  		validateFile(ev,this).then(csvFile =>{
+ 			this.setState({invalidHeaders: csvFile.invalidHeaders, missingHeaders: csvFile.missingHeaders})
 	 		if (csvFile.validity) {
 	    		fetch(config.base + 'api/maps/' + this.props.map.uid + '/upload', {
 	        		method:'POST', body:csvFile.text, headers: {'Content-Type': 'text/plain; charset=UTF-8'}
@@ -53,7 +54,7 @@ class UploadCard extends React.Component {
 	    		})
 
 	 		}
-	 		else {
+	 		else { 
 	 			this.setState({finishedUploading: true, invalidHeaders: csvFile.invalidHeaders, missingHeaders: csvFile.missingHeaders})	
 	 		}
 

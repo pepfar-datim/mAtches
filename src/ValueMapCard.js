@@ -121,7 +121,7 @@ class ValueMapCard extends React.Component {
 
 	render() {
 		return(
-	      	<Card style={{position: "relative", backgroundColor: "lightYellow", height: "100%", "minHeight": "750px"}}>
+	      	<Card style={{position: "relative", backgroundColor: "lavender", height: "100%", "minHeight": "750px"}}>
 	        	<div style={{"padding": "20px"}}>
 	          		<Typography variant="h6" style={{marginBottom: "5px"}}>
 	            		<strong>Map Values</strong> for {this.props.header}

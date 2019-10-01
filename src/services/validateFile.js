@@ -47,7 +47,7 @@ function checkHeaders(columns, map) {
 		}
 	}
 	var validity = true;
-	if (invalidHeaders.length>0 || Object.keys(map).length>0) {
+	if (Object.keys(map).length>0) {
 		validity = false;
 	}
 	

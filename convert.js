@@ -32,25 +32,27 @@ var data = {
       var pathsChecked = {};
       Object.keys(this.csvData[i]).forEach(key => {
         var tempValue = this.csvData[i][key];
-        if (this.map[key]["valueType"] == "choice") {
-          tempValue = this.convertValue(
+        if (this.map.hasOwnProperty(key)) {
+          if (this.map[key]["valueType"] == "choice") {
+            tempValue = this.convertValue(
+              tempValue,
+              this.map[key]["choiceMap"],
+              i,
+              key
+            );
+          }
+          else {
+            tempValue = this.evaluateValue(this.csvData[i][key], this.map[key]["valueType"], i, key);
+          }
+          this.addQRItems(
+            QR["item"],
+            this.map[key]["path"],
+            pathsChecked,
             tempValue,
-            this.map[key]["choiceMap"],
-            i,
-            key
+            this.map[key]["valueType"].charAt(0).toUpperCase() +
+              this.map[key]["valueType"].slice(1)
           );
         }
-        else {
-          tempValue = this.evaluateValue(this.csvData[i][key], this.map[key]["valueType"], i, key);
-        }
-        this.addQRItems(
-          QR["item"],
-          this.map[key]["path"],
-          pathsChecked,
-          tempValue,
-          this.map[key]["valueType"].charAt(0).toUpperCase() +
-            this.map[key]["valueType"].slice(1)
-        );
       });
       if (!this.rowErrors.hasOwnProperty(i)) {
         this.QuestionnaireResponses.push(QR);
@@ -59,7 +61,6 @@ var data = {
   },
   evaluateValue: function(value, valueType, row, key) {
     try {
-      //console.log(row +' '+key+' '+valueType)
       switch (valueType) {
         case 'integer':          
           if (Number.isInteger(parseFloat(value.trim()))) {

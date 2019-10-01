@@ -32,33 +32,45 @@ function ValidationCard(props) {
 
 
 return (
-		<Card height="100%" style={{backgroundColor: cardColor, width: "100%"}}>
-			<div style={{padding: "20px"}}>
-				<Typography variant="h6">
-					<strong>{successText}</strong>
-				</Typography>
-				{props.data.length>0 &&
-					<Typography variant="body1">
-						Questionnaire Responses: {JSON.stringify(props.data)}
-					</Typography>
-				}
-				{props.invalidHeaders.length>0 &&
-					<Typography variant="body1">
-						Headers in csv file, missing from map: {props.invalidHeaders.join(', ')}
-					</Typography>
-				}
-				{props.missingHeaders.length>0 &&
-					<Typography variant="body1">
-						Headers in map, missing from csv file: {props.missingHeaders.join(', ')}
-					</Typography>
-				}							
-				{Object.keys(props.errors).length>0 &&
-					<div>
-						{formatErrors(props.errors)}
+		<div>
+			{props.invalidHeaders.length >0 &&
+				<Card height="100%" style={{backgroundColor: "lightYellow", width: "100%", marginBottom: "10px"}}>
+					<div style={{padding: "20px"}}>
+						<Typography variant="h6">
+							<strong>Warning: Extra Headers in CSV File</strong>
+						</Typography>
+						{props.invalidHeaders.length>0 &&
+							<Typography variant="body1">
+								Headers in csv file, not in map: {props.invalidHeaders.join(', ')}
+							</Typography>
+						}							
+
 					</div>
-				}		
-			</div>
-		</Card>
+				</Card>
+			}
+			<Card height="100%" style={{backgroundColor: cardColor, width: "100%"}}>
+				<div style={{padding: "20px"}}>
+					<Typography variant="h6">
+						<strong>{successText}</strong>
+					</Typography>
+					{props.data.length>0 &&
+						<Typography variant="body1">
+							Questionnaire Responses: {JSON.stringify(props.data)}
+						</Typography>
+					}
+					{props.missingHeaders.length>0 &&
+						<Typography variant="body1">
+							Headers in map, missing from csv file: {props.missingHeaders.join(', ')}
+						</Typography>
+					}							
+					{Object.keys(props.errors).length>0 &&
+						<div>
+							{formatErrors(props.errors)}
+						</div>
+					}		
+				</div>
+			</Card>
+		</div>
 )
 }
 
