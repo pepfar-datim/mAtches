@@ -1,4 +1,4 @@
-function validateFile(e,_this) {
+export function uploadFile(e,_this) {
 
 	return new Promise((resolve, reject) => {	
 		let files;
@@ -16,11 +16,7 @@ function validateFile(e,_this) {
 		_this.setState({fileName: files[0].name})
 
 		readFileContent(files[0]).then((csvText) => {
-			var columnRow = csvText.split('\n')[0];
-			var columns = columnRow.split(',');
-			var result = checkHeaders(columns, JSON.parse(JSON.stringify(_this.props.map.map)));
-			result.text=csvText;
-			resolve(result)
+			resolve(csvText)
 		})
 	    
 	})
@@ -35,7 +31,9 @@ function readFileContent(file) {
   });
 }
 
-function checkHeaders(columns, map) {
+export function checkHeaders(csvFile, map) {
+	var columnRow = csvFile.split('\n')[0];
+	var columns = columnRow.split(',');
 	let i = 0
 	let invalidHeaders = [];
 	for (let i = 0; i < columns.length; i++) {
@@ -51,6 +49,6 @@ function checkHeaders(columns, map) {
 		validity = false;
 	}
 	
-	return({validity: validity, invalidHeaders: invalidHeaders, missingHeaders: Object.keys(map)})
+	return({validity: validity, invalidHeaders: invalidHeaders, missingHeaders: Object.keys(map), text: csvFile})
 }
-export default validateFile;
+export default {uploadFile, checkHeaders}

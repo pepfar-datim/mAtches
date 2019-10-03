@@ -10,7 +10,7 @@ import ValidationCard from './ValidationCard.js'
 
 import config from '../config.json'
 
-import validateFile from './services/validateFile.js'
+import {uploadFile, checkHeaders} from './services/validateFile.js'
 
 class UploadCard extends React.Component {
 
@@ -33,34 +33,36 @@ class UploadCard extends React.Component {
       	this.refs.fileInput.click(e);
  	}
 
- 	upload(ev) {
- 		ev.preventDefault();
+ 	uploadCallback(csvFile) {
+ 		csvFile = checkHeaders(csvFile, this.props.map.map);
+		this.setState({invalidHeaders: csvFile.invalidHeaders, missingHeaders: csvFile.missingHeaders})
+		if (csvFile.validity) {
+		fetch(config.base + 'api/maps/' + this.props.map.uid + '/upload', {
+    		method:'POST', body:csvFile.text, headers: {'Content-Type': 'text/plain; charset=UTF-8'}
+		})
+		.then(results => results.json())
+		.then(response => {
+			if(response.hasOwnProperty('errors')){
+				this.setState({errors: response.errors})	
+			}
+			if(response.hasOwnProperty('data')){
+				this.setState({data: response.data})	
+			}
+			this.setState({finishedUploading: true})
+		})
+
+		}
+		else { 
+			this.setState({finishedUploading: true, invalidHeaders: csvFile.invalidHeaders, missingHeaders: csvFile.missingHeaders})	
+		} 		
+ 	}
+
+ 	upload(e) {
+ 		e.preventDefault();
  		this.setInitialState();
- 		validateFile(ev,this).then(csvFile =>{
- 			this.setState({invalidHeaders: csvFile.invalidHeaders, missingHeaders: csvFile.missingHeaders})
-	 		if (csvFile.validity) {
-	    		fetch(config.base + 'api/maps/' + this.props.map.uid + '/upload', {
-	        		method:'POST', body:csvFile.text, headers: {'Content-Type': 'text/plain; charset=UTF-8'}
-	    		})
-	    		.then(results => results.json())
-	    		.then(response => {
-	    			if(response.hasOwnProperty('errors')){
-	    				this.setState({errors: response.errors})	
-	    			}
-	    			if(response.hasOwnProperty('data')){
-	    				this.setState({data: response.data})	
-	    			}
-	    			this.setState({finishedUploading: true})
-	    		})
-
-	 		}
-	 		else { 
-	 			this.setState({finishedUploading: true, invalidHeaders: csvFile.invalidHeaders, missingHeaders: csvFile.missingHeaders})	
-	 		}
-
- 		});
- 		
- 		
+ 		uploadFile(e,this).then(csvFile => {
+ 			this.uploadCallback(csvFile)
+ 		}); 		
  	}
 
 	render() {

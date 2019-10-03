@@ -21,6 +21,7 @@ import { sizing } from '@material-ui/system';
 import EditCard from "./EditCard.js";
 import ValueMapCard from "./ValueMapCard.js";
 import config from '../config.json'
+import {uploadFile} from './services/validateFile.js'
 
 import loadMapQuestionnaire from './services/loadMapQuestionnaire.js'
 
@@ -224,37 +225,29 @@ uploadAction(e) {
   this.refs.fileInput.click(e);
 }
 
+uploadCallback (csvText) {
+  var columnRow = csvText.split('\n')[0];
+  var columns = columnRow.split(',');
+  var tempMap = this.state.map;
+  var originalMap = JSON.parse(JSON.stringify(tempMap));
+  var tempUnmappedHeaders = this.state.unmappedHeaders;
+  var mapValidity = true;
+  for (let i =0; i<columns.length; i++) {
+    var addResult = processAdd(tempMap, tempUnmappedHeaders, columns[i]);
+    tempMap = addResult[0];
+    tempUnmappedHeaders = addResult[1];
+  }
+  if (tempMap != originalMap) {
+    this.setState({map: tempMap, unmappedHeaders: tempUnmappedHeaders})
+    pushMapBack(tempMap, mapValidity);
+  }
+}
+
 upload(e) {
   e.preventDefault();
-    let files;
-
-      if (e.dataTransfer && e.dataTransfer.files) {
-        files = e.dataTransfer.files;
-      } else if (e.target) {
-        files = e.target.files;
-      }
-    
-    if (typeof files !== "object" || files.length === 0){
-      console.log('problem with file')
-    }
-    
-    readFileContent(files[0]).then((csvText) => {
-      var columnRow = csvText.split('\n')[0];
-      var columns = columnRow.split(',');
-      var tempMap = this.state.map;
-      var originalMap = JSON.parse(JSON.stringify(tempMap));
-      var tempUnmappedHeaders = this.state.unmappedHeaders;
-      var mapValidity = true;
-      for (let i =0; i<columns.length; i++) {
-        var addResult = processAdd(tempMap, tempUnmappedHeaders, columns[i]);
-        tempMap = addResult[0];
-        tempUnmappedHeaders = addResult[1];
-      }
-      if (tempMap != originalMap) {
-        this.setState({map: tempMap, unmappedHeaders: tempUnmappedHeaders})
-        pushMapBack(tempMap, mapValidity);
-      }
-    })
+  uploadFile(e,this).then(csvFile => {
+    this.uploadCallback(csvFile)
+  });   
 }
 
 
