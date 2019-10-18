@@ -82,7 +82,9 @@ var data = {
           }
           else {
             this.addError(row, key, 'invalidValueType');
-          }          
+          }
+        default:
+          return value          
       }
     } catch (e) {
       console.log(e)
