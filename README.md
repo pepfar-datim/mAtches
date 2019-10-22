@@ -26,13 +26,14 @@ Mac: https://www.codementor.io/engineerapart/getting-started-with-postgresql-on-
 4. Create new database `api`
 CREATE DATABASE api;
 
-5. Run commands contained createDBtables.sql file in same postgres session, or disconnect and run
+5. Run commands contained in createDBtables.sql file in same postgres session, or disconnect and run
 `psql -U me -d api -f database/createDBtables.sql`
 
 
 
 C. Set up and start frontend
-&nbpsApp is configured to run on port 5001, to change this, edit server.js file, line 6
+<br/>
+App is configured to run on port 5001, to change this, edit server.js file, line 6
 
 1. Install dependencies
 `npm install`
