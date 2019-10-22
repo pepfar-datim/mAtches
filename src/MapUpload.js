@@ -63,7 +63,7 @@ class MapUpload extends Component {
         <div style={{"padding": "20px"}}>
         <Grid container className={classes.root} wrap="nowrap" spacing={2}>
           <Grid item xs={3} style={{maxWidth: "300px"}}>
-              <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
+              <Card style={{backgroundColor: "lightSteelBlue", height: "100%"}} wrap="wrap">
                   <div style={{"padding": "20px"}}>            
                     <Typography variant="h6">
                       <strong>Map name: </strong>{this.state.map.name}

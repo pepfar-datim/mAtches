@@ -79,7 +79,7 @@ render() {
   const questionnaireHash = this.props.questionnaireHash;
   return (
     <div style={{ padding: "20px" }}>
-      <Paper style={{ backgroundColor: "lightBlue" }}>
+      <Paper style={{ backgroundColor: "lightSteelBlue" }}>
         <div style={{ padding: "20px" }}>
           <Typography variant="h6" style={{ paddingBottom: "20px" }}>
             Create a new map

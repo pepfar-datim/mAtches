@@ -79,7 +79,7 @@ class MapUpdate extends Component {
           {this.state.mode=='edit' && this.state.map && (
             <div>
               <HeaderBar />
-              <MapEdit id={this.state.mapID} map={this.state.map} questionnaireName={this.state.questionnaire.name} mapCheck={this.state.mapCheck} />
+              <MapEdit id={this.state.mapID} questionnaireName={this.state.questionnaire.name} />
             </div>
           )}
           {this.state.mode=='upload' && (
