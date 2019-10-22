@@ -14,6 +14,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 
 import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
 import PublishIcon from '@material-ui/icons/Publish';
+import ImageSearchIcon from '@material-ui/icons/ImageSearch';
 
 import { makeStyles } from '@material-ui/core/styles';
 import { sizing } from '@material-ui/system';
@@ -24,6 +25,11 @@ import config from '../config.json'
 import {uploadFile} from './services/validateFile.js'
 
 import loadMapQuestionnaire from './services/loadMapQuestionnaire.js'
+
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+import Box from '@material-ui/core/Box';
 
 
 const drawerWidth = 200;
@@ -152,6 +158,13 @@ function readFileContent(file) {
   });
 }
 
+function a11yProps(index) {
+  return {
+    id: `scrollable-prevent-tab-${index}`,
+    'aria-controls': `scrollable-prevent-tabpanel-${index}`,
+  };
+}
+
 class MapEdit extends Component {
 
 formatHeaders(currentMap, _this) {
@@ -178,16 +191,22 @@ constructor(props){
     editValueMap: false,
     header: '',
     mapID: '',
-    unmappedHeaders: {}
+    unmappedHeaders: {},
+    value: 0
   }
   this.handleAssociationChange = this.handleAssociationChange.bind(this);
   this.handleValueMap = this.handleValueMap.bind(this);
   this.handleValueMapClose = this.handleValueMapClose.bind(this);
+  this.handleChange = this.handleChange.bind(this);
 }
 
 componentDidMount() {
   loadMapQuestionnaire(this.props.id, config, this);
 }
+
+handleChange(event, newValue) {
+    this.setState({value: newValue});
+};
 
 handleAssociationChange(event) {
   var tempMap = this.state.map; 
@@ -252,6 +271,7 @@ upload(e) {
 
 
 render() {
+const value = 1;
   return (
     <div style={{"padding": "20px"}}>
     {this.state.editValueMap &&
@@ -267,7 +287,7 @@ render() {
     {!this.state.editValueMap && this.state.mapValidity != undefined &&          
     <Grid container className={classes.root} wrap="nowrap" spacing={2}>
       <Grid item xs={3} style={{maxWidth: "300px"}}>
-          <Card style={{backgroundColor: "lightBlue", height: "100%"}} wrap="wrap">
+          <Card style={{backgroundColor: "lightSteelBlue", height: "100%"}} wrap="wrap">
               <div style={{"padding": "20px"}}>            
                 <Typography variant="h6">
                   <strong>Map name: </strong>{this.state.map.name}
@@ -281,45 +301,61 @@ render() {
                   <strong>Source Headers</strong>
                 </Typography>              
                 <br />
-                <div>
-                  <Typography variant="body1">
-                    Upload Headers from CSV
-                  </Typography>             
-                    <TextField disabled={true} label={this.state.filename} value={this.state.fileName} />
-                  <IconButton
-                  edge="start"
-                  color="inherit"
-                  aria-label="menu"
-                  onClick={(e) => { this.uploadAction(e)}}
-                  >
-                  <PublishIcon />
-                  </IconButton>
-                  <form style={{visibility: "hidden"}}>
-                  <input type="file" ref="fileInput"  accept=".csv" onChange={(ev) => { this.upload(ev)}} />
-                  </form>
+  <div style={{backgroundColor: "white"}}>
+  <Tabs
+    value={this.state.value}
+    onChange={this.handleChange}
+    style={{backgroundColor:"steelBlue"}}
+    TabIndicatorProps={{
+      style: {backgroundColor: "orange", textColor: "orange"}
+    }}
+  >
+    <Tab style ={{ minWidth: 20 }} icon={<AddCircleOutlinedIcon />} aria-label="add" {...a11yProps(0)} />
+    <Tab style ={{ minWidth: 20 }} icon={<PublishIcon />} aria-label="upload" {...a11yProps(1)} />
+    <Tab style ={{ minWidth: 20 }} icon={<ImageSearchIcon />} aria-label="fromMap" {...a11yProps(2)} />
+
+  </Tabs>
+
+                  <div hidden={this.state.value !== 1}>
+                    <Typography variant="body1">
+                      Upload Headers from CSV
+                    </Typography>             
+                      <TextField disabled={true} label={this.state.filename} value={this.state.fileName} />
+                    <IconButton
+                    edge="start"
+                    color="inherit"
+                    aria-label="menu"
+                    onClick={(e) => { this.uploadAction(e)}}
+                    >
+                    <PublishIcon />
+                    </IconButton>
+                    <form style={{visibility: "hidden"}}>
+                    <input type="file" ref="fileInput"  accept=".csv" onChange={(ev) => { this.upload(ev)}} />
+                    </form>
+                    <br />
+                  </div>
+                <div hidden={this.state.value !== 0}>                   
+                  <TextField
+                    style={{width:'120px'}}
+                    id="standard-name"
+                    label="Add a Header"
+                    value={this.state.newHeaderName}
+                    margin="normal"
+                    onChange={handleNameChange.bind(this)}
+                  />
                   <br />
-                  <Typography variant="body1">
-                    OR Add Headers Manually
-                  </Typography>
-                </div>                   
-                <TextField
-                  style={{width:'120px'}}
-                  id="standard-name"
-                  label="Add a Header"
-                  value={this.state.newHeaderName}
-                  margin="normal"
-                  onChange={handleNameChange.bind(this)}
-                />
+                  <IconButton
+                    edge="start"
+                    aria-label="menu"
+                    onClick={handleAdd.bind(this)}
+                  >
+                    <AddCircleOutlinedIcon />
+                  </IconButton>
+                </div>
+
                 <br />
-                <IconButton
-                  edge="start"
-                  aria-label="menu"
-                  onClick={handleAdd.bind(this)}
-                >
-                  <AddCircleOutlinedIcon />
-                </IconButton>
-                <br />
-                <br />
+        </div>
+        <br />                
                 {this.state.map['map'] &&
                 <div>
                   {this.formatHeaders(this.state.map['map'], this)}
