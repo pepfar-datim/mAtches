@@ -80,7 +80,7 @@ var data = {
       }
     }
     for (let i=0; i<this.QuestionnaireResponses.length; i++) {
-      this.bundle.entry.push (this.QuestionnaireResponses[i])
+      this.bundle.entry.push ({"resource": this.QuestionnaireResponses[i]})
     }
   },
   evaluateValue: function(value, valueType, row, key) {
@@ -212,7 +212,6 @@ const convertToFHIR = (csvText, map, mapID, questionnaireURL) => {
         if (Object.keys(data.errors).length > 0) {
           end.errors = data.errors;
         } else {
-          console.log(JSON.stringify(data.bundle));
           end.data = data.bundle;
         }
         resolve(end);
