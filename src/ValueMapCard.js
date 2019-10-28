@@ -121,7 +121,7 @@ class ValueMapCard extends React.Component {
 
 	render() {
 		return(
-	      	<Card style={{position: "relative", backgroundColor: "lavender", height: "100%", "minHeight": "750px"}}>
+	      	<Card style={{position: "relative", backgroundColor: "ghostWhite", height: "100%", "minHeight": "750px"}}>
 	        	<div style={{"padding": "20px"}}>
 	          		<Typography variant="h6" style={{marginBottom: "5px"}}>
 	            		<strong>Map Values</strong> for {this.props.header}
@@ -131,7 +131,7 @@ class ValueMapCard extends React.Component {
 	          		<div style={{margin: "20px"}}>
 	          			{this.formatValueMap(this.state.valueSet)}
 	          		</div>
-					<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: "lightBlue"}}
+					<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: "lightSteelBlue"}}
 						onClick={(e) => this.props.onValueMapClose(e, this.state.choiceMap, this.props.header)}
 					>
 					Save and Close
