@@ -53,17 +53,17 @@ return (
 					<Typography variant="h6">
 						<strong>{successText}</strong>
 					</Typography>
-					{props.data.length>0 &&
+					{props.data.resourceType == 'Bundle' &&
 						<Typography variant="body1">
-							Questionnaire Responses: {JSON.stringify(props.data)}
+							Questionnaire Responses Bundle: {JSON.stringify(props.data)}
 						</Typography>
 					}
-					{props.missingHeaders.length>0 &&
+					{props.missingHeaders.length > 0 &&
 						<Typography variant="body1">
 							Headers in map, missing from csv file: {props.missingHeaders.join(', ')}
 						</Typography>
 					}							
-					{Object.keys(props.errors).length>0 &&
+					{Object.keys(props.errors).length > 0 &&
 						<div>
 							{formatErrors(props.errors)}
 						</div>

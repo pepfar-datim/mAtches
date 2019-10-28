@@ -6,13 +6,15 @@ var data = {
     var promise = new Promise(function(resolve, reject) {
       csv.parse(
         rawData,
-        { 
+        {
           columns: true,
           trim: true,
           skip_empty_lines: true
         },
         function(err, output) {
-          if (err) {resolve({"error": err})}
+          if (err) {
+            resolve({ error: err });
+          }
           resolve(output);
         }
       );
@@ -20,7 +22,6 @@ var data = {
     return promise;
   },
   convertToQR: function() {
-
     for (let i = 0; i < this.csvData.length; i++) {
       var QR = {
         resourceType: "QuestionnaireResponse",
@@ -40,9 +41,13 @@ var data = {
               i,
               key
             );
-          }
-          else {
-            tempValue = this.evaluateValue(this.csvData[i][key], this.map[key]["valueType"], i, key);
+          } else {
+            tempValue = this.evaluateValue(
+              this.csvData[i][key],
+              this.map[key]["valueType"],
+              i,
+              key
+            );
           }
           this.addQRItems(
             QR["item"],
@@ -58,73 +63,87 @@ var data = {
         this.QuestionnaireResponses.push(QR);
       }
     }
+    this.convertToBundle();
+  },
+  convertToBundle: function() {
+    if (this.QuestionnaireResponses.length > 0) {
+      this.bundle = {
+        "resourceType": "Bundle",
+        "id": "auto-generated",
+        "meta": {
+          "profile": ["http://datim.org/fhir/StructureDefinition/PLM-QuestionnaireResponse-Bundle"]
+        },
+        "type": "message",
+        "timestamp": this.uploadDate,
+        "entry": []
+
+      }
+    }
+    for (let i=0; i<this.QuestionnaireResponses.length; i++) {
+      this.bundle.entry.push (this.QuestionnaireResponses[i])
+    }
   },
   evaluateValue: function(value, valueType, row, key) {
     try {
       switch (valueType) {
-        case 'integer':          
+        case "integer":
           if (Number.isInteger(parseFloat(value.trim()))) {
             return parseInt(value.trim());
+          } else {
+            this.addError(row, key, "invalidValueType");
           }
-          else {
-            this.addError(row, key, 'invalidValueType');
+        case "dateTime":
+          if (moment(value, moment.ISO_8601, true).isValid()) {
+            return value;
+          } else {
+            this.addError(row, key, "invalidValueType");
           }
-        case 'dateTime':
-          if(moment(value, moment.ISO_8601, true).isValid()) {
-            return value
-          }
-          else {
-            this.addError(row, key, 'invalidValueType');
-          }
-        case 'date':
-          if(moment(value, moment.ISO_8601, true).isValid()) {
-            return value
-          }
-          else {
-            this.addError(row, key, 'invalidValueType');
+        case "date":
+          if (moment(value, moment.ISO_8601, true).isValid()) {
+            return value;
+          } else {
+            this.addError(row, key, "invalidValueType");
           }
         default:
-          return value          
+          return value;
       }
     } catch (e) {
-      console.log(e)
-      this.addError(row, key, 'invalidValueType');
+      console.log(e);
+      this.addError(row, key, "invalidValueType");
     }
   },
   addError: function(row, key, type, value) {
-      if (!this.rowErrors.hasOwnProperty(row)) {
-        this.rowErrors[row] = true;
+    if (!this.rowErrors.hasOwnProperty(row)) {
+      this.rowErrors[row] = true;
+    }
+    if (!this.errors.hasOwnProperty(key)) {
+      this.errors[key] = {};
+    }
+    if (!this.errors[key].hasOwnProperty(type)) {
+      this.errors[key][type] = [];
+      if (type == "invalidValueMapping") {
+        this.errors[key][type] = {};
       }
-      if (!this.errors.hasOwnProperty(key)) {
-        this.errors[key] = {};
-      }
-      if (!this.errors[key].hasOwnProperty(type)) {
-        this.errors[key][type] = [];
-        if (type == 'invalidValueMapping') {
-         this.errors[key][type] = {};
-        }
-      }
-      if (type == 'invalidValueMapping') {
-       this.errors[key][type][value] = {};
-      }
-      else {
-        this.errors[key][type].push(row)  
-      }     
-      
+    }
+    if (type == "invalidValueMapping") {
+      this.errors[key][type][value] = {};
+    } else {
+      this.errors[key][type].push(row);
+    }
   },
   convertValue: function(value, valueMapLocation, row, key) {
     //if there is an error in mapping the value (e.g. map missing, then push error), else convert
     try {
-      if (!this.map[key].hasOwnProperty('choiceMap')) {
-        throw new Error('Missing a map for values')
+      if (!this.map[key].hasOwnProperty("choiceMap")) {
+        throw new Error("Missing a map for values");
       }
-      var valueMap = this.map[key]['choiceMap']
+      var valueMap = this.map[key]["choiceMap"];
       if (valueMap[value] === undefined) {
         throw new Error("Unmapped choice value");
       }
       return valueMap[value];
     } catch (e) {
-      this.addError(row, key, 'invalidValueMapping', value);
+      this.addError(row, key, "invalidValueMapping", value);
     }
   },
   addQRItems: function(tempObject, pathArray, pathsChecked, value, valueType) {
@@ -162,11 +181,10 @@ var data = {
       tempObject[indexPosition]["answer"] = {};
       var valueName = "value" + valueType;
       if (valueName == "valueChoice") {
-        tempObject[indexPosition]["answer"]["valueCoding"] = {choice: value}  
+        tempObject[indexPosition]["answer"]["valueCoding"] = { choice: value };
+      } else {
+        tempObject[indexPosition]["answer"][valueName] = value;
       }
-      else {
-        tempObject[indexPosition]["answer"][valueName] = value;  
-      }  
     }
   }
 };
@@ -179,32 +197,31 @@ const convertToFHIR = (csvText, map, mapID, questionnaireURL) => {
   data.QuestionnaireResponses = [];
   data.questionnaireURL = questionnaireURL;
 
-  var end = {status: 400, message: "Something went wrong"};
+  var end = { status: 400, message: "Something went wrong" };
   var promise = new Promise(function(resolve, reject) {
-    var uploadDate = new Date().toISOString();
-    data.mapDate = mapID + "-" + uploadDate;
+    data.uploadDate = new Date().toISOString();
+    data.mapDate = mapID + "-" + data.uploadDate;
     data.loadCsv(csvText).then(output => {
       if (!Array.isArray(output)) {
-        end = {status: 200, message: "Invalid CSV File"};
-      }
-      else {
+        end = { status: 200, message: "Invalid CSV File" };
+      } else {
         data.csvData = output;
         data.convertToQR();
-        end = {status: 200, message: "Converted"};
+        end = { status: 200, message: "Converted" };
 
-        if(Object.keys(data.errors).length>0) {
-          end.errors=data.errors
+        if (Object.keys(data.errors).length > 0) {
+          end.errors = data.errors;
+        } else {
+          console.log(JSON.stringify(data.bundle));
+          end.data = data.bundle;
         }
-        else {
-          end.data=data.QuestionnaireResponses;
-        }
-        resolve(end)
+        resolve(end);
       }
-    })
-  })
-  return promise
-}
+    });
+  });
+  return promise;
+};
 
 module.exports = {
   convertToFHIR
-}
+};

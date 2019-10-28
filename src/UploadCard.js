@@ -23,7 +23,7 @@ class UploadCard extends React.Component {
  	setInitialState() {
  		this.setState({
  			finishedUploading:false,
- 			data: [],
+ 			data: {"resourceType": undefined},
  			errors: {},
  			invalidHeaders: [],
  			missingHeaders: [],
@@ -93,7 +93,7 @@ class UploadCard extends React.Component {
 								errors={this.state.errors}
 								invalidHeaders={this.state.invalidHeaders}
 								missingHeaders={this.state.missingHeaders}
-								success={this.state.data.length>0}
+								success={this.state.data.resourceType == 'Bundle'}
 								data={this.state.data}
 							/>
 						}
