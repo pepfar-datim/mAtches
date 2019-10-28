@@ -7,6 +7,7 @@ import TextField from "@material-ui/core/TextField";
 import PublishIcon from '@material-ui/icons/Publish';
 
 import ValidationCard from './ValidationCard.js'
+import UploadDestinationSelector from './UploadDestinationSelector.js'
 
 import config from '../config.json'
 
@@ -17,8 +18,12 @@ class UploadCard extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			fileName: '',
+			fileName: "",
+			destination: "internal",
+ 			externalURL: ""
 		};
+		this.handleDestinationChange = this.handleDestinationChange.bind(this);
+		this.handleURLChange = this.handleURLChange.bind(this);
 	}
  	setInitialState() {
  		this.setState({
@@ -26,9 +31,15 @@ class UploadCard extends React.Component {
  			data: {"resourceType": undefined},
  			errors: {},
  			invalidHeaders: [],
- 			missingHeaders: [],
+ 			missingHeaders: []
  		})
  	}
+ 	handleDestinationChange(text) {
+		this.setState({ destination: text });
+	}
+ 	handleURLChange(text) {
+		this.setState({ externalURL: text });
+	}	
  	uploadAction(e) {
       	this.refs.fileInput.click(e);
  	}
@@ -72,6 +83,12 @@ class UploadCard extends React.Component {
 	          		<Typography variant="h6">
 	            		<strong>Upload Data</strong>
 	          		</Typography>
+	          		<UploadDestinationSelector
+						destination={this.state.destination}
+						externalURL={this.state.externalURL}
+						onDestinationChange={this.handleDestinationChange}
+						onURLChange={this.handleURLChange}
+					/>
 	          		<div style={{padding: "5px"}}>
 	          		<Typography variant="body1">
 	            		Select a CSV file to upload
