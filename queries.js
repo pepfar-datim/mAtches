@@ -1,6 +1,7 @@
 const helpers = require('./helpers.js')
 const Pool = require('pg').Pool;
 const csv = require('csv');
+var fetch = require('node-fetch')
 
 const config = require('./config.json')
 var convert = require('./convert.js')
@@ -312,7 +313,7 @@ const createQuestionnaire = (request, response) => {
 }
 
 const uploadData = (request, response) => {
-  
+  var url = decodeURIComponent(request.query.url);
   const query = {
     text: "SELECT m.map, q.questionnaire FROM maps m LEFT JOIN questionnaires q ON m.questionnaireuid=q.uid WHERE m.uid=$1",
     values: [request.params.id]
@@ -324,7 +325,35 @@ const uploadData = (request, response) => {
       var map = {map: results.rows[0]['map']};
       var questionnaireURL = results.rows[0]['questionnaire']['url'];
       convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
-        response.status(200).json(result)
+        if (result.hasOwnProperty('errors')) {
+          response.status(200).json(result);  
+        } else {
+          if (url == null || url.trim().toLowerCase() == 'null') {
+            response.status(200).json(result);
+          } else {
+            try {
+              fetch(url, 
+                {
+                  method: "POST",
+                  body: result.bundle,
+                  headers: { "Content-Type": "application/json" }
+                }
+              )
+              //.then(firstRes => firstRes.text())
+              .then(extRes => {
+                result.urlResponse = {status: extRes.status, url: extRes.url, body: extRes.body}
+                response.status(200).json(result);
+              })
+            }
+            catch (e) {
+              result.urlResponse = e;
+              response.status(400).json(result);
+              console.log(e)
+            }
+          }
+          //send request to url
+        }
+        
     })
   });
   
