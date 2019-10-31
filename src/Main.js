@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {Route, Switch } from 'react-router-dom';
+import {Route, Switch, Redirect} from 'react-router-dom';
 
 import Home from './Home.js';
 import MapDashboard from './MapDashboard.js';
@@ -23,7 +23,7 @@ class Main extends React.Component {
 		        <Switch>
 		          <Route 
 		          	exact path={basePath}
-		          	render={(props) => <Home />}
+		          	render={() => (<Redirect to="/maps" />)}
 		          />
 		          <Route 
 		          	exact path={basePath + 'maps/:id'}

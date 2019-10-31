@@ -1,10 +1,6 @@
 import React, { Component } from "react";
 import HeaderBar from "./HeaderBar.js";
 
-const config = {
-	name: "Tanzania Ministry of Health"
-};
-
 class Home extends Component {
 
 	render() {
