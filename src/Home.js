@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import HeaderBar from "./HeaderBar.js";
 
+//currently this component is not used, but 
+
 class Home extends Component {
 
 	render() {
