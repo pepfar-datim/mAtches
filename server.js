@@ -9,7 +9,7 @@ const DIST_DIR = path.join(__dirname, './dist');
 const HTML_FILE = path.join(DIST_DIR, 'index.html');
 const ERROR_FILE = path.join(DIST_DIR, 'error.html');
 app.use(bodyParser.json({ limit: '50mb' }));
-app.use(bodyParser.text())
+app.use(bodyParser.text({limit: '50mb'}))
 app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 500000 }));
 
 app.use(express.static(DIST_DIR));
