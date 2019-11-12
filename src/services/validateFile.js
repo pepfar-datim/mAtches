@@ -37,11 +37,11 @@ export function checkHeaders(csvFile, map) {
 	let i = 0
 	let invalidHeaders = [];
 	for (let i = 0; i < columns.length; i++) {
-		if(!map.hasOwnProperty(columns[i])) {
-			invalidHeaders.push(columns[i]);
+		if(!map.hasOwnProperty(columns[i].trim())) {
+			invalidHeaders.push(columns[i].trim());
 		}
 		else {
-			delete map[columns[i]]
+			delete map[columns[i].trim()]
 		}
 	}
 	var validity = true;
