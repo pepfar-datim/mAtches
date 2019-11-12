@@ -8,20 +8,16 @@ const port = 5001
 const DIST_DIR = path.join(__dirname, './dist');
 const HTML_FILE = path.join(DIST_DIR, 'index.html');
 const ERROR_FILE = path.join(DIST_DIR, 'error.html');
-app.use(bodyParser.json())
+app.use(bodyParser.json({ limit: '50mb' }));
 app.use(bodyParser.text())
+app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 500000 }));
 
-app.use(
-  bodyParser.urlencoded({
-    extended: true,
-  })
-)
 app.use(express.static(DIST_DIR));
 
-const config = require('./config.json')
+const config = require('./config.json');
 const basePath = config.base;
 
-app.get(basePath + 'api/maps', api.getAll)
+app.get(basePath + 'api/maps', api.getAll);
 
 app.get(basePath + 'api/maps/names/:name', api.checkName);
 
