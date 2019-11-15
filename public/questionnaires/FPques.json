@@ -1,61 +1,112 @@
-{"name":"Family Planning","created":"2019-08-16T02:21:10.307Z","updated":"2019-08-26T07:59:19.321Z","uid":"FPques","questionnaire":
 {
-  "resourceType": "Questionnaire",
-  "id": "PLM-FP-Questionnaire",
-  "url": "http://datim.org/fhir/Questionnaire/PLM-FP-Questionnaire",
-  "meta": {
-    "profile": [ "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extract" ]
-  },
-  "name": "PLMFPQuestionnaire",
-  "title": "PLM Prototype Questionnaire - FP",
-  "status": "active",
-  "item": [
-    {
-      "linkId": "/Patient",
-      "text": "Patient ID",
-      "type": "group",
-      "item": [
-        {
-          "linkId": "/Patient/id",
-          "text": "Patient ID",
-          "type": "string",
-          "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-Patient#Patient.id"
-        },
-        {
-          "linkId": "/Patient/birthDate",
-          "text": "Birth Date",
-          "type": "date",
-          "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-Patient#Patient.birthDate"
-        },
-        {
-          "linkId": "/Patient/gender",
-          "text": "Gender",
-          "type": "choice",
-          "answerValueSet": "http://hl7.org/fhir/ValueSet/administrative-gender",
-          "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-Patient#Patient.gender"
-        }
+  "name": "Family Planning",
+  "created": "2019-08-15T22:21:10.307Z",
+  "updated": "2019-08-26T03:59:19.321Z",
+  "uid": "FPques",
+  "questionnaire": {
+    "resourceType": "Questionnaire",
+    "id": "PLM-FP-Questionnaire",
+    "url": "http://datim.org/fhir/Questionnaire/PLM-FP-Questionnaire",
+    "meta": {
+      "profile": [
+        "http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extract"
       ]
     },
-    {
-      "linkId": "/MedicationStatement",
-      "text": "MedicationStatement",
-      "type": "group",
-      "item": [
-        {
-          "linkId": "/MedicationStatement/method",
-          "text": "Family Planning Modern Method",
-          "type": "choice",
-          "answerValueSet": "http://datim.org/fhir/ValueSet/PLM-FP-Modern-Methods",
-          "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-MedicationStatement#MedicationStatement.medicationCodeableConcept.coding.code"
-        },
-        {
-          "linkId": "/MedicationStatement/startDate",
-          "text": "Family Planning Modern Method Start Date",
-          "type": "dateTime",
-          "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-MedicationStatement#MedicationStatement.effectivePeriod.start"
-        }
-      ]
-    }
-  ]
-}
+    "name": "PLMFPQuestionnaire",
+    "title": "PLM Prototype Questionnaire - FP",
+    "status": "active",
+    "item": [
+      {
+        "linkId": "/Patient",
+        "text": "Patient ID",
+        "type": "group",
+        "item": [
+          {
+            "linkId": "/Patient/id",
+            "text": "Patient ID",
+            "type": "string",
+            "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-Patient#Patient.id"
+          },
+          {
+            "linkId": "/Patient/birthDate",
+            "text": "Birth Date",
+            "type": "date",
+            "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-Patient#Patient.birthDate"
+          },
+          {
+            "linkId": "/Patient/gender",
+            "text": "Gender",
+            "type": "choice",
+            "answerValueSet": {
+              "concept": [
+                {
+                  "Code": "male",
+                  "Display": "Male",
+                  "Definition": "Male."
+                },
+                {
+                  "Code": "female",
+                  "Display": "Female",
+                  "Definition": "Female."
+                },
+                {
+                  "Code": "other",
+                  "Display": "Other",
+                  "Definition": "Other."
+                },
+                {
+                  "Code": "unknown",
+                  "Display": "Unknown",
+                  "Definition": "Unknown."
+                }
+              ]
+            },
+            "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-Patient#Patient.gender"
+          }
+        ]
+      },
+      {
+        "linkId": "/MedicationStatement",
+        "text": "MedicationStatement",
+        "type": "group",
+        "item": [
+          {
+            "linkId": "/MedicationStatement/method",
+            "text": "Family Planning Modern Method",
+            "type": "choice",
+            "answerValueSet": {
+              "concept": [
+                {
+                  "Code": "coc",
+                  "Display": "Combined oral contraceptives",
+                  "Definition": "Combined oral contraceptives."
+                },
+                {
+                  "Code": "pop",
+                  "Display": "Progestogen-only pills",
+                  "Definition": "Progestogen-only pills."
+                },
+                {
+                  "Code": "implant",
+                  "Display": "Implants",
+                  "Definition": "Implants."
+                },
+                {
+                  "Code": "injectable",
+                  "Display": "Progestogen only injectables",
+                  "Definition": "Progestogen only injectables."
+                }
+              ]
+            }
+          },
+          {
+            "linkId": "/MedicationStatement/startDate",
+            "text": "Family Planning Modern Method Start Date",
+            "type": "dateTime",
+            "definition": "http://datim.org/fhir/StructureDefinition/PLM-FP-MedicationStatement#MedicationStatement.effectivePeriod.start"
+          }
+        ]
+      }
+    ]
+  }
 }

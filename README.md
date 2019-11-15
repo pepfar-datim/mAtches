@@ -6,6 +6,7 @@ Data source to target mapping utility
 **HOW TO RUN mAppr locally**
 
 A. Fork repo
+App is configured to run on port 5001, to change this, edit server.js file, line 6
 
 B. Configure backend locally
 
@@ -29,11 +30,13 @@ CREATE DATABASE api;
 5. Run commands contained in createDBtables.sql file in same postgres session, or disconnect and run
 `psql -U me -d api -f database/createDBtables.sql`
 
-
+6. Load Questionnaires into the backend. mAppr currently uses modified FHIR Questionnaires (modified to incorporate answerValueSet for choice valueTypes) (this is a temporary workaround)
+`curl -X POST http://localhost:5001/api/questionnaires -H 'Content-Type:application/json' -d@public/questionnaires/FPques.json`
+`curl -X POST http://localhost:5001/api/questionnaires -H 'Content-Type:application/json' -d@public/questionnaires/HIVque.json`
 
 C. Set up and start frontend
 <br/>
-App is configured to run on port 5001, to change this, edit server.js file, line 6
+
 
 1. Install dependencies
 `npm install`
