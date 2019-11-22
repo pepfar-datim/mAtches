@@ -438,7 +438,7 @@ class MapEdit extends Component {
                       </IconButton>
                     </div>
                     <div hidden={this.state.value !== 2}>
-                      <UploadMapList onMapProcess={this.handleMapUpload}/>
+                      <UploadMapList onMapProcess={this.handleMapUpload} id={this.props.id}/>
                     </div>
                     <br />
                   </div>
