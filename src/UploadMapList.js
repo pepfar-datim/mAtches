@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-import MaterialTable from "material-table";
 import Typography from '@material-ui/core/Typography';
 
 import config from "../config.json";
@@ -12,70 +11,39 @@ import {DebounceInput} from 'react-debounce-input';
 import TextField from '@material-ui/core/TextField';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Grid from '@material-ui/core/Grid';
+import Button from "@material-ui/core/Button";
 import IconButton from "@material-ui/core/IconButton";
+import MobileStepper from '@material-ui/core/MobileStepper';
 
-
-import AddBox from "@material-ui/icons/AddBox";
-import ArrowUpward from "@material-ui/icons/ArrowUpward";
-import Check from "@material-ui/icons/Check";
-import ChevronLeft from "@material-ui/icons/ChevronLeft";
-import ChevronRight from "@material-ui/icons/ChevronRight";
-import Clear from "@material-ui/icons/Clear";
-import DeleteOutline from "@material-ui/icons/DeleteOutline";
-import Edit from "@material-ui/icons/Edit";
-import FilterList from "@material-ui/icons/FilterList";
-import FirstPage from "@material-ui/icons/FirstPage";
-import LastPage from "@material-ui/icons/LastPage";
-import Remove from "@material-ui/icons/Remove";
-import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
-import Upload from "@material-ui/icons/PublishOutlined";
-import ViewColumn from "@material-ui/icons/ViewColumn";
+import Sync from "@material-ui/icons/Sync";
+import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
+import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
 
-const tableIcons = {
-	Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
-	Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
-	Clear: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-	Delete: forwardRef((props, ref) => <DeleteOutline {...props} ref={ref} />),
-	DetailPanel: forwardRef((props, ref) => (
-		<ChevronRight {...props} ref={ref} />
-	)),
-	Edit: forwardRef((props, ref) => <Edit {...props} ref={ref} />),
-	Export: forwardRef((props, ref) => <SaveAlt {...props} ref={ref} />),
-	Filter: forwardRef((props, ref) => <FilterList {...props} ref={ref} />),
-	FirstPage: forwardRef((props, ref) => <FirstPage {...props} ref={ref} />),
-	LastPage: forwardRef((props, ref) => <LastPage {...props} ref={ref} />),
-	NextPage: forwardRef((props, ref) => <ChevronRight {...props} ref={ref} />),
-	PreviousPage: forwardRef((props, ref) => (
-		<ChevronLeft {...props} ref={ref} />
-	)),
-	ResetSearch: forwardRef((props, ref) => <Clear {...props} ref={ref} />),
-	Search: forwardRef((props, ref) => <Search {...props} ref={ref} />),
-	SortArrow: forwardRef((props, ref) => <ArrowUpward {...props} ref={ref} />),
-	ThirdStateCheck: forwardRef((props, ref) => (
-		<Remove {...props} ref={ref} />
-	)),
-	Upload: forwardRef((props, ref) => <Upload {...props} ref={ref} />),
-	ViewColumn: forwardRef((props, ref) => <ViewColumn {...props} ref={ref} />)
-};
 
-function formatMapList(maps, searchText, currentMapID) {
+function formatMapList(maps, searchText, currentMapID, onMapProcess, currentStep, numberOfMaps) {
 	return maps
 		.filter(m => {
 			if (m.uid == currentMapID) {return false}
-			if (!searchText.length) {return true}
+			if (!searchText.trim().length) {return true}
 			return m.name.toLowerCase().includes(searchText.trim().toLowerCase())
 		})
-		.slice(0,4)
+		.slice(currentStep * numberOfMaps,(currentStep + 1) * numberOfMaps)
 		.map(function(k, i) {
 			return (
 				<div>
-					<Grid container spacing={1} alignItems="flex-end">
+					<Grid container spacing={1} alignItems="center">
           				<Grid item>
-            				<Upload/>
+        				    <IconButton
+					            edge="start"
+					            aria-label="menu"
+								onClick={() => {onMapProcess(k.map)}}					            
+      						>
+      							<Sync />
+      						</IconButton>
           				</Grid>
-          				<Grid item>
-            				<Typography align="top">{k.name}</Typography>
+          				<Grid item xs zeroMinWidth>
+            				<Typography align="left" noWrap>{k.name}</Typography>
           				</Grid>
         			</Grid>					
 				</div>
@@ -89,8 +57,14 @@ class UploadMapList extends Component {
 		super(props);
 		this.state = {
 			maps: [],
-			searchText: ''
+			searchText: '',
+			currentStep: 0,
+			numberOfMaps: 3,
+			maxSteps: 0
 		};
+		this.handleNext = this.handleNext.bind(this);
+		this.handleBack = this.handleBack.bind(this);
+		this.handleSearchTextChange = this.handleSearchTextChange.bind(this);
 	}
 
 	// Fetch the list on first mount
@@ -102,33 +76,31 @@ class UploadMapList extends Component {
 		fetch(config.base + "api/maps")
 			.then(res => res.json())
 			.then(maps => {
-				this.setState({ maps: maps });
+				this.setState({ maps: maps, maxSteps: Math.ceil((maps.length -1 )/this.state.numberOfMaps)});
 			});
 	}
+
+	handleNext() {
+    	this.setState({currentStep: this.state.currentStep + 1});
+  	}
+
+	handleBack() {
+    	this.setState({currentStep: this.state.currentStep - 1});
+  	}
+
+  	handleSearchTextChange(newText) {
+  		var tempMax = Math.ceil((this.state.maps.length -1 )/this.state.numberOfMaps);
+  		var tempStep = this.state.currentStep
+  		if (newText.trim().length != 0) {
+  			var tempLength = this.state.maps.filter(m => {return m.name.toLowerCase().includes(newText.trim().toLowerCase())}).length;
+  			tempMax = Math.ceil((tempLength -1)/ this.state.numberOfMaps);
+  			tempStep = Math.min(this.state.currentStep, (tempMax -1));
+  		}
+  		this.setState({searchText: newText, currentStep: tempStep, maxSteps: tempMax});
+  	}
 		
 /*
-	        <MaterialTable
-		        	width="50"
-			        title=""
-			        icons={tableIcons}
-			        columns={[
-			          { title: 'Name', field: 'name' },
-			        ]}
-			        data={this.state.maps}
-			        actions={[
-			          rowData => ({
-			            icon: tableIcons.Upload,
-			            tooltip: 'Process',
-			            onClick: (event, rowData) => {this.props.onMapProcess(rowData.map);},
-			          })		          
-			        ]}		                
-			        options={{
-			          search: true,
-			          actionsColumnIndex: -1
-			        }}
 
-	 
-		        />
 //preferably, could get debounce to work with this, but it's not registering change...
 		    <DebounceInput
 		        	element={SearchTextComponent}
@@ -144,7 +116,7 @@ class UploadMapList extends Component {
 		    <TextField
 				id="narrowdown-search"
 				label="Narrow down maps"
-				onChange={e => this.setState({searchText: e.target.value})}
+				onChange={e => this.handleSearchTextChange(e.target.value)}
 				InputProps={{
 					startAdornment: (
 						<InputAdornment position="start">
@@ -155,7 +127,28 @@ class UploadMapList extends Component {
 			/>
 			<br />
 			<br />
-				{formatMapList(this.state.maps, this.state.searchText, this.props.id)}
+			{formatMapList(this.state.maps, this.state.searchText, this.props.id, this.props.onMapProcess, this.state.currentStep, this.state.numberOfMaps)}
+				<MobileStepper
+			        steps={this.state.maxSteps}
+			        position="static"
+			        variant="text"
+			        activeStep={this.state.currentStep}
+					backButton={
+						<Button size="small" onClick={this.handleBack} disabled={this.state.currentStep === 0}>
+							<KeyboardArrowLeft />
+						Back
+						</Button>
+					}
+					nextButton={
+						<Button size="small" onClick={this.handleNext} disabled={this.state.currentStep === this.state.maxSteps - 1}>
+							<KeyboardArrowRight />
+						Next
+						</Button>
+					}					
+				>
+				</MobileStepper>
+
+				
 			</div>
 		);
 	}
