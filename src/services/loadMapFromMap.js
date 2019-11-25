@@ -12,13 +12,9 @@ function checkFQ(flatQuestionnaire, path, linkid) {
 }
 
 function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {
-	console.log("loading a map");
 	var returnObj = {};
-
 	for (var header in baseMap) {
-		
 		//if not in newMap, add 
-
 		if (!newMap.map.hasOwnProperty(header)) {
 			newMap.map[header] = {}
 			unmappedHeaders[header] = {}
@@ -27,9 +23,10 @@ function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {
 		if (baseMap[header].hasOwnProperty("path")) {
 			var linkid = baseMap[header]["path"].slice(-1)[0]["linkid"];
 			var match = checkFQ(flatQuestionnaire, baseMap[header]["path"], linkid)
-			if (match) {
-				//if there is a match to Questionnaire, copy properties from Base Map and make association
 
+			if (match) {
+
+				//if there is a match to Questionnaire, copy properties from Base Map and make association
 				var propertiesToCopy = ['path', 'valueType', 'choiceMap']
 				for (let i =0; i<propertiesToCopy.length; i++) {
 					if (baseMap[header].hasOwnProperty(propertiesToCopy[i])) {
@@ -37,9 +34,9 @@ function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {
  					}
 				}
 
-				//remove existing association in flatQuestionnaire from map
+				//remove existing association in flatQuestionnaire from map (if different header)
 				if (flatQuestionnaire[linkid].hasOwnProperty('header')) {
-					if (newMap.map.hasOwnProperty(flatQuestionnaire[linkid]['header'])) {
+					if (newMap.map.hasOwnProperty(flatQuestionnaire[linkid]['header']) && flatQuestionnaire[linkid]['header'] != header) {
 						delete newMap.map[flatQuestionnaire[linkid]['header']];
 					}
 				}
@@ -57,7 +54,6 @@ function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {
 	}
 
 	returnObj.flatQuestionnaire = flatQuestionnaire;
-	returnObj.baseMap = baseMap;
 	returnObj.newMap = newMap;
 	returnObj.unmappedHeaders = unmappedHeaders;
 	return returnObj;
