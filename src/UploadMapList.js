@@ -76,7 +76,7 @@ class UploadMapList extends Component {
 		fetch(config.base + "api/maps")
 			.then(res => res.json())
 			.then(maps => {
-				this.setState({ maps: maps, maxSteps: Math.ceil((maps.length -1 )/this.state.numberOfMaps)});
+				this.setState({ maps: maps, maxSteps: Math.ceil(maps.length / this.state.numberOfMaps)});
 			});
 	}
 
@@ -89,11 +89,11 @@ class UploadMapList extends Component {
   	}
 
   	handleSearchTextChange(newText) {
-  		var tempMax = Math.ceil((this.state.maps.length -1 )/this.state.numberOfMaps);
+  		var tempMax = Math.ceil(this.state.maps.length / this.state.numberOfMaps);
   		var tempStep = this.state.currentStep
   		if (newText.trim().length != 0) {
-  			var tempLength = this.state.maps.filter(m => {return m.name.toLowerCase().includes(newText.trim().toLowerCase())}).length;
-  			tempMax = Math.ceil((tempLength -1)/ this.state.numberOfMaps);
+  			var tempLength = this.state.maps.filter(m => {return m.name.toLowerCase().includes(newText.trim().toLowerCase())}).length;  			
+  			tempMax = Math.ceil(tempLength / this.state.numberOfMaps);
   			tempStep = Math.min(this.state.currentStep, (tempMax -1));
   		}
   		this.setState({searchText: newText, currentStep: tempStep, maxSteps: tempMax});

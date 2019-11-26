@@ -13,9 +13,11 @@ import Chip from '@material-ui/core/Chip';
 
 import SaveIcon from '@material-ui/icons/Save';
 import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
+import PublishIcon from '@material-ui/icons/Publish';
 
 import ChipInput from 'material-ui-chip-input'
 
+import ValueMapUploadDialogue from "./ValueMapUploadDialogue.js";
 import config from '../config.json'
 
 function generateChoiceMap(headerDefinitions, tempValueSet) {
@@ -56,11 +58,13 @@ class ValueMapCard extends React.Component {
 		this.state = {
 			choiceMap: {},
 			valueSet: [],
+			valueMapUploadDialogue: false
 		};
 		this.formatValueMap = this.formatValueMap.bind(this);
 		this.formatChips = this.formatChips.bind(this);
 		this.handleAddChip = this.handleAddChip.bind(this);
 		this.handleDeleteChip = this.handleDeleteChip.bind(this);
+		this.handleDialogueChange = this.handleDialogueChange.bind(this)
 	}
 
 	componentDidMount() {
@@ -117,7 +121,11 @@ class ValueMapCard extends React.Component {
 		tempValueSet[index]['maps'] = filteredValueSet;
 		this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
 
-	}	
+	}
+
+	handleDialogueChange() {
+		this.setState({valueMapUploadDialogue: !this.state.valueMapUploadDialogue})
+	}
 
 	render() {
 		return(
@@ -127,7 +135,21 @@ class ValueMapCard extends React.Component {
 	            		<strong>Map Values</strong> for {this.props.header}
 	            		<br />
 	          		</Typography>
-
+	          		<Button
+	          			style={{textTransform: "none", marginTop: "10px", backgroundColor: "lightSteelBlue"}}
+	          			onClick={this.handleDialogueChange}
+	          		>
+	          		Upload Values Map
+	          			<PublishIcon />
+	          		</Button>
+	          		{this.state.valueMapUploadDialogue &&
+	          			<ValueMapUploadDialogue 
+	          				open = {this.state.valueMapUploadDialogue}
+	          				onClose = {this.handleDialogueChange}
+	          				valueSet = {this.props.mapCheck['flatQuestionnaire'][this.props.mapID]['answerValueSet']}
+	          			/>
+	          		}
+	          		<br />
 	          		<div style={{margin: "20px"}}>
 	          			{this.formatValueMap(this.state.valueSet)}
 	          		</div>
