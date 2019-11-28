@@ -1,4 +1,5 @@
 import React from "react";
+import csv from "csv";
 
 import getMuiTheme from 'material-ui/styles/getMuiTheme'
 
@@ -27,7 +28,7 @@ function getStepContent(step) {
     case 0:
       return 'First, download a CSV copy of template that contains all of your existing mappings';
     case 1:
-      return 'Populate (offline) the template that you downloaded in Step 1. Names in the target columns may not be altered (except for deleting or duplicating rows)';
+      return 'Fill out the the CSV file that has just downloaded in your browser.  Names in the target columns may not be altered (except for deleting or duplicating rows)';
     case 2:
       return 'Load back the template (in CSV format)';
     default:
@@ -49,7 +50,16 @@ class ValueMapUploadDialogue extends React.Component {
 	handleDownload() {
 		var tempValueSet = JSON.parse(JSON.stringify(this.props.valueSet));
 		var flatCSV = flattenValuesMap(tempValueSet);
-		console.log(JSON.stringify(flatCSV));
+		try {
+			csv.stringify(flatCSV, (err, output) => {
+			    var data = new Blob([output], {type: 'text/csv'});
+			    var csvURL = window.URL.createObjectURL(data);
+			    let tempLink = document.createElement('a');
+			    tempLink.href = csvURL;
+			    tempLink.setAttribute('download', this.props.header + '_valueMapTemplate');
+			    tempLink.click();
+	  		})
+		} catch(e) {console.error(e)}		    
 	}
 
 	handleBack() {
