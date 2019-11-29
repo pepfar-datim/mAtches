@@ -29,6 +29,8 @@ app.put(basePath + 'api/maps', api.updateMap);
 
 app.post(basePath + 'api/maps/:id/upload', api.uploadData);
 
+app.post(basePath + 'api/maps/:id/upload/valueMap/:header', api.validateValueMapPayload);
+
 app.delete(basePath + 'api/maps/:id', api.deleteSpecificResource);
 
 app.get(basePath + 'api/questionnaires', api.getAll)

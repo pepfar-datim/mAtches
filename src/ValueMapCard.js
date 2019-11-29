@@ -148,6 +148,7 @@ class ValueMapCard extends React.Component {
 	          				onClose = {this.handleDialogueChange}
 	          				valueSet = {this.props.mapCheck['flatQuestionnaire'][this.props.mapID]['answerValueSet']}
 	          				header = {this.props.header}
+	          				uid = {this.props.map.uid}
 	          			/>
 	          		}
 	          		<br />

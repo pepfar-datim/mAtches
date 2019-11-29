@@ -31,6 +31,30 @@ function readFileContent(file) {
   });
 }
 
+export function checkHeadersGeneral(actualHeaders, desiredHeaders) {
+	var duplicates = false;
+	var missingHeaders = [];
+
+	actualHeaders = actualHeaders.reduce((a, h) => {
+		if (a.hasOwnProperty(h)) {duplicates = true}
+		a[h] = true;
+		return a
+	}, {});
+	
+	for (var h of desiredHeaders) {
+		if (actualHeaders.hasOwnProperty(h)) {
+			delete actualHeaders[h];
+		} else {
+			missingHeaders.push(h)
+		}
+	}
+
+	var validity = duplicates ? false : (missingHeaders.length > 0 ? false : true);
+	return ({"valid": validity, "extraHeaders": Object.keys(actualHeaders)});
+
+
+}
+
 export function checkHeaders(csvFile, map) {
 	var columnRow = csvFile.split('\n')[0];
 	var columns = columnRow.split(',');

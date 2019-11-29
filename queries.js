@@ -1,10 +1,12 @@
 const helpers = require('./helpers.js')
 const Pool = require('pg').Pool;
 const csv = require('csv');
-var fetch = require('node-fetch')
+var fetch = require('node-fetch');
 
-const config = require('./config.json')
-var convert = require('./convert.js')
+const config = require('./config.json');
+var convert = require('./convert.js');
+var validateServices = require('./validateValueMap.js');
+var validateValueMap = validateServices.validateValueMap;
 var convertToFHIR = convert.convertToFHIR;
 splitNumber = config.base.split('/').length;
 
@@ -197,6 +199,12 @@ const validateMapPayload = (payload, uid) => {
   })
   return promise
 }
+const validateValueMapPayload = (request, response) => {
+    validateValueMap(request.body).then(res => {
+      response.status(200).json(res);  
+    })
+    
+}
 
 const createMap = (request, response) => {
   var map = request.body;
@@ -367,5 +375,6 @@ module.exports = {
   updateMap,
   deleteSpecificResource,
   createQuestionnaire,
-  uploadData
+  uploadData,
+  validateValueMapPayload
 }
