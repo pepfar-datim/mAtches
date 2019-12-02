@@ -117,8 +117,8 @@ class ValueMapUploadDialogue extends React.Component {
 		var headersCheck = checkHeadersGeneral(csvText.split("\n")[0].split(","), ['Target', 'Source']);
 		console.log(JSON.stringify(headersCheck));
 		if (headersCheck.valid) {
+			var postObject = {csvText: csvText, valueSet: JSON.parse(JSON.stringify(this.props.valueSet))};
 			console.log('send server side');
-			//api/maps/:id/upload/valueMap/:header
 			fetch(
 				config.base +
 					"api/maps/" +
@@ -127,8 +127,8 @@ class ValueMapUploadDialogue extends React.Component {
 					this.props.header,
 				{
 					method: "POST",
-					body: csvText,
-					headers: { "Content-Type": "text/plain; charset=UTF-8" }
+					body: JSON.stringify(postObject),
+					headers: { "Content-Type": "application/json; charset=UTF-8" }
 				}
 			)
 			.then(results => results.json())

@@ -20,20 +20,34 @@ const loadCsv = rawData => {
 	return promise;
 };
 
-const validateValueMap = csvText => {
-	var returnObject = { valid: true, valueSet: [], choiceMap: {} };
+const validateValueMap = body => {
+	var returnObject = { valid: true, valueSet: [], choiceMap: {}, duplicateMappings: [], invalidMappings: []};
 	var promise = new Promise(function(resolve, reject) {
-		loadCsv(csvText).then(output => {
+		loadCsv(body.csvText).then(output => {
+			console.log(body.valueSet);
+			console.log(typeof body.valueSet);
+			var valueSetMap = body.valueSet.reduce((m,i,index) => {
+				m[i.Code] = index;
+				return m
+			}, {});
 			var tempChoiceMap = output.reduce((a,i) => {
 				if (!a.hasOwnProperty(a[i.Source])) { 
-					a[i.Source] = i.Target; 
+					//invalid if they've added target system values (e.g, added Masculin in target column)
+					if (valueSetMap.hasOwnProperty(i.Target)) {
+						a[i.Source] = i.Target; 	
+					} else {
+						returnObject.invalidMappings.push(i);
+						returnObject.valid = false;
+					}
+					
 				} else {
 					//invalid if repeate source system values
+					returnObject.duplicateMappings.push(i)
 					returnObject.valid = false;
 				}
 				return a
-			}, {})
-			//invalid if they've added target system values (e.g, added Masculin in target column)
+			}, {});
+			
     		
 			resolve(returnObject);	
 		})		
