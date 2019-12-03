@@ -64,7 +64,8 @@ class ValueMapCard extends React.Component {
 		this.formatChips = this.formatChips.bind(this);
 		this.handleAddChip = this.handleAddChip.bind(this);
 		this.handleDeleteChip = this.handleDeleteChip.bind(this);
-		this.handleDialogueChange = this.handleDialogueChange.bind(this)
+		this.handleDialogueChange = this.handleDialogueChange.bind(this);
+		this.handleValueMapUpdate = this.handleValueMapUpdate.bind(this);
 	}
 
 	componentDidMount() {
@@ -127,6 +128,11 @@ class ValueMapCard extends React.Component {
 		this.setState({valueMapUploadDialogue: !this.state.valueMapUploadDialogue})
 	}
 
+	handleValueMapUpdate(tempValueSet, tempChoiceMap) {
+		this.setState({valueSet: tempValueSet, choiceMap: tempChoiceMap});
+		this.handleDialogueChange();
+	}
+
 	render() {
 		return(
 	      	<Card style={{position: "relative", backgroundColor: "ghostWhite", height: "100%", "minHeight": "750px"}}>
@@ -149,6 +155,7 @@ class ValueMapCard extends React.Component {
 	          				valueSet = {this.props.mapCheck['flatQuestionnaire'][this.props.mapID]['answerValueSet']}
 	          				header = {this.props.header}
 	          				uid = {this.props.map.uid}
+	          				handleValueMapUpdate = {this.handleValueMapUpdate}
 	          			/>
 	          		}
 	          		<br />

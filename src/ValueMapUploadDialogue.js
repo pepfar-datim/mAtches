@@ -47,7 +47,9 @@ class ValueMapUploadDialogue extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
-			activeStep: 0
+			activeStep: 0,
+			duplicateMappings: [],
+			invalidMappings: []
 		};
 		this.handleBack = this.handleBack.bind(this);
 		this.handleNext = this.handleNext.bind(this);
@@ -82,14 +84,11 @@ class ValueMapUploadDialogue extends React.Component {
 		var currentStep = this.state.activeStep;
 		switch (this.state.activeStep) {
 			case 0:
-				console.log("download csv");
-				//this.handleDownload();
+				this.handleDownload();
 				break;
 			case 1:
-				console.log("do nothing");
 				break;
 			case 2:
-				console.log("upload csv");
                 this.uploadAction(e);
 				break;
 		}
@@ -108,17 +107,14 @@ class ValueMapUploadDialogue extends React.Component {
 	upload(e) {
 		e.preventDefault();
 		uploadFile(e, this).then(csvFile => {
-			console.log('got a file');		
 			this.uploadCallback(csvFile);
 		});
 	}
 
 	uploadCallback(csvText) {
 		var headersCheck = checkHeadersGeneral(csvText.split("\n")[0].split(","), ['Target', 'Source']);
-		console.log(JSON.stringify(headersCheck));
 		if (headersCheck.valid) {
 			var postObject = {csvText: csvText, valueSet: JSON.parse(JSON.stringify(this.props.valueSet))};
-			console.log('send server side');
 			fetch(
 				config.base +
 					"api/maps/" +
@@ -133,7 +129,12 @@ class ValueMapUploadDialogue extends React.Component {
 			)
 			.then(results => results.json())
 			.then(response => {	
-				console.log(response);
+				if (response.valid) {
+					this.setState({duplicateMappings: [], invalidMappings: []});
+					this.props.handleValueMapUpdate(response.valueSet, response.choiceMap);
+				} else {
+					this.setState({duplicateMappings: response.duplicateMappings, invalidMappings: response.invalidMappings})
+				}
 			})
 			
 		}
@@ -161,7 +162,7 @@ class ValueMapUploadDialogue extends React.Component {
 						{steps.map((label, index) => (
 							<Step key={label}>
 								<StepLabel
-									StepIconProps={{ color: "lightSteelBlue" }}
+									style={{root: {color: "lightSteelBlue" }}}
 								>
 									{label}
 								</StepLabel>
@@ -204,6 +205,25 @@ class ValueMapUploadDialogue extends React.Component {
 												/>
 											</form>
 										</div>
+									{(this.state.duplicateMappings.length>0 || this.state.invalidMappings.length>0) &&
+										<Typography color="error">
+											ERROR: Review the below errors with your Value Map Upload, fix, and reload
+										</Typography>
+									}
+									{this.state.duplicateMappings.length>0 && 
+										<Typography color="error">
+											The following mappings have been mapped to more than one Target value:
+											<br /> 
+											{this.state.duplicateMappings.join(', ')}
+										</Typography>
+									}
+									{this.state.invalidMappings.length>0 && 
+										<Typography color="error">
+											The following items in the Target Column are Invalid:
+											<br /> 
+											{this.state.invalidMappings.join(', ')}
+										</Typography>
+									}									
 									</div>
 								</StepContent>
 							</Step>

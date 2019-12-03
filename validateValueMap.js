@@ -21,35 +21,39 @@ const loadCsv = rawData => {
 };
 
 const validateValueMap = body => {
-	var returnObject = { valid: true, valueSet: [], choiceMap: {}, duplicateMappings: [], invalidMappings: []};
+	var returnObject = {valid: true, valueSet: body.valueSet, choiceMap: {}, duplicateMappings: [], invalidMappings: []};
 	var promise = new Promise(function(resolve, reject) {
 		loadCsv(body.csvText).then(output => {
-			console.log(body.valueSet);
-			console.log(typeof body.valueSet);
 			var valueSetMap = body.valueSet.reduce((m,i,index) => {
 				m[i.Code] = index;
 				return m
 			}, {});
+			for (let i=0; i<returnObject.valueSet.length; i++) {
+				returnObject.valueSet[i].maps = [];
+			}
 			var tempChoiceMap = output.reduce((a,i) => {
-				if (!a.hasOwnProperty(a[i.Source])) { 
-					//invalid if they've added target system values (e.g, added Masculin in target column)
-					if (valueSetMap.hasOwnProperty(i.Target)) {
-						a[i.Source] = i.Target; 	
+				var source = i.Source.trim();
+				var target = i.Target.trim();
+				if (source.length > 0) {
+					if (!a.hasOwnProperty(source)) { 
+						//invalid if they've added target system values (e.g, added Masculin in target column)
+						if (valueSetMap.hasOwnProperty(target)) {
+							a[source] = target;
+							returnObject.valueSet[valueSetMap[target]].maps.push(source);
+						} else {
+							returnObject.invalidMappings.push(target);
+							returnObject.valid = false;
+						}
 					} else {
-						returnObject.invalidMappings.push(i);
+						//invalid if repeate source system values
+						returnObject.duplicateMappings.push(source);
 						returnObject.valid = false;
 					}
-					
-				} else {
-					//invalid if repeate source system values
-					returnObject.duplicateMappings.push(i)
-					returnObject.valid = false;
 				}
 				return a
 			}, {});
-			
-    		
-			resolve(returnObject);	
+			returnObject.choiceMap = tempChoiceMap;
+			resolve(returnObject);
 		})		
 	});
 	return promise;
