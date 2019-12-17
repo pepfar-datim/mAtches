@@ -181,7 +181,7 @@ var data = {
       tempObject[indexPosition]["answer"] = {};
       var valueName = "value" + valueType;
       if (valueName == "valueChoice") {
-        tempObject[indexPosition]["answer"]["valueCoding"] = { choice: value };
+        tempObject[indexPosition]["answer"]["valueCoding"] = { code: value };
       } else {
         tempObject[indexPosition]["answer"][valueName] = value;
       }
