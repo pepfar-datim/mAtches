@@ -43,18 +43,18 @@ function formatSelect(header,key,map,associationFunction) {
 }
 
 function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
-  return Object.keys(mapCheck['flatQuestionnaire']).map(function (k, i) {
+  return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
     return(
       <div key={'question-'+i} style={{paddingBottom: "40px"}}>
         <Typography wrap="noWrap">
-          <strong>{mapCheck['flatQuestionnaire'][k]['text']}</strong>
+          <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
         </Typography>
-		{formatSelect(mapCheck['flatQuestionnaire'][k]['header'],k,map,associationFunction)}
+		{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
 		<br />
-		{(mapCheck['flatQuestionnaire'][k]['valueType'] == 'choice') &&
+		{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
 			<Button variant="contained" style={{textTransform: "none", marginTop: "10px", backgroundColor: "whiteSmoke"}}
-				onClick={() => { valueMapFunction(mapCheck['flatQuestionnaire'][k]['header'],k)}}
-				disabled={!mapCheck['flatQuestionnaire'][k].hasOwnProperty('header')}
+				onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
+				disabled={!mapCheck.flatQuestionnaire[k].hasOwnProperty('header')}
 			>
 			Map values
 			<MapIcon style={{margin: "5px"}} />			
@@ -91,7 +91,7 @@ redirectToUpload () {
 	          		<div style={{padding: "5px"}}>
 	                {this.props.mapCheck && this.props.map &&
 	                <div>
-	                  {formatQuestions(this.props.mapCheck, this.props.map['map'], this.props.onAssociation, this.props.onValueMap)}
+	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap)}
 	                </div>
 
 	                }  

@@ -11,12 +11,12 @@ function formatErrors(errors) {
 				</Typography>
 				{errors[key].hasOwnProperty('invalidValueMapping') &&
 					<Typography variant="body1" style={{paddingLeft: "20px", paddingTop: "5px"}}>
-						Values are not Mapped for following values: {Object.keys(errors[key]['invalidValueMapping']).join(', ')}
+						Values are not Mapped for following values: {Object.keys(errors[key].invalidValueMapping).join(', ')}
 					</Typography>
 				}
 				{errors[key].hasOwnProperty('invalidValueType') &&
 					<Typography variant="body1" style={{paddingLeft: "20px", paddingTop: "5px"}}>
-						Values are Invalid on the following rows: {errors[key]['invalidValueType'].join(', ')}
+						Values are Invalid on the following rows: {errors[key].invalidValueType.join(', ')}
 					</Typography>
 				}
 			</div>

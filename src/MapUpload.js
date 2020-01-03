@@ -27,14 +27,14 @@ const classes = {
 };
 
 function formatQuestions(mapCheck) {
-  return Object.keys(mapCheck['flatQuestionnaire']).map(function (k, i) {
+  return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
     return(
       <div key={'question-'+i}>
         <Typography wrap="noWrap">
-          <strong>{mapCheck['flatQuestionnaire'][k]['text']}</strong>
+          <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
         </Typography>
         <Typography wrap="noWrap">
-          {mapCheck['flatQuestionnaire'][k]['header'] || ''}
+          {mapCheck.flatQuestionnaire[k].header || ''}
         </Typography>
         <br />
       </div>  

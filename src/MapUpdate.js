@@ -29,8 +29,8 @@ class MapUpdate extends Component {
     this.getSpecificMap(this.state.mapID);
     var mode = 'invalid';
     if(this.state.queryParams.hasOwnProperty('mode')){
-      if(this.state.queryParams['mode'].toLowerCase() == 'upload'){mode = 'upload'}
-      if(this.state.queryParams['mode'].toLowerCase() == 'edit'){mode = 'edit'}
+      if(this.state.queryParams.mode.toLowerCase() == 'upload'){mode = 'upload'}
+      if(this.state.queryParams.mode.toLowerCase() == 'edit'){mode = 'edit'}
     }
     this.setState({'mode': mode});
   }

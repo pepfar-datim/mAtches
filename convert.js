@@ -34,28 +34,28 @@ var data = {
       Object.keys(this.csvData[i]).forEach(key => {
         var tempValue = this.csvData[i][key];
         if (this.map.hasOwnProperty(key)) {
-          if (this.map[key]["valueType"] == "choice") {
+          if (this.map[key].valueType == "choice") {
             tempValue = this.convertValue(
               tempValue,
-              this.map[key]["choiceMap"],
+              this.map[key].choiceMap,
               i,
               key
             );
           } else {
             tempValue = this.evaluateValue(
               this.csvData[i][key],
-              this.map[key]["valueType"],
+              this.map[key].valueType,
               i,
               key
             );
           }
           this.addQRItems(
-            QR["item"],
-            this.map[key]["path"],
+            QR.item,
+            this.map[key].path,
             pathsChecked,
             tempValue,
-            this.map[key]["valueType"].charAt(0).toUpperCase() +
-              this.map[key]["valueType"].slice(1)
+            this.map[key].valueType.charAt(0).toUpperCase() +
+              this.map[key].valueType.slice(1)
           );
         }
       });
@@ -137,7 +137,7 @@ var data = {
       if (!this.map[key].hasOwnProperty("choiceMap")) {
         throw new Error("Missing a map for values");
       }
-      var valueMap = this.map[key]["choiceMap"];
+      var valueMap = this.map[key].choiceMap;
       if (valueMap[value] === undefined) {
         throw new Error("Unmapped choice value");
       }
@@ -148,14 +148,14 @@ var data = {
   },
   addQRItems: function(tempObject, pathArray, pathsChecked, value, valueType) {
     var indexPosition = 0;
-    if (!pathsChecked.hasOwnProperty(pathArray[0]["linkid"])) {
-      pathsChecked[pathArray[0]["linkid"]] = {};
+    if (!pathsChecked.hasOwnProperty(pathArray[0].linkid)) {
+      pathsChecked[pathArray[0].linkid] = {};
       var newItem = {};
 
-      newItem["linkId"] = pathArray[0]["linkid"];
-      newItem["text"] = pathArray[0]["text"];
+      newItem.linkId = pathArray[0].linkid;
+      newItem.text = pathArray[0].text;
       if (pathArray.length > 1) {
-        newItem["item"] = [];
+        newItem.item = [];
       }
 
       tempObject.push(newItem);
@@ -163,7 +163,7 @@ var data = {
 
     //find the appropriate index position for the given linkID
     for (let i = 0; i < tempObject.length; i++) {
-      if (pathArray[0]["linkid"] == tempObject[i]["linkId"]) {
+      if (pathArray[0].linkid == tempObject[i].linkId) {
         indexPosition = i;
         break;
       }
@@ -171,19 +171,19 @@ var data = {
     //call recursively if not last item in path, otherwise push value
     if (pathArray.length > 1) {
       this.addQRItems(
-        tempObject[indexPosition]["item"],
+        tempObject[indexPosition].item,
         pathArray.slice(1),
-        pathsChecked[pathArray[0]["linkid"]],
+        pathsChecked[pathArray[0].linkid],
         value,
         valueType
       );
     } else {
-      tempObject[indexPosition]["answer"] = {};
+      tempObject[indexPosition].answer = {};
       var valueName = "value" + valueType;
       if (valueName == "valueChoice") {
-        tempObject[indexPosition]["answer"]["valueCoding"] = { code: value };
+        tempObject[indexPosition].answer.valueCoding = { code: value };
       } else {
-        tempObject[indexPosition]["answer"][valueName] = value;
+        tempObject[indexPosition].answer[valueName] = value;
       }
     }
   }

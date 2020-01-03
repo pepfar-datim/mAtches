@@ -330,8 +330,8 @@ const uploadData = (request, response) => {
     if (error) {
       response.status(400).end(error)
     }
-      var map = {map: results.rows[0]['map']};
-      var questionnaireURL = results.rows[0]['questionnaire']['url'];
+      var map = {map: results.rows[0].map};
+      var questionnaireURL = results.rows[0].questionnaire.url;
       convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
         if (result.hasOwnProperty('errors')) {
           response.status(200).json(result);  

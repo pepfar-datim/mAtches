@@ -23,11 +23,11 @@ import config from '../config.json'
 function generateChoiceMap(headerDefinitions, tempValueSet) {
 	var tempChoiceMap = {};
 	if (headerDefinitions.hasOwnProperty('choiceMap')) {
-		tempChoiceMap = headerDefinitions['choiceMap'];
+		tempChoiceMap = headerDefinitions.choiceMap;
 	}
 	else {
 		for (let i =0; i<tempValueSet.length; i++) {
-			tempChoiceMap[tempValueSet[i]['Code']] = tempValueSet[i]['Code'];
+			tempChoiceMap[tempValueSet[i].Code] = tempValueSet[i].Code;
 		}
 	}
 	return tempChoiceMap
@@ -43,9 +43,9 @@ function loadValueSet(tempChoiceMap, tempValueSet) {
 		reverseChoiceMap[tempChoiceMap[k]].push(k)
 	}
 	for (let i =0; i<tempValueSet.length; i++) {
-		tempValueSet[i]['maps'] = [];
-		if (reverseChoiceMap.hasOwnProperty(tempValueSet[i]['Code'])) {
-			tempValueSet[i]['maps'] = reverseChoiceMap[tempValueSet[i]['Code']]
+		tempValueSet[i].maps = [];
+		if (reverseChoiceMap.hasOwnProperty(tempValueSet[i].Code)) {
+			tempValueSet[i].maps = reverseChoiceMap[tempValueSet[i].Code]
 		}
 	}
 	return tempValueSet
@@ -69,8 +69,8 @@ class ValueMapCard extends React.Component {
 	}
 
 	componentDidMount() {
-		var tempValueSet = this.props.mapCheck['flatQuestionnaire'][this.props.mapID]['answerValueSet'];
-		var tempChoiceMap = generateChoiceMap(this.props.map['map'][this.props.header], tempValueSet);
+		var tempValueSet = this.props.mapCheck.flatQuestionnaire[this.props.mapID].answerValueSet;
+		var tempChoiceMap = generateChoiceMap(this.props.map.map[this.props.header], tempValueSet);
 		tempValueSet = loadValueSet(tempChoiceMap, tempValueSet)
 		this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
 	}
@@ -80,9 +80,9 @@ class ValueMapCard extends React.Component {
 			return(
 				<div>
 					<Typography variant="h6" style={{marginBottom: "5px"}}>
-						<strong>{o['Display']}</strong>
+						<strong>{o.Display}</strong>
 						<br />
-						{this.formatChips(o['maps'], i, o['Code'])}
+						{this.formatChips(o.maps, i, o.Code)}
 					</Typography>
 					<br />
 				</div>
@@ -109,7 +109,7 @@ class ValueMapCard extends React.Component {
 			var tempChoiceMap = this.state.choiceMap;
 			var tempValueSet = this.state.valueSet;
 			tempChoiceMap[chip] = code;
-			tempValueSet[index]['maps'].push(chip);
+			tempValueSet[index].maps.push(chip);
 			this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
 		}
 	}
@@ -118,8 +118,8 @@ class ValueMapCard extends React.Component {
 		var tempChoiceMap = this.state.choiceMap;
 		var tempValueSet = this.state.valueSet;
 		delete tempChoiceMap[chip];
-		var filteredValueSet = tempValueSet[index]['maps'].filter(v => v != chip);
-		tempValueSet[index]['maps'] = filteredValueSet;
+		var filteredValueSet = tempValueSet[index].maps.filter(v => v != chip);
+		tempValueSet[index].maps = filteredValueSet;
 		this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
 
 	}
@@ -152,7 +152,7 @@ class ValueMapCard extends React.Component {
 	          			<ValueMapUploadDialogue 
 	          				open = {this.state.valueMapUploadDialogue}
 	          				onClose = {this.handleDialogueChange}
-	          				valueSet = {this.props.mapCheck['flatQuestionnaire'][this.props.mapID]['answerValueSet']}
+	          				valueSet = {this.props.mapCheck.flatQuestionnaire[this.props.mapID].answerValueSet}
 	          				header = {this.props.header}
 	          				uid = {this.props.map.uid}
 	          				handleValueMapUpdate = {this.handleValueMapUpdate}

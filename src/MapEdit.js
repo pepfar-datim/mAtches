@@ -47,7 +47,7 @@ const classes = {
 };
 
 function pushMapBack(tempMap, mapValidity) {
-  tempMap["complete"] = mapValidity;
+  tempMap.complete = mapValidity;
   fetch(config.base + "api/maps", {
     method: "PUT",
     body: JSON.stringify(tempMap),
@@ -59,9 +59,9 @@ function pushMapBack(tempMap, mapValidity) {
 
 function removeAssociationQuestionnaire(tempCheck, mapping, header) {
   if (mapping.hasOwnProperty("path")) {
-    var position = mapping["path"].length - 1;
-    var qLocation = mapping["path"][position]["linkid"];
-    tempCheck["flatQuestionnaire"][qLocation]["header"] = "";
+    var position = mapping.path.length - 1;
+    var qLocation = mapping.path[position].linkid;
+    tempCheck.flatQuestionnaire[qLocation].header = "";
   }
   return tempCheck;
 }
@@ -73,18 +73,18 @@ function checkValidity(flatQuestionnaire, mappings) {
       mapValidity = false;
       break;
     }
-    if (flatQuestionnaire[i]["header"] == "") {
+    if (flatQuestionnaire[i].header == "") {
       mapValidity = false;
       break;
     }
   }
   for (var i in mappings) {
-    if (mappings[i]["valueType"] == "choice") {
+    if (mappings[i].valueType == "choice") {
       if (!mappings[i].hasOwnProperty("choiceMap")) {
         mapValidity = false;
         break;
       }
-      if (Object.keys(mappings[i]["choiceMap"]).length == 0) {
+      if (Object.keys(mappings[i].choiceMap).length == 0) {
         mapValidity = false;
         break;
       }
@@ -99,14 +99,14 @@ function handleDelete(header) {
   var tempUnmappedHeaders = this.state.unmappedHeaders;
   tempCheck = removeAssociationQuestionnaire(
     tempCheck,
-    tempMap["map"][header],
+    tempMap.map[header],
     header
   );
-  delete tempMap["map"][header];
+  delete tempMap.map[header];
   delete tempUnmappedHeaders[header];
   var mapValidity = false; //mapValidity false if there are unmapped headers
   if (Object.keys(tempUnmappedHeaders).length == 0) {
-    mapValidity = checkValidity(tempCheck["flatQuestionnaire"], tempMap["map"]);
+    mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
   }
   this.setState({
     map: tempMap,
@@ -137,7 +137,7 @@ function checkName(tempName) {
 
 function processAdd(tempMap, tempUnmappedHeaders, tempHeader) {
   if (!tempMap.map.hasOwnProperty(tempHeader)) {
-    tempMap["map"][tempHeader] = {};
+    tempMap.map[tempHeader] = {};
     if (!tempUnmappedHeaders.hasOwnProperty(tempHeader)) {
       tempUnmappedHeaders[tempHeader] = {};
     }
@@ -231,7 +231,7 @@ class MapEdit extends Component {
 
     var mapValidity = false; //mapValidity false if there are unmapped headers
     if (Object.keys(returnObj.unmappedHeaders).length == 0) {
-      mapValidity = checkValidity(tempMapCheck["flatQuestionnaire"], returnObj.newMap["map"]);
+      mapValidity = checkValidity(tempMapCheck.flatQuestionnaire, returnObj.newMap.map);
     }
     pushMapBack(returnObj.newMap, mapValidity);
 
@@ -243,22 +243,20 @@ class MapEdit extends Component {
     var tempUnmappedHeaders = this.state.unmappedHeaders;
     tempCheck = removeAssociationQuestionnaire(
       tempCheck,
-      tempMap["map"][event.target.value],
+      tempMap.map[event.target.value],
       event.target.value
     );
-    tempCheck["flatQuestionnaire"][event.target.name]["header"] =
+    tempCheck.flatQuestionnaire[event.target.name].header =
       event.target.value;
-    tempMap["map"][event.target.value]["path"] = tempCheck["flatQuestionnaire"][
-      event.target.name
-    ]["path"].slice();
-    tempMap["map"][event.target.value]["valueType"] =
-      tempCheck["flatQuestionnaire"][event.target.name]["valueType"];
+    tempMap.map[event.target.value].path = tempCheck.flatQuestionnaire[event.target.name].path.slice();
+    tempMap.map[event.target.value].valueType =
+      tempCheck.flatQuestionnaire[event.target.name].valueType;
     delete tempUnmappedHeaders[event.target.value];
     var mapValidity = false; //assume false until proven otherwise
     if (Object.keys(tempUnmappedHeaders).length == 0) {
       mapValidity = checkValidity(
-        tempCheck["flatQuestionnaire"],
-        tempMap["map"]
+        tempCheck.flatQuestionnaire,
+        tempMap.map
       );
     }
     this.setState({
@@ -276,12 +274,12 @@ class MapEdit extends Component {
 
   handleValueMapClose(event, choiceMap, header) {
     var tempMap = this.state.map;
-    tempMap["map"][header]["choiceMap"] = choiceMap;
+    tempMap.map[header].choiceMap = choiceMap;
     var mapValidity = false; //assume false until proven otherwise
     if (Object.keys(this.state.unmappedHeaders).length == 0) {
       mapValidity = checkValidity(
-        this.state.mapCheck["flatQuestionnaire"],
-        tempMap["map"]
+        this.state.mapCheck.flatQuestionnaire,
+        tempMap.map
       );
     }
     this.setState({
@@ -443,8 +441,8 @@ class MapEdit extends Component {
                     <br />
                   </div>
                   <br />
-                  {this.state.map["map"] && (
-                    <div>{this.formatHeaders(this.state.map["map"], this)}</div>
+                  {this.state.map.map && (
+                    <div>{this.formatHeaders(this.state.map.map, this)}</div>
                   )}
                 </div>
               </Card>
