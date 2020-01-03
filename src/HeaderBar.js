@@ -8,6 +8,7 @@ import SettingsIcon from "@material-ui/icons/Settings";
 import MenuIcon from "@material-ui/icons/Menu";
 import HelpIcon from "@material-ui/icons/Help";
 import MapIcon from "@material-ui/icons/Public";
+import match from '../public/images/match_color.png'; // Tell Webpack this JS file uses this image
 
 import config from '../config.json'
 
@@ -26,9 +27,9 @@ function HeaderBar() {
 		<div>
 			<AppBar position="relative" color="default">
 				<Toolbar>
-					<MapIcon/>
+					<img src={match} alt="match" />
 					<Typography style={{padding: "20px"}} variant="h5" color="inherit">
-						mAppr
+						mAtches
 					</Typography>
 					<Typography
 						variant="h6"
