@@ -36,18 +36,19 @@ function generateChoiceMap(headerDefinitions, tempValueSet) {
 function loadValueSet(tempChoiceMap, tempValueSet) {
 	//maybe want to get reversed object from server side in case these become large?
 	var reverseChoiceMap = {}
+
 	for (var k in tempChoiceMap) {
 		if (!reverseChoiceMap.hasOwnProperty(tempChoiceMap[k])) {
 			reverseChoiceMap[tempChoiceMap[k]] = []
 		}
 		reverseChoiceMap[tempChoiceMap[k]].push(k)
 	}
-	for (let i =0; i<tempValueSet.length; i++) {
-		tempValueSet[i].maps = [];
-		if (reverseChoiceMap.hasOwnProperty(tempValueSet[i].Code)) {
-			tempValueSet[i].maps = reverseChoiceMap[tempValueSet[i].Code]
-		}
-	}
+	
+	tempValueSet = tempValueSet.map(function(mapItem) {
+		mapItem.maps = reverseChoiceMap.hasOwnProperty(mapItem.Code) ? reverseChoiceMap[mapItem.Code] : [];
+		return mapItem
+	})
+
 	return tempValueSet
 }
 
