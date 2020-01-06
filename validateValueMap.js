@@ -28,9 +28,10 @@ const validateValueMap = body => {
 				m[i.Code] = index;
 				return m
 			}, {});
-			for (let i=0; i<returnObject.valueSet.length; i++) {
-				returnObject.valueSet[i].maps = [];
-			}
+			returnObject.valueSet = returnObject.valueSet.map(prop => {
+				prop.maps = [];
+				return prop
+			})
 			var tempChoiceMap = output.reduce((a,i) => {
 				var source = i.Source.trim();
 				var target = i.Target.trim();
