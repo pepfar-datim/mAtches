@@ -1,13 +1,7 @@
 import React from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import AppBar from "@material-ui/core/AppBar";
-import Toolbar from "@material-ui/core/Toolbar";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import SettingsIcon from "@material-ui/icons/Settings";
-import MenuIcon from "@material-ui/icons/Menu";
-import HelpIcon from "@material-ui/icons/Help";
-import MapIcon from "@material-ui/icons/Public";
+import {AppBar, Toolbar, Typography, IconButton} from "@material-ui/core";
+import {Settings, Menu, Help} from "@material-ui/icons";
 import match from '../public/images/match_color.png'; // Tell Webpack this JS file uses this image
 
 import config from '../config.json'
@@ -45,7 +39,7 @@ function HeaderBar() {
 							aria-label="menu"
 							onClick={() => { window.location = config.base + 'maps/' }}
 						>
-							<MenuIcon />
+							<Menu />
 						</IconButton>
 						<IconButton
 							edge="start"
@@ -53,7 +47,7 @@ function HeaderBar() {
 							color="inherit"
 							aria-label="menu"
 						>
-							<SettingsIcon />
+							<Settings />
 						</IconButton>
 						<IconButton
 							edge="start"
@@ -61,7 +55,7 @@ function HeaderBar() {
 							color="inherit"
 							aria-label="menu"
 						>
-							<HelpIcon />
+							<Help />
 						</IconButton>
 					</div>
 				</Toolbar>

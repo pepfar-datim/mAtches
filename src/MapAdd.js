@@ -1,14 +1,5 @@
 import React, { Component } from "react";
-import Paper from "@material-ui/core/Paper";
-import Typography from "@material-ui/core/Typography";
-import TextField from "@material-ui/core/TextField";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import IconButton from "@material-ui/core/IconButton";
+import {Paper, Typography, TextField, FormControl, FormHelperText, Input, InputLabel, Select, MenuItem, IconButton} from "@material-ui/core";
 
 import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
 

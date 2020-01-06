@@ -1,6 +1,5 @@
 import React from 'react';
-import Card from '@material-ui/core/Card';
-import Typography from '@material-ui/core/Typography';
+import {Card, Typography} from '@material-ui/core';
 
 function formatErrors(errors) {
 	return Object.keys(errors).map(key =>{

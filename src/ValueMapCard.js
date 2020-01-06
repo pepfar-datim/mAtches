@@ -1,19 +1,7 @@
 import React from "react";
-import Card from '@material-ui/core/Card';
-import Typography from '@material-ui/core/Typography';
-import IconButton from "@material-ui/core/IconButton";
-import TextField from "@material-ui/core/TextField";
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Button from '@material-ui/core/Button';
-import Chip from '@material-ui/core/Chip';
+import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelperText, FormControl, Select, Button, Chip} from '@material-ui/core';
 
-import SaveIcon from '@material-ui/icons/Save';
-import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
-import PublishIcon from '@material-ui/icons/Publish';
+import {Save, AddCircleOutlined, Publish} from '@material-ui/icons';
 
 import ChipInput from 'material-ui-chip-input'
 
@@ -147,7 +135,7 @@ class ValueMapCard extends React.Component {
 	          			onClick={this.handleDialogueChange}
 	          		>
 	          		Upload Values Map
-	          			<PublishIcon />
+	          			<Publish />
 	          		</Button>
 	          		{this.state.valueMapUploadDialogue &&
 	          			<ValueMapUploadDialogue 
@@ -167,7 +155,7 @@ class ValueMapCard extends React.Component {
 						onClick={(e) => this.props.onValueMapClose(e, this.state.choiceMap, this.props.header)}
 					>
 					Save and Close
-					<SaveIcon style={{margin: "5px"}} />
+					<Save style={{margin: "5px"}} />
 					</Button>	
 	        	</div>
         	            

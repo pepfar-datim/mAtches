@@ -1,20 +1,7 @@
 import React, { Component } from "react";
-import Grid from "@material-ui/core/Grid";
-import Paper from "@material-ui/core/Paper";
-import Card from "@material-ui/core/Card";
-import Typography from "@material-ui/core/Typography";
-import IconButton from "@material-ui/core/IconButton";
-import Edit from "@material-ui/icons/Edit";
-import Chip from "@material-ui/core/Chip";
-import TextField from "@material-ui/core/TextField";
-import FormControl from "@material-ui/core/FormControl";
-import FormHelperText from "@material-ui/core/FormHelperText";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
+import {Grid, Paper, Card, Typography, IconButton, Edit, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box} from "@material-ui/core";
 
-import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
-import PublishIcon from "@material-ui/icons/Publish";
-import ImageSearchIcon from "@material-ui/icons/ImageSearch";
+import {AddCircleOutlined, Publish, ImageSearch}  from "@material-ui/icons";
 
 import { makeStyles } from "@material-ui/core/styles";
 import { sizing } from "@material-ui/system";
@@ -28,11 +15,6 @@ import { uploadFile } from "./services/validateFile.js";
 
 import loadMapQuestionnaire from "./services/loadMapQuestionnaire.js";
 import loadMapFromMap from "./services/loadMapFromMap.js";
-
-import AppBar from "@material-ui/core/AppBar";
-import Tabs from "@material-ui/core/Tabs";
-import Tab from "@material-ui/core/Tab";
-import Box from "@material-ui/core/Box";
 
 const drawerWidth = 200;
 
@@ -391,19 +373,19 @@ class MapEdit extends Component {
                     >
                       <Tab
                         style={{ minWidth: 20 }}
-                        icon={<AddCircleOutlinedIcon />}
+                        icon={<AddCircleOutlined />}
                         aria-label="add"
                         {...a11yProps(0)}
                       />
                       <Tab
                         style={{ minWidth: 20 }}
-                        icon={<PublishIcon />}
+                        icon={<Publish />}
                         aria-label="upload"
                         {...a11yProps(1)}
                       />
                       <Tab
                         style={{ minWidth: 20 }}
-                        icon={<ImageSearchIcon />}
+                        icon={<ImageSearch />}
                         aria-label="fromMap"
                         {...a11yProps(2)}
                       />
@@ -426,7 +408,7 @@ class MapEdit extends Component {
                           this.uploadAction(e);
                         }}
                       >
-                        <PublishIcon />
+                        <Publish />
                       </IconButton>
                       <form style={{ visibility: "hidden" }}>
                         <input
@@ -455,7 +437,7 @@ class MapEdit extends Component {
                         aria-label="menu"
                         onClick={handleAdd.bind(this)}
                       >
-                        <AddCircleOutlinedIcon />
+                        <AddCircleOutlined />
                       </IconButton>
                     </div>
                     <div hidden={this.state.value !== 2}>

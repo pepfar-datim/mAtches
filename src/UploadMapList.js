@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import Typography from '@material-ui/core/Typography';
+import {Typography, TextField, InputAdornment, Grid, Button, IconButton, MobileStepper} from '@material-ui/core';
 
 import config from "../config.json";
 import SearchTextComponent from "./SearchTextComponent.js";
@@ -8,18 +8,7 @@ import { forwardRef } from "react";
 
 import {DebounceInput} from 'react-debounce-input';
 
-import TextField from '@material-ui/core/TextField';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Grid from '@material-ui/core/Grid';
-import Button from "@material-ui/core/Button";
-import IconButton from "@material-ui/core/IconButton";
-import MobileStepper from '@material-ui/core/MobileStepper';
-
-import Search from "@material-ui/icons/Search";
-import Sync from "@material-ui/icons/Sync";
-import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
-import KeyboardArrowRight from '@material-ui/icons/KeyboardArrowRight';
-
+import {Search, Sync, KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 
 function formatMapList(maps, searchText, currentMapID, onMapProcess, currentStep, numberOfMaps) {
 	return maps

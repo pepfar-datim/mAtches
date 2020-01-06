@@ -1,14 +1,5 @@
 import React from "react";
-import Card from '@material-ui/core/Card';
-import Typography from '@material-ui/core/Typography';
-import IconButton from "@material-ui/core/IconButton";
-import TextField from "@material-ui/core/TextField";
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
-import Button from '@material-ui/core/Button';
+import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelperText, FormControl, Select, Button} from '@material-ui/core';
 
 import PublishIcon from '@material-ui/icons/Publish';
 import MapIcon from '@material-ui/icons/Map';

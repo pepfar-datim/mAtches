@@ -3,19 +3,7 @@ import csv from "csv";
 
 import getMuiTheme from "material-ui/styles/getMuiTheme";
 
-import Stepper from "@material-ui/core/Stepper";
-import Step from "@material-ui/core/Step";
-import StepLabel from "@material-ui/core/StepLabel";
-import StepButton from "@material-ui/core/StepButton";
-import StepContent from "@material-ui/core/StepContent";
-import Button from "@material-ui/core/Button";
-import Typography from "@material-ui/core/Typography";
-
-import Dialog from "@material-ui/core/Dialog";
-import DialogActions from "@material-ui/core/DialogActions";
-import DialogContent from "@material-ui/core/DialogContent";
-import DialogContentText from "@material-ui/core/DialogContentText";
-import DialogTitle from "@material-ui/core/DialogTitle";
+import {Stepper, Step, StepLabel, StepButton, StepContent, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle}  from "@material-ui/core";
 
 import config from "../config.json";
 import flattenValuesMap from "./services/flattenValuesMap.js";
