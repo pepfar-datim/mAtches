@@ -66,6 +66,16 @@ function removeAssociationQuestionnaire(tempCheck, mapping, header) {
   return tempCheck;
 }
 
+function getCurrentAssociation(tempCheck, prop) {
+  var currentAssociation = "";
+  if (tempCheck.flatQuestionnaire.hasOwnProperty(prop)) {
+    if (tempCheck.flatQuestionnaire[prop].hasOwnProperty("header")) {
+      currentAssociation = tempCheck.flatQuestionnaire[prop].header;
+    }    
+  }
+  return currentAssociation;
+}
+
 function checkValidity(flatQuestionnaire, mappings) {
   var mapValidity = true;
   for (var i in flatQuestionnaire) {
@@ -241,11 +251,24 @@ class MapEdit extends Component {
     var tempMap = this.state.map;
     var tempCheck = this.state.mapCheck;
     var tempUnmappedHeaders = this.state.unmappedHeaders;
+    
+    // clear out current association in map
+    var currentAssociation = getCurrentAssociation(
+      tempCheck,
+      event.target.name
+    );
+    if (currentAssociation.length && (currentAssociation != event.target.value)) {
+      tempMap.map[currentAssociation] = {};
+      tempUnmappedHeaders[currentAssociation] = {};
+    }
+
+    // clear out assocation in flat questtionaire
     tempCheck = removeAssociationQuestionnaire(
       tempCheck,
       tempMap.map[event.target.value],
       event.target.value
     );
+
     tempCheck.flatQuestionnaire[event.target.name].header =
       event.target.value;
     tempMap.map[event.target.value].path = tempCheck.flatQuestionnaire[event.target.name].path.slice();
