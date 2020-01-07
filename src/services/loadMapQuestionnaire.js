@@ -1,12 +1,13 @@
 import validateMap from './validateMap.js'
 
-function loadMapQuestionnaire(mapID, config, _this) {
-	getSpecificMap(mapID, config, _this)
+import api from "./api.js";
+
+function loadMapQuestionnaire(mapID, _this) {
+	getSpecificMap(mapID, _this)
 }
 
-function getSpecificMap(id, config, _this) {
-	fetch(config.base + 'api/maps/' + id)
-	.then(res => res.json())
+function getSpecificMap(id, _this) {
+	api.get('api/maps/' + id)
 	.then(map => {
 	  _this.setState({"map": map, "mapValidity": map.complete })
 	  var questionnaireUID = map.questionnaireuid;
@@ -14,13 +15,12 @@ function getSpecificMap(id, config, _this) {
 	  return questionnaireUID
 	})
 	.then(questionnaireUID =>{
-	  getSpecificQuestionnaire(questionnaireUID, config, _this)
+	  getSpecificQuestionnaire(questionnaireUID, _this)
 	})  
 }
 
-function getSpecificQuestionnaire(id, config, _this) {
-	fetch(config.base +'api/questionnaires/' + id)
-	.then(res => res.json())
+function getSpecificQuestionnaire(id, _this) {
+	api.get('api/questionnaires/' + id)
 	.then(questionnaire => {
 	  _this.setState({"questionnaire": questionnaire});
 	  var mapCheck = {}

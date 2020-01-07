@@ -3,7 +3,8 @@ import {Paper, Typography, TextField, FormControl, FormHelperText, Input, InputL
 
 import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
 
-import config from '../config.json'
+import config from '../config.json';
+import api from "./services/api.js";
 
 class MapAdd extends Component {
   // Initialize the state
@@ -33,8 +34,7 @@ handleNameChange(event) {
 }
 
 checkName(name, _this){
-  fetch(config.base + 'api/maps/names/' + encodeURI(name))
-  .then(res => res.json())
+  api.get('api/maps/names/' + encodeURI(name))
   .then(nameFound => {
     _this.setState({
       invalidName: nameFound,
@@ -43,27 +43,19 @@ checkName(name, _this){
   })
 }
 
-handleAdd(){
-  if (!this.state.invalidName) {
-    var payload = {
-      "map": {},
-      "name": this.state.name,
-      "questionnaireuid": this.state.questionnaire
-    }
-    fetch(config.base + 'api/maps',{
-      method:'POST', 
-      body:JSON.stringify(payload),
-      headers: {
-        'Content-Type': 'application/json',
-      },      
-    })
-  .then(res => res.json())
-  .then(response => {
-    response = JSON.parse(response) //not sure why this is necessary and why it's a string after .json() step above
-    window.location = config.base + 'maps/' + response.uid + '?mode=edit'
-  })
-  }
-  
+handleAdd() {
+	if (!this.state.invalidName) {
+	    var payload = {
+	    	"map": {},
+	    	"name": this.state.name,
+	    	"questionnaireuid": this.state.questionnaire
+	    }
+	    api.post('api/maps', payload)
+		.then(response => {
+			response = JSON.parse(response) //not sure why this is necessary and why it's a string after .json() step above
+		    window.location = config.base + 'maps/' + response.uid + '?mode=edit'
+		})
+	}  
 }
 
 render() {

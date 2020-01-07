@@ -247,7 +247,7 @@ const updateMap = (request, response) => {
     if (validity === true) {
       updateDB(request.body, uid).then(success => {
         if (success) {
-          response.status(200).end('Updated map with uid of: ' + uid + '\n');
+          response.status(200).json({"status": "SUCCESS", "uid": uid});
         }
         else {
          response.status(400).end('Problem updating database for ' + uid + '. Map with this id may not exist\n'); 

@@ -6,7 +6,7 @@ import PublishIcon from "@material-ui/icons/Publish";
 import ValidationCard from "./ValidationCard.js";
 import UploadDestinationSelector from "./UploadDestinationSelector.js";
 
-import config from "../config.json";
+import api from "./services/api.js";
 
 import { uploadFile, checkHeaders } from "./services/validateFile.js";
 
@@ -52,31 +52,19 @@ class UploadCard extends React.Component {
 		});
 		if (csvFile.validity) {
 			var url = (this.state.destination == 'external') ? encodeURIComponent(this.state.externalURL) : null
-			fetch(
-				config.base +
-					"api/maps/" +
-					this.props.map.uid +
-					"/upload?url=" +
-					url,
-				{
-					method: "POST",
-					body: csvFile.text,
-					headers: { "Content-Type": "text/plain; charset=UTF-8" }
+			api.postCSV("api/maps/" + this.props.map.uid + "/upload?url=" + url, csvFile.text)
+			.then(response => {
+				if (response.hasOwnProperty("errors")) {
+					this.setState({ errors: response.errors });
 				}
-			)
-				.then(results => results.json())
-				.then(response => {
-					if (response.hasOwnProperty("errors")) {
-						this.setState({ errors: response.errors });
-					}
-					if (response.hasOwnProperty("data")) {
-						this.setState({ data: response.data });
-					}
-					if (response.hasOwnProperty("urlResponse")) {
-						this.setState({ urlResponse: response.urlResponse });
-					}					
-					this.setState({ finishedUploading: true });
-				});
+				if (response.hasOwnProperty("data")) {
+					this.setState({ data: response.data });
+				}
+				if (response.hasOwnProperty("urlResponse")) {
+					this.setState({ urlResponse: response.urlResponse });
+				}					
+				this.setState({ finishedUploading: true });
+			});
 		} else {
 			this.setState({
 				finishedUploading: true,

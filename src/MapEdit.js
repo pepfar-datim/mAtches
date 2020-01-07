@@ -10,7 +10,7 @@ import EditCard from "./EditCard.js";
 import ValueMapCard from "./ValueMapCard.js";
 import UploadMapList from "./UploadMapList.js";
 
-import config from "../config.json";
+import api from "./services/api.js";
 import { uploadFile } from "./services/validateFile.js";
 
 import loadMapQuestionnaire from "./services/loadMapQuestionnaire.js";
@@ -30,13 +30,7 @@ const classes = {
 
 function pushMapBack(tempMap, mapValidity) {
   tempMap.complete = mapValidity;
-  fetch(config.base + "api/maps", {
-    method: "PUT",
-    body: JSON.stringify(tempMap),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
+  api.put("api/maps", tempMap)
 }
 
 function removeAssociationQuestionnaire(tempCheck, mapping, header) {
@@ -208,7 +202,7 @@ class MapEdit extends Component {
   }
 
   componentDidMount() {
-    loadMapQuestionnaire(this.props.id, config, this);
+    loadMapQuestionnaire(this.props.id, this);
   }
 
   handleTabChange(event, newValue) {

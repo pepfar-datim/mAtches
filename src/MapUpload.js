@@ -51,7 +51,7 @@ class MapUpload extends Component {
   }
 
   componentDidMount() {
-    loadMapQuestionnaire(this.props.id, config, this);
+    loadMapQuestionnaire(this.props.id, this);
   }
 
   render() {    

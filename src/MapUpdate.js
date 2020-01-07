@@ -5,7 +5,8 @@ import HeaderBar from "./HeaderBar.js";
 import MapEdit from './MapEdit.js';
 import MapUpload from './MapUpload.js';
 
-import config from '../config.json'
+import config from '../config.json';
+import api from "./services/api.js";
 
 import validateMap from './services/validateMap.js'
 
@@ -37,8 +38,7 @@ class MapUpdate extends Component {
 
   // Retrieves the list of items from the Express app
   getSpecificMap(id) {
-    fetch(config.base + 'api/maps/' + id)
-    .then(res => res.json())
+    api.get('api/maps/' + id)
     .then(map => {
       this.setState({"map": map })
       var questionnaireUID = map.questionnaireuid;
@@ -51,7 +51,7 @@ class MapUpdate extends Component {
   }
   
   getSpecificQuestionnaire(id) {
-    fetch(config.base +'api/questionnaires/' + id)
+    api.get('api/questionnaires/' + id)
     .then(res => res.json())
     .then(questionnaire => {
       this.setState({"questionnaire": questionnaire});

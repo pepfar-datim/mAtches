@@ -5,7 +5,7 @@ import getMuiTheme from "material-ui/styles/getMuiTheme";
 
 import {Stepper, Step, StepLabel, StepButton, StepContent, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle}  from "@material-ui/core";
 
-import config from "../config.json";
+import api from "./services/api.js";
 import flattenValuesMap from "./services/flattenValuesMap.js";
 import { uploadFile, checkHeadersGeneral } from "./services/validateFile.js";
 
@@ -103,19 +103,7 @@ class ValueMapUploadDialogue extends React.Component {
 		var headersCheck = checkHeadersGeneral(csvText.split("\n")[0].split(","), ['Target', 'Source']);
 		if (headersCheck.valid) {
 			var postObject = {csvText: csvText, valueSet: JSON.parse(JSON.stringify(this.props.valueSet))};
-			fetch(
-				config.base +
-					"api/maps/" +
-					this.props.uid +
-					"/upload/valueMap/" +
-					this.props.header,
-				{
-					method: "POST",
-					body: JSON.stringify(postObject),
-					headers: { "Content-Type": "application/json; charset=UTF-8" }
-				}
-			)
-			.then(results => results.json())
+			api.post("api/maps/" + this.props.uid + "/upload/valueMap/" + this.props.header, postObject)
 			.then(response => {	
 				if (response.valid) {
 					this.setState({duplicateMappings: [], invalidMappings: []});

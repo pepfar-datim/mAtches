@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import MaterialTable from 'material-table'
 
 import config from '../config.json'
+import api from "./services/api.js";
 
 import { forwardRef } from 'react';
 
@@ -59,8 +60,7 @@ class MapList extends Component {
 
   // Retrieves the list of items from the Express app
   getMaps() {
-    fetch(config.base + 'api/maps')
-    .then(res => res.json())
+    api.get('api/maps')
     .then(maps => {
       this.setState({"maps": maps })
     })  
@@ -96,18 +96,13 @@ class MapList extends Component {
 		            tooltip: 'Delete Map',
 		            onClick: (event, rowData) => {
 	    				var tempIndex = rowData.tableData.id;
-
-		            	fetch(config.base + 'api/maps/' + rowData.uid , {
-	        				method:'DELETE'
-	    				})
-	    				.then(res => {
-	    					if(res.status == 200) {	    						
-	    						var tempMaps = this.state.maps
-	    						tempMaps.splice(tempIndex,1);
-	    						this.setState({maps: tempMaps})
-	    					}
-	    				})
-
+	    				var _this = this;
+	    				function deleteCallback () {
+    						var tempMaps = _this.state.maps
+    						tempMaps.splice(tempIndex,1);
+    						_this.setState({maps: tempMaps})	    					
+	    				}
+		            	api.delete('api/maps/' + rowData.uid, deleteCallback)
 		            },
 		          },		          
 		        ]}		                

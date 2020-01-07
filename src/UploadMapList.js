@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import {Typography, TextField, InputAdornment, Grid, Button, IconButton, MobileStepper} from '@material-ui/core';
 
-import config from "../config.json";
+import api from "./services/api.js";
 import SearchTextComponent from "./SearchTextComponent.js";
 
 import { forwardRef } from "react";
@@ -62,11 +62,10 @@ class UploadMapList extends Component {
 	}
 
 	getMaps() {
-		fetch(config.base + "api/maps")
-			.then(res => res.json())
-			.then(maps => {
-				this.setState({ maps: maps, maxSteps: Math.ceil(maps.length / this.state.numberOfMaps)});
-			});
+		api.get("api/maps")
+		.then(maps => {
+			this.setState({ maps: maps, maxSteps: Math.ceil(maps.length / this.state.numberOfMaps)});
+		});
 	}
 
 	handleNext() {

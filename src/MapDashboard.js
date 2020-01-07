@@ -3,7 +3,7 @@ import HeaderBar from "./HeaderBar.js";
 import MapList from "./MapList.js";
 import MapAdd from "./MapAdd.js";
 
-import config from '../config.json'
+import api from "./services/api.js";
 
 class MapDashboard extends Component {
   // Initialize the state
@@ -19,8 +19,7 @@ class MapDashboard extends Component {
   }
 
   getQuestionnaires() {
-    fetch(config.base + 'api/questionnaires')
-    .then(res => res.json())
+    api.get('api/questionnaires')
     .then(questionnaires => {
       var questionnaireHash = questionnaires.reduce(function(mappedQs, q) {
         if (!mappedQs.hasOwnProperty(q.uid)){

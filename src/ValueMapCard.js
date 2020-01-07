@@ -6,7 +6,6 @@ import {Save, AddCircleOutlined, Publish} from '@material-ui/icons';
 import ChipInput from 'material-ui-chip-input'
 
 import ValueMapUploadDialogue from "./ValueMapUploadDialogue.js";
-import config from '../config.json'
 
 function generateChoiceMap(headerDefinitions, tempValueSet) {
 	var tempChoiceMap = {};
