@@ -10,6 +10,8 @@ import api from "./services/api.js";
 
 import { uploadFile, checkHeaders } from "./services/validateFile.js";
 
+import {stylesObj} from './styling/stylesObj.js';
+
 class UploadCard extends React.Component {
 	constructor(props) {
 		super(props);
@@ -85,13 +87,9 @@ class UploadCard extends React.Component {
 	render() {
 		return (
 			<Card
-				style={{
-					backgroundColor: "lightGrey",
-					height: "100%",
-					minHeight: "750px"
-				}}
+				style={stylesObj.mainCard}
 			>
-				<div style={{ padding: "20px" }}>
+				<div style={stylesObj.themePadding}>
 					<Typography variant="h6">
 						<strong>Upload Data</strong>
 					</Typography>
@@ -101,7 +99,7 @@ class UploadCard extends React.Component {
 						onDestinationChange={this.handleDestinationChange}
 						onURLChange={this.handleURLChange}
 					/>
-					<div style={{ padding: "5px" }}>
+					<div style={stylesObj.themePaddingQuarter}>
 						<Typography variant="body1">
 							Select a CSV file to upload
 						</Typography>
@@ -120,7 +118,7 @@ class UploadCard extends React.Component {
 						>
 							<PublishIcon />
 						</IconButton>
-						<form style={{ visibility: "hidden" }}>
+						<form style={stylesObj.hidden}>
 							<input
 								type="file"
 								ref="fileInput"

@@ -7,6 +7,8 @@ import ChipInput from 'material-ui-chip-input'
 
 import ValueMapUploadDialogue from "./ValueMapUploadDialogue.js";
 
+import {stylesObj} from './styling/stylesObj.js';
+
 function generateChoiceMap(headerDefinitions, tempValueSet) {
 	var tempChoiceMap = {};
 	if (headerDefinitions.hasOwnProperty('choiceMap')) {
@@ -67,7 +69,7 @@ class ValueMapCard extends React.Component {
 	 	return valueSet.map( (o, i) => {
 			return(
 				<div>
-					<Typography variant="h6" style={{marginBottom: "5px"}}>
+					<Typography variant="h6" style={stylesObj.marginQuarter}>
 						<strong>{o.Display}</strong>
 						<br />
 						{this.formatChips(o.maps, i, o.Code)}
@@ -123,14 +125,14 @@ class ValueMapCard extends React.Component {
 
 	render() {
 		return(
-	      	<Card style={{position: "relative", backgroundColor: "ghostWhite", height: "100%", "minHeight": "750px"}}>
-	        	<div style={{"padding": "20px"}}>
-	          		<Typography variant="h6" style={{marginBottom: "5px"}}>
+	      	<Card style={stylesObj.valueMapCard}>
+	        	<div style={stylesObj.themePadding}>
+	          		<Typography variant="h6" style={stylesObj.marginQuarter}>
 	            		<strong>Map Values</strong> for {this.props.header}
 	            		<br />
 	          		</Typography>
 	          		<Button
-	          			style={{textTransform: "none", marginTop: "10px", backgroundColor: "lightSteelBlue"}}
+	          			style={stylesObj.valueMapButton}
 	          			onClick={this.handleDialogueChange}
 	          		>
 	          		Upload Values Map
@@ -147,14 +149,14 @@ class ValueMapCard extends React.Component {
 	          			/>
 	          		}
 	          		<br />
-	          		<div style={{margin: "20px"}}>
+	          		<div style={stylesObj.marginQuarter}>
 	          			{this.formatValueMap(this.state.valueSet)}
 	          		</div>
-					<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: "lightSteelBlue"}}
+					<Button variant="contained" style={stylesObj.valueMapContinueButton}
 						onClick={(e) => this.props.onValueMapClose(e, this.state.choiceMap, this.props.header)}
 					>
 					Save and Close
-					<Save style={{margin: "5px"}} />
+					<Save style={stylesObj.marginQuarter} />
 					</Button>	
 	        	</div>
         	            

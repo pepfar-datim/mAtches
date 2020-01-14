@@ -6,6 +6,8 @@ import MapIcon from '@material-ui/icons/Map';
 
 import config from '../config.json'
 
+import {stylesObj} from './styling/stylesObj.js';
+
 function handleChange(event) {
 	console.log(event)
 }
@@ -21,7 +23,7 @@ function formatMenuItems(currentMap) {
 
 function formatSelect(header,key,map,associationFunction) {
     return(
-		<FormControl style={{minWidth: "120px", paddingTop: "10px"}}>
+		<FormControl style={stylesObj.editCardSelector}>
 		<Select
 		  value={header || ''}
 		  onChange={associationFunction}
@@ -36,19 +38,21 @@ function formatSelect(header,key,map,associationFunction) {
 function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
     return(
-      <div key={'question-'+i} style={{paddingBottom: "40px"}}>
+      <div key={'question-'+i} style={stylesObj.editCardSelectorPadding}>
         <Typography wrap="noWrap">
           <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
         </Typography>
 		{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
 		<br />
 		{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
-			<Button variant="contained" style={{textTransform: "none", marginTop: "10px", backgroundColor: "whiteSmoke"}}
+			<Button 
+				variant="contained" 
+				style={stylesObj.editCardSelectorButton}
 				onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
 				disabled={!mapCheck.flatQuestionnaire[k].hasOwnProperty('header')}
 			>
 			Map values
-			<MapIcon style={{margin: "5px"}} />			
+			<MapIcon style={stylesObj.editCardSelectorButtonIcon} />			
 			</Button>
 
 		}
@@ -72,14 +76,14 @@ redirectToUpload () {
 	
 	render() {
 		var buttonDisabled = Object.keys(this.props.unmappedHeaders).length > 0 || !this.props.mapValidity;
-		var buttonColor = buttonDisabled ?  "darkGrey" : "darkSeaGreen"
+		var buttonUploadStyling = buttonDisabled ? stylesObj.editCardUploadButtonDisabled : stylesObj.editCardUploadButtonEnabled
 		return(
-	      	<Card style={{position: "relative", backgroundColor: "lightGrey", height: "100%", "minHeight": "750px"}}>
-	        	<div style={{"padding": "20px"}}>
-	          		<Typography variant="h6" style={{marginBottom: "5px"}}>
+	      	<Card style={stylesObj.editCard}>
+	        	<div style={stylesObj.themePadding}>
+	          		<Typography variant="h6" style={stylesObj.marginQuarterBottom}>
 	            		<strong>Map Source Headers to Target Questions</strong>
 	          		</Typography>
-	          		<div style={{padding: "5px"}}>
+	          		<div style={stylesObj.themePaddingQuarter}>
 	                {this.props.mapCheck && this.props.map &&
 	                <div>
 	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap)}
@@ -89,12 +93,12 @@ redirectToUpload () {
 	          		</div>
 	        	</div>
 					<div>
-					<Button variant="contained" style={{position: "absolute", right: "0px", bottom: "0px", margin: "20px", backgroundColor: buttonColor}}
+					<Button variant="contained" style={buttonUploadStyling}
 						onClick={this.redirectToUpload.bind(this)}
 						disabled={buttonDisabled}
 					>
 					Upload Data
-					<PublishIcon style={{margin: "5px"}} />
+					<PublishIcon style={stylesObj.marginQuarter} />
 					</Button>			
 					</div>   	        	            
 			</Card>

@@ -2,25 +2,12 @@ import React, { Component } from "react";
 import {Grid, Paper, Card, Typography, IconButton} from '@material-ui/core';
 import Edit from '@material-ui/icons/Edit';
 
-import { makeStyles } from '@material-ui/core/styles';
-import { sizing } from '@material-ui/system';
-
 import UploadCard from "./UploadCard.js";
-import config from '../config.json'
+import config from '../config.json';
 
-import loadMapQuestionnaire from './services/loadMapQuestionnaire.js'
+import loadMapQuestionnaire from './services/loadMapQuestionnaire.js';
 
-const drawerWidth = 200;
-
-const classes = {
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    height: "500px",
-    width: "500px",
-  }
-};
+import {stylesObj} from './styling/stylesObj.js';
 
 function formatQuestions(mapCheck) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
@@ -56,11 +43,11 @@ class MapUpload extends Component {
 
   render() {    
     return (
-        <div style={{"padding": "20px"}}>
-        <Grid container className={classes.root} wrap="nowrap" spacing={2}>
-          <Grid item xs={3} style={{maxWidth: "300px"}}>
-              <Card style={{backgroundColor: "lightSteelBlue", height: "100%"}} wrap="wrap">
-                  <div style={{"padding": "20px"}}>            
+        <div style={stylesObj.themePadding}>
+        <Grid container className={stylesObj.flexGrow} wrap="nowrap" spacing={2}>
+          <Grid item xs={3} style={stylesObj.gridWidth}>
+              <Card style={stylesObj.sideCard} wrap="wrap">
+                  <div style={stylesObj.themePadding}>            
                     <Typography variant="h6">
                       <strong>Map name: </strong>{this.state.map.name}
                     </Typography>

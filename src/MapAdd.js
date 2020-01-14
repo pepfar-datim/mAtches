@@ -6,6 +6,8 @@ import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
 import config from '../config.json';
 import api from "./services/api.js";
 
+import {stylesObj} from './styling/stylesObj.js'
+
 class MapAdd extends Component {
   // Initialize the state
   constructor(props){
@@ -61,13 +63,13 @@ handleAdd() {
 render() {
   const questionnaireHash = this.props.questionnaireHash;
   return (
-    <div style={{ padding: "20px" }}>
-      <Paper style={{ backgroundColor: "lightSteelBlue" }}>
-        <div style={{ padding: "20px" }}>
+    <div style={stylesObj.themePadding}>
+      <Paper style={stylesObj.addBox}>
+        <div style={stylesObj.themePadding}>
           <Typography variant="h6" style={{ paddingBottom: "20px" }}>
             Create a new map
           </Typography>
-          <FormControl style={{width:'200px'}} >
+          <FormControl style={stylesObj.themeWidth} >
             <InputLabel shrink htmlFor="questionnaire-select">
               Questionnaire
             </InputLabel>
@@ -79,7 +81,7 @@ render() {
           </FormControl>
           <br />
           <TextField
-            style={{width:'200px'}}
+            style={stylesObj.themeWidth}
             id="standard-name"
             label="Name"
             value={this.state.name}

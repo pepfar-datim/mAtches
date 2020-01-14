@@ -2,14 +2,13 @@ import React from "react";
 
 import {Radio, RadioGroup, FormControlLabel, TextField} from "@material-ui/core";
 
+import {stylesObj} from './styling/stylesObj.js';
+
 function UploadDestinationSelector(props) {
 	return (
 		<div>
 			<RadioGroup 
-				style ={{
-					padding: '5px',
-					marginLeft: '10px'
-				}}
+				style ={stylesObj.uploadDestinationRadioGroup}
 				aria-label="destination"
 				name="destinationSelector"
 				value={props.destination}
@@ -18,19 +17,19 @@ function UploadDestinationSelector(props) {
 			>
 				<FormControlLabel
 					value="internal"
-					control={<Radio style={{color: "black"}}/>}
+					control={<Radio style={stylesObj.uploadDestinationRadio}/>}
 					label="Output generated FHIR bundle in mAppr"
 				/>
 				<FormControlLabel
 					value="external"
-					control={<Radio style={{color: "black"}} />}
+					control={<Radio style={stylesObj.uploadDestinationRadio} />}
 					label="Send generated FHIR bundle to external URL"
 				/>
 			</RadioGroup>
 			{props.destination == 'external' &&
 				<div>
 		          <TextField
-		            style={{width:'600px', marginBottom: "20px"}}
+		            style={stylesObj.uploadDestinationText}
 		            id="url-name"
 		            label="URL"
 		            value={props.externalURL}

@@ -1,28 +1,20 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import {AppBar, Toolbar, Typography, IconButton} from "@material-ui/core";
 import {Settings, Menu, Help} from "@material-ui/icons";
 import match from '../public/images/match_color.png'; // Tell Webpack this JS file uses this image
 
 import config from '../config.json'
 
-const useStyles = makeStyles({
-	root: {
-		padding: "0px",
-		margin: "0px",
-		width: "100%"
-	}
-});
+import {stylesObj} from './styling/stylesObj.js';
 
 function HeaderBar() {
-	const classes = useStyles();
 
 	return (
 		<div>
-			<AppBar position="relative" color="default">
+			<AppBar position="relative" style={stylesObj.headerBar}>
 				<Toolbar>
 					<img src={match} alt="match" />
-					<Typography style={{padding: "20px"}} variant="h5" color="inherit">
+					<Typography style={stylesObj.themePadding} variant="h5" color="inherit">
 						mAtches
 					</Typography>
 					<Typography
@@ -31,10 +23,9 @@ function HeaderBar() {
 					>
 						{config.name}
 					</Typography>
-					<div style={{ position: "absolute", right: "0px" }}>
+					<div style={stylesObj.headerBarRightIcons}>
 						<IconButton
 							edge="start"
-							className={classes.menuButton}
 							color="inherit"
 							aria-label="menu"
 							onClick={() => { window.location = config.base + 'maps/' }}
@@ -43,7 +34,6 @@ function HeaderBar() {
 						</IconButton>
 						<IconButton
 							edge="start"
-							className={classes.menuButton}
 							color="inherit"
 							aria-label="menu"
 						>
@@ -51,7 +41,6 @@ function HeaderBar() {
 						</IconButton>
 						<IconButton
 							edge="start"
-							className={classes.menuButton}
 							color="inherit"
 							aria-label="menu"
 						>

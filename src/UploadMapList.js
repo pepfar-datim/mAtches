@@ -10,6 +10,8 @@ import {DebounceInput} from 'react-debounce-input';
 
 import {Search, Sync, KeyboardArrowLeft, KeyboardArrowRight} from "@material-ui/icons";
 
+import {stylesObj} from './styling/stylesObj.js';
+
 function formatMapList(maps, searchText, currentMapID, onMapProcess, currentStep, numberOfMaps) {
 	return maps
 		.filter(m => {
@@ -99,7 +101,7 @@ class UploadMapList extends Component {
 */
 	render() {
 		return (
-			<div style={{ padding: "10px" }}>		    
+			<div style={stylesObj.themePadding}>		    
 
 		    <TextField
 				id="narrowdown-search"

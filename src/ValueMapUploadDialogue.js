@@ -9,6 +9,7 @@ import api from "./services/api.js";
 import flattenValuesMap from "./services/flattenValuesMap.js";
 import { uploadFile, checkHeadersGeneral } from "./services/validateFile.js";
 
+import {stylesObj} from './styling/stylesObj.js';
 
 function getSteps() {
 	return [
@@ -138,7 +139,7 @@ class ValueMapUploadDialogue extends React.Component {
 						{steps.map((label, index) => (
 							<Step key={label}>
 								<StepLabel
-									style={{root: {color: "lightSteelBlue" }}}
+									style={stylesObj.valueMapUploadStepLabel}
 								>
 									{label}
 								</StepLabel>
@@ -161,16 +162,13 @@ class ValueMapUploadDialogue extends React.Component {
 												variant="contained"
 												color="primary"
 												onClick={e => this.handleNext(e)}
-												style={{
-													backgroundColor:
-														"lightSteelBlue"
-												}}
+												style={stylesObj.valueMapUploadButton}
 											>
 												{
 													["Download", "Next", "Upload"][this.state.activeStep]
 												}
 											</Button>
-											<form style={{ visibility: "hidden" }}>
+											<form style={stylesObj.hidden}>
 												<input
 													type="file"
 													id="uploadClick"

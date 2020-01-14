@@ -3,9 +3,6 @@ import {Grid, Paper, Card, Typography, IconButton, Edit, Chip, TextField, FormCo
 
 import {AddCircleOutlined, Publish, ImageSearch}  from "@material-ui/icons";
 
-import { makeStyles } from "@material-ui/core/styles";
-import { sizing } from "@material-ui/system";
-
 import EditCard from "./EditCard.js";
 import ValueMapCard from "./ValueMapCard.js";
 import UploadMapList from "./UploadMapList.js";
@@ -16,17 +13,7 @@ import { uploadFile } from "./services/validateFile.js";
 import loadMapQuestionnaire from "./services/loadMapQuestionnaire.js";
 import loadMapFromMap from "./services/loadMapFromMap.js";
 
-const drawerWidth = 200;
-
-const classes = {
-  root: {
-    flexGrow: 1
-  },
-  paper: {
-    height: "500px",
-    width: "500px"
-  }
-};
+import {stylesObj} from './styling/stylesObj.js';
 
 function pushMapBack(tempMap, mapValidity) {
   tempMap.complete = mapValidity;
@@ -174,7 +161,7 @@ class MapEdit extends Component {
           <Chip
             label={k}
             onDelete={handleDelete.bind(_this, k)}
-            style={{ margin: "5px" }}
+            style={stylesObj.smallMargin}
           />
         </div>
       );
@@ -321,7 +308,7 @@ class MapEdit extends Component {
   render() {
     const value = 1;
     return (
-      <div style={{ padding: "20px" }}>
+      <div style={stylesObj.themePadding}>
         {this.state.editValueMap && (
           <ValueMapCard
             map={this.state.map}
@@ -332,13 +319,13 @@ class MapEdit extends Component {
           />
         )}
         {!this.state.editValueMap && this.state.mapValidity != undefined && (
-          <Grid container className={classes.root} wrap="nowrap" spacing={2}>
-            <Grid item xs={3} style={{ maxWidth: "300px" }}>
+          <Grid container className={stylesObj.flexGrow} wrap="nowrap" spacing={2}>
+            <Grid item xs={3} style={stylesObj.gridWidth}>
               <Card
-                style={{ backgroundColor: "lightSteelBlue", height: "100%" }}
+                style={stylesObj.sideCard}
                 wrap="wrap"
               >
-                <div style={{ padding: "20px" }}>
+                <div style={stylesObj.themePadding}>
                   <Typography variant="h6">
                     <strong>Map name: </strong>
                     {this.state.map.name}
@@ -353,32 +340,29 @@ class MapEdit extends Component {
                     <strong>Source Headers</strong>
                   </Typography>
                   <br />
-                  <div style={{ backgroundColor: "white" }}>
+                  <div style={stylesObj.whiteBackground}>
                     <Tabs
                       value={this.state.value}
                       onChange={this.handleTabChange}
-                      style={{ backgroundColor: "steelBlue" }}
+                      style={stylesObj.mappingBoxBanner}
                       TabIndicatorProps={{
-                        style: {
-                          backgroundColor: "orange",
-                          textColor: "orange"
-                        }
+                        style: stylesObj.tabIndicator
                       }}
                     >
                       <Tab
-                        style={{ minWidth: 20 }}
+                        style={stylesObj.minWidth}
                         icon={<AddCircleOutlined />}
                         aria-label="add"
                         {...a11yProps(0)}
                       />
                       <Tab
-                        style={{ minWidth: 20 }}
+                        style={stylesObj.minWidth}
                         icon={<Publish />}
                         aria-label="upload"
                         {...a11yProps(1)}
                       />
                       <Tab
-                        style={{ minWidth: 20 }}
+                        style={stylesObj.minWidth}
                         icon={<ImageSearch />}
                         aria-label="fromMap"
                         {...a11yProps(2)}
@@ -404,7 +388,7 @@ class MapEdit extends Component {
                       >
                         <Publish />
                       </IconButton>
-                      <form style={{ visibility: "hidden" }}>
+                      <form style={stylesObj.hidden}>
                         <input
                           type="file"
                           ref="fileInput"
@@ -418,7 +402,7 @@ class MapEdit extends Component {
                     </div>
                     <div hidden={this.state.value !== 0}>
                       <TextField
-                        style={{ width: "120px" }}
+                        style={stylesObj.addHeaderText}
                         id="standard-name"
                         label="Add a Header"
                         value={this.state.newHeaderName}
