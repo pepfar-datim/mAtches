@@ -1,8 +1,6 @@
 import React from "react";
 import csv from "csv";
 
-import getMuiTheme from "material-ui/styles/getMuiTheme";
-
 import {Stepper, Step, StepLabel, StepButton, StepContent, Button, Typography, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle}  from "@material-ui/core";
 
 import api from "./services/api.js";
