@@ -281,7 +281,7 @@ class MapEdit extends Component {
   }
 
   uploadCallback(csvText) {
-    var columnRow = csvText.split("\n")[0];
+    var columnRow = csvText.split(/\r\n|\n/)[0];
     var columns = columnRow.split(",");
     var tempMap = this.state.map;
     var originalMap = JSON.parse(JSON.stringify(tempMap));
