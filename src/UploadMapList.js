@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import {Typography, TextField, InputAdornment, Grid, Button, IconButton, MobileStepper} from '@material-ui/core';
 
 import api from "./services/api.js";
-import SearchTextComponent from "./SearchTextComponent.js";
+// import SearchTextComponent from "./SearchTextComponent.js";
 
 import { forwardRef } from "react";
 

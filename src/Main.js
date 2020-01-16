@@ -22,7 +22,7 @@ class Main extends React.Component {
 		        <Switch>
 		          <Route 
 		          	exact path={basePath}
-		          	render={() => (<Redirect to="/maps" />)}
+		          	render={() => (<Redirect to={config.base + 'maps/'} />)}
 		          />
 		          <Route 
 		          	exact path={basePath + 'maps/:id'}
