@@ -82,7 +82,7 @@ render() {
           <br />
           <TextField
             style={stylesObj.themeWidth}
-            id="standard-name"
+            id="name-entry"
             label="Name"
             value={this.state.name}
             margin="normal"
@@ -95,6 +95,7 @@ render() {
             edge="start"
             aria-label="menu"
             disabled={this.state.invalidName || this.state.checking || !this.state.name || !this.state.questionnaire}
+            id="addMapButton"
             onClick={this.handleAdd.bind(this)}
           >
             <AddCircleOutlinedIcon />
