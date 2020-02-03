@@ -68,7 +68,7 @@ const checkName = (request, response) => {
   }
 
   const query = {
-    text: "SELECT * FROM " + type + " WHERE name=$1;",
+    text: "SELECT uid FROM " + type + " WHERE name=$1;",
     values: [request.params.name]
   }
 
@@ -76,7 +76,8 @@ const checkName = (request, response) => {
     if (error) {
       response.status(400).end(error)
     }
-    response.status(200).send(results.rows.length>0)
+    var uidToReturn = (results.rows.length > 0) ? results.rows[0] : {}
+    response.status(200).send(uidToReturn)
   })
 
 }

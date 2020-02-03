@@ -70,7 +70,7 @@ class MapList extends Component {
 
 	render() {
 	return (
-		<div style={stylesObj.themePadding}>
+		<div data-cy="mapsTable" style={stylesObj.themePadding}>
 	        <MaterialTable
 
 		        title="My maps"

@@ -39,7 +39,7 @@ checkName(name, _this){
   api.get('api/maps/names/' + encodeURI(name))
   .then(nameFound => {
     _this.setState({
-      invalidName: nameFound,
+      invalidName: nameFound.hasOwnProperty('uid'),
       checking: false
     })
   })

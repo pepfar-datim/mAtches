@@ -38,15 +38,41 @@ Cypress.Commands.add('seed', () => {
 		}	
 	})
 
+	cy.request({
+		method: 'GET',
+		url: '/api/maps/names/' + encodeURI('Cypress-Test')
+	})
+	.then((response) => {
+		if (response.body.hasOwnProperty('uid')) {
 			cy.request({
-			method: 'POST',
-			url: '/api/maps/',
-			body: {
-				name: 'Cypress-Test',
-				uid: 'gI4MEZ',
-				questionnaireuid: 'HIVque',
-				complete: false,
-				map:{}			
-			}
-		})	
+				method: 'DELETE',
+				url: '/api/maps/' + response.body.uid
+			})
+		}	
+	})
+
+	cy.request({
+		method: 'GET',
+		url: '/api/maps/names/' + encodeURI('Cypress-Test2')
+	})
+	.then((response) => {
+		if (response.body.hasOwnProperty('uid')) {
+			cy.request({
+				method: 'DELETE',
+				url: '/api/maps/' + response.body.uid
+			})
+		}	
+	})
+
+	cy.request({
+		method: 'POST',
+		url: '/api/maps/',
+		body: {
+			name: 'Cypress-Test',
+			uid: 'gI4MEZ',
+			questionnaireuid: 'HIVque',
+			complete: false,
+			map:{}			
+		}
+	})	
 })

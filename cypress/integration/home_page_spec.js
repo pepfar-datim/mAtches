@@ -4,13 +4,6 @@ describe('The Home Page', () => {
     cy.visit('/')
   })
 
-  //test seeded incomplete map appears and can have data uploaded to it
-  //test seeded complete map appears and cannot have data uploded to it
-  //test that you can delete a map
-  //test that you cannot add a map with an existing name
-  //test that you can add a map with a new name
-
-
   it('successfully loads', function() {
     cy.url().should('include', '/maps')
   })
@@ -29,12 +22,7 @@ describe('The Home Page', () => {
       .should('be.disabled')
   })
 
-  //probably need to rewrite names to deliver the id, so that can use seeding to clear and not have issues with this test
   it('allows you to add a new map (with a new name)', () => {
-    cy.request({
-      method: 'DELETE',
-      url: '/api/maps/gI4MEZ'
-    })
     cy.get('#name-entry')
       .type('Cypress-Test2')
       .should('have.value', 'Cypress-Test2')
@@ -47,5 +35,19 @@ describe('The Home Page', () => {
     cy.get('#addMapButton')
       .click()
   })    
+
+  it('map is findable in table, editable, deletable, and not uploadable against', () => {
+    cy.get('[data-cy=mapsTable]').find('input').first()
+      .type('Cypress')
+      .should('have.value', 'Cypress')
+    cy.get('[data-cy=mapsTable]').find('td')
+      .should('contain', 'Cypress-Test')
+      .get('[title="Edit Map"]')
+      .should('not.be.disabled')
+      .get('[title="Upload to map"]')
+      .should('be.disabled')
+      .get('[title="Delete Map"]')
+      .should('not.be.disabled')
+  })
 
 })
