@@ -28,6 +28,7 @@ function formatSelect(header,key,map,associationFunction) {
 		  value={header || ''}
 		  onChange={associationFunction}
 		  name={key}
+		  data_cy={key + '_selectItem'}
 		>
 			{formatMenuItems(map)}
 		</Select>

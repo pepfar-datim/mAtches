@@ -10,12 +10,12 @@ import {stylesObj} from './styling/stylesObj.js';
 function HeaderBar() {
 
 	return (
-		<div>
+		<div data-cy="headerBar">
 			<AppBar position="relative" style={stylesObj.headerBar}>
 				<Toolbar>
 					<img src={match} alt="match" />
 					<Typography style={stylesObj.themePadding} variant="h5" color="inherit">
-						mAtches
+						{config.appName}
 					</Typography>
 					<Typography
 						variant="h6"

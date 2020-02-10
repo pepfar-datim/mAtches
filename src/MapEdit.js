@@ -162,6 +162,7 @@ class MapEdit extends Component {
             label={k}
             onDelete={handleDelete.bind(_this, k)}
             style={stylesObj.smallMargin}
+            data-cy={"chip_" + k}
           />
         </div>
       );
@@ -403,17 +404,19 @@ class MapEdit extends Component {
                     <div hidden={this.state.value !== 0}>
                       <TextField
                         style={stylesObj.addHeaderText}
-                        id="standard-name"
+                        id="add_header"
                         label="Add a Header"
                         value={this.state.newHeaderName}
                         margin="normal"
                         onChange={handleNameChange.bind(this)}
+                        data-cy="addHeaderInput"
                       />
                       <br />
                       <IconButton
                         edge="start"
                         aria-label="menu"
                         onClick={handleAdd.bind(this)}
+                        data-cy="addHeaderButton"
                       >
                         <AddCircleOutlined />
                       </IconButton>
