@@ -12,6 +12,8 @@ import { uploadFile, checkHeaders } from "./services/validateFile.js";
 
 import {stylesObj} from './styling/stylesObj.js';
 
+import config from '../config.json'
+
 class UploadCard extends React.Component {
 	constructor(props) {
 		super(props);
@@ -93,12 +95,14 @@ class UploadCard extends React.Component {
 					<Typography variant="h6">
 						<strong>Upload Data</strong>
 					</Typography>
-					<UploadDestinationSelector
-						destination={this.state.destination}
-						externalURL={this.state.externalURL}
-						onDestinationChange={this.handleDestinationChange}
-						onURLChange={this.handleURLChange}
-					/>
+					{config.allowExternalURL &&
+						<UploadDestinationSelector
+							destination={this.state.destination}
+							externalURL={this.state.externalURL}
+							onDestinationChange={this.handleDestinationChange}
+							onURLChange={this.handleURLChange}
+						/>
+					}
 					<div style={stylesObj.themePaddingQuarter}>
 						<Typography variant="body1">
 							Select a CSV file to upload

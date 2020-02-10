@@ -1,5 +1,6 @@
 {
 	"base": "/",
 	"name": "PEPFAR PLM Team",
-	"appName": "mAtches"
+	"appName": "mAtches",
+	"allowExternalURL": false
 }
