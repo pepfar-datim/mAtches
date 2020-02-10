@@ -344,7 +344,7 @@ const uploadData = (request, response) => {
               fetch(url, 
                 {
                   method: "POST",
-                  body: result.bundle,
+                  body: JSON.stringify(result.data),
                   headers: { "Content-Type": "application/json" }
                 }
               )
