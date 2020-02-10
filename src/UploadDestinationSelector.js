@@ -4,6 +4,8 @@ import {Radio, RadioGroup, FormControlLabel, TextField} from "@material-ui/core"
 
 import {stylesObj} from './styling/stylesObj.js';
 
+import config from '../config.json'
+
 function UploadDestinationSelector(props) {
 	return (
 		<div>
@@ -18,7 +20,7 @@ function UploadDestinationSelector(props) {
 				<FormControlLabel
 					value="internal"
 					control={<Radio style={stylesObj.uploadDestinationRadio}/>}
-					label="Output generated FHIR bundle in mAppr"
+					label={"Output generated FHIR bundle in " + config.appName}
 				/>
 				<FormControlLabel
 					value="external"

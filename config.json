@@ -1,4 +1,5 @@
 {
 	"base": "/",
-	"name": "PEPFAR PLM Team" 
+	"name": "PEPFAR PLM Team",
+	"appName": "mAtches"
 }
