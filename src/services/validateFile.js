@@ -1,7 +1,7 @@
 export function uploadFile(e,_this) {
 
 	return new Promise((resolve, reject) => {	
-		let files;
+		let files = [];
 
 	    if (e.dataTransfer && e.dataTransfer.files) {
 	      files = e.dataTransfer.files;

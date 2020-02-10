@@ -82,6 +82,9 @@ class UploadCard extends React.Component {
 		e.preventDefault();
 		this.setInitialState();
 		uploadFile(e, this).then(csvFile => {
+			if (!csvFile) {
+				this.setState({fileName: ''});
+			}
 			this.uploadCallback(csvFile);
 		});
 	}
