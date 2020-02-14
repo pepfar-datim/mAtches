@@ -1,4 +1,6 @@
 const helpers = require('./helpers.js')
+const fs = require('fs');
+
 const Pool = require('pg').Pool;
 const csv = require('csv');
 var fetch = require('node-fetch');
@@ -43,22 +45,63 @@ const checkColumn = (table, column) => {
   return valid
 }
 
+const readResource = (fileName) => {
+  var promise = new Promise(function(resolve, reject) {
+    fs.readFile(fileName, (err, data) => {
+      if (err) {
+        resolve({"error": err}) 
+      } else {
+        var parsedData = JSON.parse(data);
+        resolve({"data": parsedData})
+      }
+    })  
+  })
+  return promise
+}
+
+const writeResource = (fileName, data) => {
+  var promise = new Promise(function(resolve, reject) {
+    fs.writeFile(fileName, data, (err) => {
+      if (err) resolve({"error": err})
+      resolve({"success": true})
+    })  
+  })
+  return promise
+}
+
+const deleteResource = (fileName) => {
+  var promise = new Promise(function(resolve, reject) {
+    fs.unlink(fileName, (err) => {
+      if (err) resolve({"error": err})
+      resolve({"success": true})
+    })  
+  })
+  return promise  
+}
+
 const getAll = (request, response) => {
   var type = request.path.split('/')[splitNumber];
   if (!checkTable(type)) {
-     response.status(403).end('Invalid\n') 
+     response.status(403).end('Invalid\n')
   }
-
-  const query = {
-    text: "SELECT * FROM " + type + " ORDER BY id ASC;"
-  }
-  
-  pool.query(query, (error, results) => {
-    if (error) {
-      throw error
+  readResource('./persistency/' + type + '/' + type + '.json').then((data) => {
+    if (data.hasOwnProperty('data')) {
+      var cleanedData = getAllClean(data.data);
+      response.status(200).json(cleanedData); 
     }
-    response.status(200).json(results.rows)
-  })
+    if (data.hasOwnProperty('error')) {
+      response.status(400).end(JSON.stringify(data.error)); 
+    }
+    response.status(400).end('problem accessing resource');
+  });
+}
+
+const getAllClean = (data) => {
+  var dataArray = []
+  for (var i in data) {
+    dataArray.push(data[i])
+  }
+  return dataArray
 }
 
 const checkName = (request, response) => {
@@ -66,37 +109,55 @@ const checkName = (request, response) => {
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n') 
   }
-
-  const query = {
-    text: "SELECT uid FROM " + type + " WHERE name=$1;",
-    values: [request.params.name]
-  }
-
-  pool.query(query, (error, results) => {
-    if (error) {
-      response.status(400).end(error)
+  checkForSpecificProp(request.params.name,'maps','name').then(nameFound => {
+    if (nameFound.hasOwnProperty('error')) {
+      response.status(400).end(nameConflict.error)
     }
-    var uidToReturn = (results.rows.length > 0) ? results.rows[0] : {}
-    response.status(200).send(uidToReturn)
+    if (nameFound) {
+      response.status(200).send(nameFound)
+    } else {
+      response.status(200).send({})  
+    }   
   })
-
 }
 
 const getSpecificResource = (request, response) => {
   var type = request.path.split('/')[splitNumber];
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n') 
-  }  
-  const query = {
-    text: "SELECT * FROM " + type + " WHERE uid=$1",
-    values: [request.params.id]
   }
-  pool.query(query, (error, results) => {
-    if (error) {
-      response.status(400).end(error)
-    }
-    response.status(200).json(results.rows[0])
+  readResource('./persistency/' + type + '/' + request.params.id + '.json').then((data) => {
+    if (data.hasOwnProperty('data')) response.status(200).json(data.data);
+    if (data.hasOwnProperty('error')) response.status(400).end(data.error);
+    response.status(400).end('problem accessing resource');
+  });  
+}
+
+const checkForSpecificProp = (value, resource, prop) => {
+  var promise = new Promise(function(resolve, reject) {
+    readResource('./persistency/' + resource + '/' + resource + '.json').then((data) => {
+      if (data.hasOwnProperty('error')) resolve(data)
+      for (var i in data.data) {
+        if (data.data[i].hasOwnProperty(prop)) {
+          if (data.data[i][prop] == value) {
+            resolve({"uid": data.data[i].uid})
+          }
+        }
+      }
+      resolve(false)
+    })
   })
+  return promise  
+}
+
+const checkForUID = (uid, resource) => {
+  var promise = new Promise(function(resolve, reject) {
+    readResource('./persistency/' + resource + '/' + resource + '.json').then((data) => {
+      if (data.hasOwnProperty('error')) resolve(data)
+      resolve(data.data.hasOwnProperty(uid))
+    })
+  })
+  return promise
 }
 
 const checkForProp = (value, table, column, uidExclude) => {
@@ -120,6 +181,45 @@ const checkForProp = (value, table, column, uidExclude) => {
       }
       resolve(results.rowCount > 0)      
     })
+  })
+  return promise
+}
+
+const addToSummary = (payload, uid, endpoint) => {
+  var promise = new Promise(function(resolve, reject) {
+    var now = new Date().toISOString();
+    if (!payload.hasOwnProperty('created')) {
+      payload.created = now;
+    }
+    if (!payload.hasOwnProperty('updated')) {
+      payload.updated = now;
+    }
+    if (!payload.hasOwnProperty('complete')) {
+      payload.complete = false;
+    }
+    var desiredProperties = {
+      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete', 'map'],
+      "questionnaires": ['name', 'created', 'updated', 'uid', 'questionnaire']
+    };
+    var scrubbedObject = {}
+
+    for (let i=0; i<desiredProperties[endpoint].length; i++) {
+      scrubbedObject[desiredProperties[endpoint][i]] = payload[desiredProperties[endpoint][i]];
+    }
+    readResource('./persistency/'+ endpoint + '/' + endpoint + '.json').then(file => {
+      if (file.hasOwnProperty('data')) {
+        file.data[uid] = scrubbedObject;
+        writeResource('./persistency/'+ endpoint + '/' + endpoint + '.json', JSON.stringify(file.data)).then(status => {
+          if (status.hasOwnProperty('success')) {
+            resolve(scrubbedObject)
+          } else {
+            resolve(file)
+          }
+        })
+      } else {
+        resolve(file)
+      }
+    }) 
   })
   return promise
 }
@@ -185,14 +285,20 @@ const validateMapPayload = (payload, uid) => {
       resolve('Questionnaire UID is required')
     }
 
-    checkForProp(payload.name.replace(/'/gi,"''"), 'maps', 'name', uid).then(nameConflict => {
+    checkForSpecificProp(payload.name.replace(/'/gi,"''"), 'maps', 'name').then(nameConflict => {
+      if (nameConflict.hasOwnProperty('error')) {
+        response.status(400).end(nameConflict.error);
+      }
       if (nameConflict) {
         resolve('Name (' + payload.name + ') already exists(, or request is invalid)')
       }
-      checkForProp(payload.questionnaireuid, 'questionnaires', 'uid').then(questFound => {
+      checkForUID(payload.questionnaireuid, 'questionnaires').then(questFound => {     
         if (!questFound) {
           resolve('questionnaireuid (' + payload.questionnaireuid + ') is invalid(, or request is invalid)')
         }
+        if (questFound.hasOwnProperty('error')) {
+          response.status(400).end(questFound.error);
+        }           
         resolve(true)
       })
     })
@@ -210,29 +316,33 @@ const validateValueMapPayload = (request, response) => {
 const createMap = (request, response) => {
   var map = request.body;
   var uid = helpers.generateUID(); //should define as random at first and then redefine
+
   if (request.body.hasOwnProperty('uid')) {
     uid = request.body.uid;
-  }  
-  checkForProp(uid, 'maps', 'uid').then(idConflict => {
-    if (idConflict) {
+  } else {
+    request.body.uid = uid;  
+  }
+  
+  checkForUID(uid, 'maps').then(uidFound => {
+    if (uidFound) {
       response.status(400).end('The uid provided/generated (' + uid + ') already exists. Please update and try again.\n')
-    }
-    else {
+    } else {
       validateMapPayload(request.body, uid).then(validity => {
-        if(validity === true){
-          addToDB(request.body, uid).then(success => {
-            if (success) {
-              response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');              
-            }
-            else {
-              response.status(400).end('Problem with database upload\n');
-            }          
-          });
-        }
-        else {
+        if (validity === true) {
+          addToSummary(request.body, uid, 'maps').then(result => {
+            writeResource('./persistency/maps/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
+              var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
+              if (writeStatus.hasOwnProperty('success')) {
+                response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');
+              }
+              response.status(400).end(JSON.stringify(error));
+            })            
+          })
+
+        } else {
           response.status(400).end('Problem with payload: ' + validity + '\n');
-        }          
-      })
+        } 
+      })  
     }
   })
 }
@@ -270,26 +380,26 @@ const deleteSpecificResource = (request, response) => {
   }  
   var indType = type.substring(0,type.length - 1);
   var uid = request.params.id;
-  //delete from database
-
-  const query = {
-    text: "DELETE FROM " + type + " WHERE uid=$1;",
-    values: [uid]
-  }
-
-  pool.query(query, (error, results) => {
-    if (error) {
-      response.status(400).end('Failed to delete from database')
-    }
-    else {
-      if (results.rowCount>0) {
-        response.status(200).end('Deleted ' + indType + ' with uid of: ' + uid + '\n'); 
-      }
-      else {
-        response.status(400).end('Failed to delete from database')
+  readResource('./persistency/' + type + '/' + type + '.json').then(file => {
+    if (file.hasOwnProperty('data')) {
+      if (file.data.hasOwnProperty(uid)) {
+        delete file.data[uid]
+        writeResource('./persistency/' + type + '/' + type + '.json', JSON.stringify(file.data)).then(a => {
+          deleteResource('./persistency/' + type + '/' + uid + '.json').then(b => {
+            console.log(b)
+            if (b.hasOwnProperty('error')) {
+              response.status(400).end(JSON.stringify(b.error));
+            }
+            response.status(200).send('Removed ' + indType + ' with uid of ' + uid);
+          })
+        })
       }
     }
   })
+  .catch(e => {
+    response.status(400).end(JSON.stringify(e));
+  })  
+
 }
 
 //there are no validation checks here because users will not being interacting with this route
@@ -299,7 +409,9 @@ const createQuestionnaire = (request, response) => {
   var uid = helpers.generateUID(); //should define as random at first and then redefine
   if (payload.hasOwnProperty('uid')) {
     uid = payload.uid;
-  }  
+  } else {
+    payload.uid = uid;
+  }
   var now = new Date().toISOString();
   if (!payload.hasOwnProperty('created')) {
     payload.created = now;
@@ -307,17 +419,14 @@ const createQuestionnaire = (request, response) => {
   if (!payload.hasOwnProperty('updated')) {
     payload.updated = now;
   }
-
-  const query = {
-    text: "INSERT INTO questionnaires (name, created, updated, uid, questionnaire) VALUES ($1, $2, $3, $4, $5);",
-    values: [payload.name, payload.created, payload.updated, uid, payload.questionnaire]
-  }  
-
-  pool.query(query, (error, results) => {
-    if (error) {
-      response.status(400).end(error +'\n')
-    }
-    response.status(200).end('Uploaded questionnaire for: ' + uid + '\n')
+  addToSummary(request.body, uid, 'questionnaires').then(result => {
+    writeResource('./persistency/questionnaires/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
+      var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
+      if (writeStatus.hasOwnProperty('success')) {
+        response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded questionnaire for: ' + uid + '"}');
+      }
+      response.status(400).end(JSON.stringify(error));
+    })            
   })
 }
 
@@ -357,7 +466,6 @@ const uploadData = (request, response) => {
             catch (e) {
               result.urlResponse = e;
               response.status(400).json(result);
-              console.log(e)
             }
           }
           //send request to url

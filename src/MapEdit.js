@@ -161,7 +161,7 @@ class MapEdit extends Component {
           <Chip
             label={k}
             onDelete={handleDelete.bind(_this, k)}
-            style={stylesObj.smallMargin}
+            style={stylesObj.csvHeaderChip}
             data-cy={"chip_" + k}
           />
         </div>

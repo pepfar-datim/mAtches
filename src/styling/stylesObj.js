@@ -7,6 +7,7 @@ var themeColors = {
     "secondary": "lightGrey",
     "secondaryDark": "darkGrey",
     "success": "darkSeaGreen",
+    "warning": "lightYellow",
 	"white": "white",
 }
 
@@ -23,6 +24,9 @@ var stylesObj = {
     },
     "addHeaderText": {
     	"width": "160px",
+    },
+    "csvHeaderChip": {
+        "margin": "5px"
     },
     "editCard": {
         "position": "relative",
@@ -147,7 +151,7 @@ var stylesObj = {
         "width": "100%"
     },
     "validationWarningCard": {
-        "backgroundColor": "lightYellow", 
+        "backgroundColor": themeColors.warning,
         "width": "100%", 
         "marginBottom": themeSettings.spacing + "px"
     },
