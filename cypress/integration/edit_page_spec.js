@@ -2,6 +2,7 @@ describe('The Edit Page', () => {
 
   it('successfully loads', function() {
     cy.seed_incomplete();
+    cy.wait(500);
     cy.visit('/maps/gI4MEZ');
     cy.url().should('include', '/maps/gI4MEZ?mode=edit');
   })

@@ -1,6 +1,7 @@
 describe('The Home Page', () => {
   beforeEach(() => {
     cy.seed_incomplete()
+    cy.wait(500)
     cy.visit('/')
   })
 

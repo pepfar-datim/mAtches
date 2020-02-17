@@ -1,7 +1,6 @@
 const helpers = require('./helpers.js')
 const fs = require('fs');
 
-const Pool = require('pg').Pool;
 const csv = require('csv');
 var fetch = require('node-fetch');
 
@@ -11,14 +10,6 @@ var validateServices = require('./validateValueMap.js');
 var validateValueMap = validateServices.validateValueMap;
 var convertToFHIR = convert.convertToFHIR;
 splitNumber = config.base.split('/').length;
-
-const pool = new Pool({
-  user: 'me',
-  host: 'localhost',
-  database: 'api',
-  password: 'password',
-  port: 5432,
-})
 
 const allowableQuery = {
   "maps": {
@@ -49,6 +40,7 @@ const readResource = (fileName) => {
   var promise = new Promise(function(resolve, reject) {
     fs.readFile(fileName, (err, data) => {
       if (err) {
+        console.log(err)
         resolve({"error": err}) 
       } else {
         var parsedData = JSON.parse(data);
@@ -128,7 +120,7 @@ const getSpecificResource = (request, response) => {
   }
   readResource('./persistency/' + type + '/' + request.params.id + '.json').then((data) => {
     if (data.hasOwnProperty('data')) response.status(200).json(data.data);
-    if (data.hasOwnProperty('error')) response.status(400).end(data.error);
+    if (data.hasOwnProperty('error')) response.status(200).send('');
     response.status(400).end('problem accessing resource');
   });  
 }
@@ -220,58 +212,6 @@ const addToSummary = (payload, uid, endpoint) => {
         resolve(file)
       }
     }) 
-  })
-  return promise
-}
-
-const addToDB = (payload, uid) => {
-  var promise = new Promise(function(resolve, reject) {  
-    var now = new Date().toISOString();
-    if (!payload.hasOwnProperty('created')) {
-      payload.created = now;
-    }
-    if (!payload.hasOwnProperty('updated')) {
-      payload.updated = now;
-    }
-    if (!payload.hasOwnProperty('complete')) {
-      payload.complete = false;
-    }
-    const query = {
-      text: "INSERT INTO maps (name, created, updated, uid, questionnaireuid, complete, map) VALUES ($1, $2, $3, $4, $5, $6, $7);",
-      values: [payload.name, payload.created, payload.updated, uid, payload.questionnaireuid, payload.complete, JSON.stringify(payload.map)]
-    }
-
-    pool.query(query, (error, results) => {
-      if (error) {
-        throw error
-      }
-      resolve(results)
-    })
-  })
-  return promise
-}
-
-const updateDB = (payload, uid) => {
-  var promise = new Promise(function(resolve, reject) {  
-    var now = new Date().toISOString();
-    if (!payload.hasOwnProperty('created')) {
-      payload.created = now;
-    }
-    payload.updated = now;
-    if (!payload.hasOwnProperty('complete')) {
-      payload.complete = false;
-    }
-    const query = {
-      text: "UPDATE maps SET name=$1, created=$2, updated=$3, questionnaireuid=$4, complete=$5, map=$6 WHERE uid=$7;",
-      values: [payload.name,payload.created,payload.updated,payload.questionnaireuid,payload.complete,JSON.stringify(payload.map),uid]
-    }
-
-    pool.query(query, (error, results) => {
-      if (error) {
-        throw error
-      }
-      resolve(results.rowCount > 0)
-    })
   })
   return promise
 }
