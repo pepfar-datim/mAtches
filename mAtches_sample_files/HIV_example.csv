@@ -1,0 +1,6 @@
+PatientNum,DOB,Gender,LocationCode,PractitionerCode,DateObserved,VLC,ART_Start
+1,1990-01-01,F,AmharaA1,medUnit01,2019-01-01,100,2010-01-01
+2,1991-01-01,M,AmharaA1,medUnit01,2019-02-01,200,2011-01-01
+3,1992-01-01,F,GambelaB2,medUnit02,2019-03-01,300,2012-01-01
+4,1993-01-01,U,GambelaB2,medUnit02,2019-04-01,400,2013-01-01
+5,1994-01-01,M,GambelaB2,medUnit01,2019-05-01,5000,2019-01-01

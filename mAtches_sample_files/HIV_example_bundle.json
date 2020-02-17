@@ -1,0 +1,375 @@
+{
+	"resourceType": "Bundle",
+	"id": "auto-generated",
+	"meta": {
+		"profile": ["http://datim.org/fhir/StructureDefinition/PLM-QuestionnaireResponse-Bundle"]
+	},
+	"type": "message",
+	"timestamp": "2020-02-17T11:25:49.177Z",
+	"entry": [{
+		"resource": {
+			"resourceType": "QuestionnaireResponse",
+			"id": "K33t41-2020-02-17T11:25:49.177Z-row0",
+			"status": "completed",
+			"item": [{
+				"linkId": "/Patient",
+				"text": "Patient ID",
+				"item": [{
+					"linkId": "/Patient/id",
+					"text": "Patient ID",
+					"answer": {
+						"valueString": "1"
+					}
+				}, {
+					"linkId": "/Patient/birthDate",
+					"text": "Birth Date",
+					"answer": {
+						"valueDate": "1990-01-01"
+					}
+				}, {
+					"linkId": "/Patient/gender",
+					"text": "Gender",
+					"answer": {
+						"valueCoding": {
+							"code": "female"
+						}
+					}
+				}]
+			}, {
+				"linkId": "/Encounter",
+				"text": "Encounter",
+				"item": [{
+					"linkId": "/Encounter/location",
+					"text": "Location ID",
+					"answer": {
+						"valueString": "AmharaA1"
+					}
+				}]
+			}, {
+				"linkId": "/Observation",
+				"text": "Practitioner",
+				"item": [{
+					"linkId": "/Observation/performer",
+					"text": "Practitioner ID",
+					"answer": {
+						"valueString": "medUnit01"
+					}
+				}, {
+					"linkId": "/Observation/date",
+					"text": "Observation Date",
+					"answer": {
+						"valueDateTime": "2019-01-01"
+					}
+				}, {
+					"linkId": "/Observation/viralLoad",
+					"text": "Viral Load Count",
+					"answer": {
+						"valueInteger": 100
+					}
+				}]
+			}, {
+				"linkId": "/MedicationStatement",
+				"text": "MedicationStatement",
+				"item": [{
+					"linkId": "/MedicationStatement/startDate",
+					"text": "ART Start Date",
+					"answer": {
+						"valueDateTime": "2010-01-01"
+					}
+				}]
+			}]
+		}
+	}, {
+		"resource": {
+			"resourceType": "QuestionnaireResponse",
+			"id": "K33t41-2020-02-17T11:25:49.177Z-row1",
+			"status": "completed",
+			"item": [{
+				"linkId": "/Patient",
+				"text": "Patient ID",
+				"item": [{
+					"linkId": "/Patient/id",
+					"text": "Patient ID",
+					"answer": {
+						"valueString": "2"
+					}
+				}, {
+					"linkId": "/Patient/birthDate",
+					"text": "Birth Date",
+					"answer": {
+						"valueDate": "1991-01-01"
+					}
+				}, {
+					"linkId": "/Patient/gender",
+					"text": "Gender",
+					"answer": {
+						"valueCoding": {
+							"code": "male"
+						}
+					}
+				}]
+			}, {
+				"linkId": "/Encounter",
+				"text": "Encounter",
+				"item": [{
+					"linkId": "/Encounter/location",
+					"text": "Location ID",
+					"answer": {
+						"valueString": "AmharaA1"
+					}
+				}]
+			}, {
+				"linkId": "/Observation",
+				"text": "Practitioner",
+				"item": [{
+					"linkId": "/Observation/performer",
+					"text": "Practitioner ID",
+					"answer": {
+						"valueString": "medUnit01"
+					}
+				}, {
+					"linkId": "/Observation/date",
+					"text": "Observation Date",
+					"answer": {
+						"valueDateTime": "2019-02-01"
+					}
+				}, {
+					"linkId": "/Observation/viralLoad",
+					"text": "Viral Load Count",
+					"answer": {
+						"valueInteger": 200
+					}
+				}]
+			}, {
+				"linkId": "/MedicationStatement",
+				"text": "MedicationStatement",
+				"item": [{
+					"linkId": "/MedicationStatement/startDate",
+					"text": "ART Start Date",
+					"answer": {
+						"valueDateTime": "2011-01-01"
+					}
+				}]
+			}]
+		}
+	}, {
+		"resource": {
+			"resourceType": "QuestionnaireResponse",
+			"id": "K33t41-2020-02-17T11:25:49.177Z-row2",
+			"status": "completed",
+			"item": [{
+				"linkId": "/Patient",
+				"text": "Patient ID",
+				"item": [{
+					"linkId": "/Patient/id",
+					"text": "Patient ID",
+					"answer": {
+						"valueString": "3"
+					}
+				}, {
+					"linkId": "/Patient/birthDate",
+					"text": "Birth Date",
+					"answer": {
+						"valueDate": "1992-01-01"
+					}
+				}, {
+					"linkId": "/Patient/gender",
+					"text": "Gender",
+					"answer": {
+						"valueCoding": {
+							"code": "female"
+						}
+					}
+				}]
+			}, {
+				"linkId": "/Encounter",
+				"text": "Encounter",
+				"item": [{
+					"linkId": "/Encounter/location",
+					"text": "Location ID",
+					"answer": {
+						"valueString": "GambelaB2"
+					}
+				}]
+			}, {
+				"linkId": "/Observation",
+				"text": "Practitioner",
+				"item": [{
+					"linkId": "/Observation/performer",
+					"text": "Practitioner ID",
+					"answer": {
+						"valueString": "medUnit02"
+					}
+				}, {
+					"linkId": "/Observation/date",
+					"text": "Observation Date",
+					"answer": {
+						"valueDateTime": "2019-03-01"
+					}
+				}, {
+					"linkId": "/Observation/viralLoad",
+					"text": "Viral Load Count",
+					"answer": {
+						"valueInteger": 300
+					}
+				}]
+			}, {
+				"linkId": "/MedicationStatement",
+				"text": "MedicationStatement",
+				"item": [{
+					"linkId": "/MedicationStatement/startDate",
+					"text": "ART Start Date",
+					"answer": {
+						"valueDateTime": "2012-01-01"
+					}
+				}]
+			}]
+		}
+	}, {
+		"resource": {
+			"resourceType": "QuestionnaireResponse",
+			"id": "K33t41-2020-02-17T11:25:49.177Z-row3",
+			"status": "completed",
+			"item": [{
+				"linkId": "/Patient",
+				"text": "Patient ID",
+				"item": [{
+					"linkId": "/Patient/id",
+					"text": "Patient ID",
+					"answer": {
+						"valueString": "4"
+					}
+				}, {
+					"linkId": "/Patient/birthDate",
+					"text": "Birth Date",
+					"answer": {
+						"valueDate": "1993-01-01"
+					}
+				}, {
+					"linkId": "/Patient/gender",
+					"text": "Gender",
+					"answer": {
+						"valueCoding": {
+							"code": "unknown"
+						}
+					}
+				}]
+			}, {
+				"linkId": "/Encounter",
+				"text": "Encounter",
+				"item": [{
+					"linkId": "/Encounter/location",
+					"text": "Location ID",
+					"answer": {
+						"valueString": "GambelaB2"
+					}
+				}]
+			}, {
+				"linkId": "/Observation",
+				"text": "Practitioner",
+				"item": [{
+					"linkId": "/Observation/performer",
+					"text": "Practitioner ID",
+					"answer": {
+						"valueString": "medUnit02"
+					}
+				}, {
+					"linkId": "/Observation/date",
+					"text": "Observation Date",
+					"answer": {
+						"valueDateTime": "2019-04-01"
+					}
+				}, {
+					"linkId": "/Observation/viralLoad",
+					"text": "Viral Load Count",
+					"answer": {
+						"valueInteger": 400
+					}
+				}]
+			}, {
+				"linkId": "/MedicationStatement",
+				"text": "MedicationStatement",
+				"item": [{
+					"linkId": "/MedicationStatement/startDate",
+					"text": "ART Start Date",
+					"answer": {
+						"valueDateTime": "2013-01-01"
+					}
+				}]
+			}]
+		}
+	}, {
+		"resource": {
+			"resourceType": "QuestionnaireResponse",
+			"id": "K33t41-2020-02-17T11:25:49.177Z-row4",
+			"status": "completed",
+			"item": [{
+				"linkId": "/Patient",
+				"text": "Patient ID",
+				"item": [{
+					"linkId": "/Patient/id",
+					"text": "Patient ID",
+					"answer": {
+						"valueString": "5"
+					}
+				}, {
+					"linkId": "/Patient/birthDate",
+					"text": "Birth Date",
+					"answer": {
+						"valueDate": "1994-01-01"
+					}
+				}, {
+					"linkId": "/Patient/gender",
+					"text": "Gender",
+					"answer": {
+						"valueCoding": {
+							"code": "male"
+						}
+					}
+				}]
+			}, {
+				"linkId": "/Encounter",
+				"text": "Encounter",
+				"item": [{
+					"linkId": "/Encounter/location",
+					"text": "Location ID",
+					"answer": {
+						"valueString": "GambelaB2"
+					}
+				}]
+			}, {
+				"linkId": "/Observation",
+				"text": "Practitioner",
+				"item": [{
+					"linkId": "/Observation/performer",
+					"text": "Practitioner ID",
+					"answer": {
+						"valueString": "medUnit01"
+					}
+				}, {
+					"linkId": "/Observation/date",
+					"text": "Observation Date",
+					"answer": {
+						"valueDateTime": "2019-05-01"
+					}
+				}, {
+					"linkId": "/Observation/viralLoad",
+					"text": "Viral Load Count",
+					"answer": {
+						"valueInteger": 5000
+					}
+				}]
+			}, {
+				"linkId": "/MedicationStatement",
+				"text": "MedicationStatement",
+				"item": [{
+					"linkId": "/MedicationStatement/startDate",
+					"text": "ART Start Date",
+					"answer": {
+						"valueDateTime": "2019-01-01"
+					}
+				}]
+			}]
+		}
+	}]
+}
