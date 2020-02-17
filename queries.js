@@ -276,13 +276,16 @@ const updateDB = (payload, uid) => {
   return promise
 }
 
-const validateMapPayload = (payload, uid) => {
+const validateMapPayload = (payload, uid, update) => {
   var promise = new Promise(function(resolve, reject) {
     if (!payload.hasOwnProperty('name')) {
       resolve('Name is required')
     }
     if (!payload.hasOwnProperty('questionnaireuid')) {
       resolve('Questionnaire UID is required')
+    }
+    if (update) {
+      resolve(true)
     }
 
     checkForSpecificProp(payload.name.replace(/'/gi,"''"), 'maps', 'name').then(nameConflict => {
@@ -306,11 +309,31 @@ const validateMapPayload = (payload, uid) => {
   })
   return promise
 }
+
 const validateValueMapPayload = (request, response) => {
     validateValueMap(request.body).then(res => {
       response.status(200).json(res);  
     })
     
+}
+
+const updateMapFiles = (request, response, uid, update) => {
+  validateMapPayload(request.body, uid, update).then(validity => {
+    if (validity === true) {
+      addToSummary(request.body, uid, 'maps').then(result => {
+        writeResource('./persistency/maps/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
+          var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
+          if (writeStatus.hasOwnProperty('success')) {
+            response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');
+          }
+          response.status(400).end(JSON.stringify(error));
+        })            
+      })
+
+    } else {
+      response.status(400).end('Problem with payload: ' + validity + '\n');
+    } 
+  })  
 }
 
 const createMap = (request, response) => {
@@ -327,22 +350,7 @@ const createMap = (request, response) => {
     if (uidFound) {
       response.status(400).end('The uid provided/generated (' + uid + ') already exists. Please update and try again.\n')
     } else {
-      validateMapPayload(request.body, uid).then(validity => {
-        if (validity === true) {
-          addToSummary(request.body, uid, 'maps').then(result => {
-            writeResource('./persistency/maps/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
-              var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
-              if (writeStatus.hasOwnProperty('success')) {
-                response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');
-              }
-              response.status(400).end(JSON.stringify(error));
-            })            
-          })
-
-        } else {
-          response.status(400).end('Problem with payload: ' + validity + '\n');
-        } 
-      })  
+      updateMapFiles(request, response, uid, false);
     }
   })
 }
@@ -354,21 +362,7 @@ const updateMap = (request, response) => {
     response.status(400).end('Missing uid\n');
   }
   var uid = request.body.uid;
-  validateMapPayload(request.body, uid).then(validity => {
-    if (validity === true) {
-      updateDB(request.body, uid).then(success => {
-        if (success) {
-          response.status(200).json({"status": "SUCCESS", "uid": uid});
-        }
-        else {
-         response.status(400).end('Problem updating database for ' + uid + '. Map with this id may not exist\n'); 
-        }
-      })
-    }
-    else {
-      response.status(400).end('Problem with payload: ' + validity + '\n');
-    }
-  })
+  updateMapFiles(request, response, uid, true);
 }      
 
 //generalized for questionnaires...however this is just for development convenience.
@@ -432,48 +426,53 @@ const createQuestionnaire = (request, response) => {
 
 const uploadData = (request, response) => {
   var url = decodeURIComponent(request.query.url);
-  const query = {
-    text: "SELECT m.map, q.questionnaire FROM maps m LEFT JOIN questionnaires q ON m.questionnaireuid=q.uid WHERE m.uid=$1",
-    values: [request.params.id]
-  }
-  pool.query(query, (error, results) => {
-    if (error) {
-      response.status(400).end(error)
-    }
-      var map = {map: results.rows[0].map};
-      var questionnaireURL = results.rows[0].questionnaire.url;
-      convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
-        if (result.hasOwnProperty('errors')) {
-          response.status(200).json(result);  
-        } else {
-          if (url == null || url.trim().toLowerCase() == 'null') {
-            response.status(200).json(result);
-          } else {
-            try {
-              fetch(url, 
-                {
-                  method: "POST",
-                  body: JSON.stringify(result.data),
-                  headers: { "Content-Type": "application/json" }
-                }
-              )
-              //.then(firstRes => firstRes.text())
-              .then(extRes => {
-                result.urlResponse = {status: extRes.status, url: extRes.url, body: extRes.body}
-                response.status(200).json(result);
-              })
-            }
-            catch (e) {
-              result.urlResponse = e;
-              response.status(400).json(result);
-            }
+
+  readResource('./persistency/maps/' + request.params.id + '.json').then((data) => {
+    if (data.hasOwnProperty('data')) {
+      var map = {map: data.data.map};
+        readResource('./persistency/maps/' + request.params.id + '.json').then((dataQ) => {
+          if (dataQ.hasOwnProperty('data')) {
+            var questionnaireURL = dataQ.data.url;
+                  convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
+                    if (result.hasOwnProperty('errors')) {
+                      response.status(200).json(result);  
+                    } else {
+                      if (url == null || url.trim().toLowerCase() == 'null') {
+                        response.status(200).json(result);
+                      } else {
+                        try {
+                          fetch(url, 
+                            {
+                              method: "POST",
+                              body: JSON.stringify(result.data),
+                              headers: { "Content-Type": "application/json" }
+                            }
+                          )
+                          //.then(firstRes => firstRes.text())
+                          .then(extRes => {
+                            result.urlResponse = {status: extRes.status, url: extRes.url, body: extRes.body}
+                            response.status(200).json(result);
+                          })
+                        }
+                        catch (e) {
+                          result.urlResponse = e;
+                          response.status(400).json(result);
+                        }
+                      }
+                      //send request to url
+                    }
+                  })
           }
-          //send request to url
-        }
-        
-    })
+          if (dataQ.hasOwnProperty('error')) {
+            response.status(400).end(dataQ.error);
+          }
+        });
+    }
+    if (data.hasOwnProperty('error')) {
+      response.status(400).end(data.error);
+    } 
   });
-  
+
 }
 
 module.exports = {
