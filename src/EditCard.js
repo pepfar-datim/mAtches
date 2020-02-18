@@ -40,7 +40,8 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
     return(
       <div key={'question-'+i} style={stylesObj.editCardSelectorPadding}>
-        <Typography wrap="noWrap">
+        <Typography wrap="noWrap" style={((mapCheck.flatQuestionnaire[k].header || '').length ? stylesObj.completeQuestion : stylesObj.incompleteQuestion)}>
+
           <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
         </Typography>
 		{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
@@ -48,9 +49,9 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
 		{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
 			<Button 
 				variant="contained" 
-				style={stylesObj.editCardSelectorButton}
+				style={getValueMapButtonStyle(mapCheck.flatQuestionnaire[k], (map[mapCheck.flatQuestionnaire[k].header] || {}))}
 				onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
-				disabled={!mapCheck.flatQuestionnaire[k].hasOwnProperty('header')}
+				disabled={!(mapCheck.flatQuestionnaire[k].header || '').length}
 			>
 			Map values
 			<MapIcon style={stylesObj.editCardSelectorButtonIcon} />			
@@ -61,6 +62,17 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
 
     )
   })  
+}
+
+function getValueMapButtonStyle (questionnaireItem, mapItem) {
+	if (!(questionnaireItem.header || '').length) {
+		return stylesObj.editCardSelectorButtonDisabled
+	}
+	var tempChoiceMap = (mapItem.choiceMap || {})
+	if (Object.entries(tempChoiceMap).length) {
+		return stylesObj.editCardSelectorButtonComplete
+	}
+	return stylesObj.editCardSelectorButtonIncomplete
 }
 
 class EditCard extends React.Component {

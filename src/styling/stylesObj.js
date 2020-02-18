@@ -7,6 +7,7 @@ var themeColors = {
     "secondary": "lightGrey",
     "secondaryDark": "darkGrey",
     "success": "darkSeaGreen",
+    "warning": "lightYellow",
 	"white": "white",
 }
 
@@ -24,6 +25,9 @@ var stylesObj = {
     "addHeaderText": {
     	"width": "160px",
     },
+    "completeQuestion": {
+      "color": themeColors.success
+    },    
     "editCard": {
         "position": "relative",
         "backgroundColor": themeColors.secondary,
@@ -34,11 +38,21 @@ var stylesObj = {
         "minWidth": "160px",
         "paddingTop": themeSettings.spacing + "px"
     },
-    "editCardSelectorButton": {
+    "editCardSelectorButtonComplete": {
+        "textTransform": "none", 
+        "marginTop": themeSettings.spacing + "px",
+        "backgroundColor": themeColors.success
+    },
+    "editCardSelectorButtonDisabled": {
         "textTransform": "none", 
         "marginTop": themeSettings.spacing + "px",
         "backgroundColor": themeColors.secondaryLight
     },
+    "editCardSelectorButtonIncomplete": {
+        "textTransform": "none", 
+        "marginTop": themeSettings.spacing + "px",
+        "backgroundColor": themeColors.warning
+    },    
     "editCardSelectorButtonIcon": {
         "margin": themeSettings.spacing / 2 + "px"
     },
@@ -73,10 +87,17 @@ var stylesObj = {
     "hidden": {
     	"visibility": "hidden"
     },
+    "incompleteQuestion": {
+      "color": themeColors.warning
+    },    
     "mainCard": {
         "backgroundColor": "lightGrey",
         "height": "100%",
         "minHeight": "750px"        
+    },
+    "mappedChip": {
+        "margin": "5px",
+        "backgroundColor": themeColors.success
     },
     "mappingBoxBanner": {
     	"backgroundColor": themeColors.primaryDark,
@@ -119,6 +140,10 @@ var stylesObj = {
     	"backgroundColor": themeColors.highlightColor,
     	"textColor": themeColors.highlightColor
     },
+    "unmappedChip": {
+        "margin": "5px",
+        "backgroundColor": themeColors.warning
+    },    
     "uploadDestinationRadioGroup": {
         "padding": themeSettings.spacing / 2 + "px",
         "marginLeft": themeSettings.spacing + "px"
@@ -147,7 +172,7 @@ var stylesObj = {
         "width": "100%"
     },
     "validationWarningCard": {
-        "backgroundColor": "lightYellow", 
+        "backgroundColor": themeColors.warning,
         "width": "100%", 
         "marginBottom": themeSettings.spacing + "px"
     },

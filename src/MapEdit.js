@@ -161,7 +161,7 @@ class MapEdit extends Component {
           <Chip
             label={k}
             onDelete={handleDelete.bind(_this, k)}
-            style={stylesObj.smallMargin}
+            style={currentMap[k].hasOwnProperty('path') ? stylesObj.mappedChip : stylesObj.unmappedChip}
             data-cy={"chip_" + k}
           />
         </div>
