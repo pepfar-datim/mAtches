@@ -52,7 +52,6 @@ class MapUpdate extends Component {
   
   getSpecificQuestionnaire(id) {
     api.get('api/questionnaires/' + id)
-    .then(res => res.json())
     .then(questionnaire => {
       this.setState({"questionnaire": questionnaire});
       var mapCheck = {}

@@ -190,9 +190,13 @@ const addToSummary = (payload, uid, endpoint) => {
       payload.complete = false;
     }
     var desiredProperties = {
-      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete', 'map'],
-      "questionnaires": ['name', 'created', 'updated', 'uid', 'questionnaire']
+      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete'],
+      "questionnaires": ['name', 'created', 'updated', 'uid']
     };
+    var undesiredProperties = {
+      "maps": "map",
+      "questionnaires": "questionnaire"
+    };    
     var scrubbedObject = {}
 
     for (let i=0; i<desiredProperties[endpoint].length; i++) {
@@ -203,6 +207,8 @@ const addToSummary = (payload, uid, endpoint) => {
         file.data[uid] = scrubbedObject;
         writeResource('./persistency/'+ endpoint + '/' + endpoint + '.json', JSON.stringify(file.data)).then(status => {
           if (status.hasOwnProperty('success')) {
+            //add back in map or questionnaire
+            scrubbedObject[undesiredProperties[endpoint]] = payload[undesiredProperties[endpoint]];
             resolve(scrubbedObject)
           } else {
             resolve(file)
