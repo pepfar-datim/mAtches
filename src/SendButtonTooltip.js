@@ -19,6 +19,18 @@ function SendButtonTooltip(props) {
 		<div>
 			<Typography>Cannot Upload</Typography>
 			<br />
+				{(props.mapUnchanged == true) &&
+					<div>
+						<span>Map is the same as last submission</span>
+						<br /><br/>
+					</div>
+				}
+				{(props.mapUnchanged == false && props.tempDelay == true) &&
+					<div>
+						<span>Please wait a few seconds for button to be reenabled</span>
+						<br /><br/>
+					</div>
+				}
 				{(Object.keys(unmappedHeaders).length != 0) &&
 					<div>
 						<strong>Unmapped Headers</strong>

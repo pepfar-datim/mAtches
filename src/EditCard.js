@@ -3,8 +3,10 @@ import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelpe
 
 import SendButtonTooltip from "./SendButtonTooltip.js";
 
-import PublishIcon from '@material-ui/icons/Publish';
+import SendIcon from '@material-ui/icons/Send';
 import MapIcon from '@material-ui/icons/Map';
+
+import api from "./api.js";
 
 import config from '../config.json'
 
@@ -82,15 +84,21 @@ class EditCard extends React.Component {
 	constructor(props) {
 		super(props);
 		this.state = {
+			buttonDelay: false,
 		};
 	}
 
-redirectToUpload () {
-	window.location = config.base + 'maps/' + this.props.map.uid + '?mode=upload'
+sendMap () {
+	// api.sendMap(JSON.stringify(this.props.map));
+	this.setState({buttonDelay: true, submittedMap: JSON.parse(JSON.stringify(this.props.map))})
+	setTimeout(() => { 
+		this.setState({buttonDelay: false})
+	}, 10000)
 }
 	
 	render() {
-		var buttonDisabled = Object.keys(this.props.unmappedHeaders).length > 0 || !this.props.mapValidity;
+		var mapUnchanged = JSON.stringify(this.state.submittedMap) == JSON.stringify(this.props.map);
+		var buttonDisabled = Object.keys(this.props.unmappedHeaders).length > 0 || !this.props.mapValidity || this.state.buttonDelay || mapUnchanged;
 		var buttonUploadStyling = buttonDisabled ? stylesObj.editCardUploadButtonDisabled : stylesObj.editCardUploadButtonEnabled
 		return(
 	      	<Card style={stylesObj.editCard}>
@@ -108,14 +116,14 @@ redirectToUpload () {
 	          		</div>
 	        	</div>
 					
-					<Tooltip title={!buttonDisabled ? '' : <SendButtonTooltip unmappedHeaders={this.props.unmappedHeaders} flatQuestionnaire={this.props.mapCheck.flatQuestionnaire}/>}>
+					<Tooltip title={!buttonDisabled ? '' : <SendButtonTooltip mapUnchanged={mapUnchanged} tempDelay={this.state.buttonDelay} unmappedHeaders={this.props.unmappedHeaders} flatQuestionnaire={this.props.mapCheck.flatQuestionnaire}/>}>
 						<div style={stylesObj.editCardUploadButtonDiv}>					
 							<Button variant="contained" style={buttonUploadStyling}
-								onClick={this.redirectToUpload.bind(this)}
+								onClick={this.sendMap.bind(this)}
 								disabled={buttonDisabled}
 							>
-								Upload Data
-								<PublishIcon style={stylesObj.marginQuarter} />
+								Submit to {config.externalMappingLocation}
+								<SendIcon style={stylesObj.marginQuarter} />
 							</Button>
 						</div>   	        	            
 					</Tooltip>			
