@@ -14,6 +14,7 @@ function generateEmptyQuestions(flatQuestionnaire) {
 function SendButtonTooltip(props) {
 	let unmappedHeaders = props.unmappedHeaders;
 	let tempEmptyQuestions = generateEmptyQuestions(props.flatQuestionnaire);
+
 	return(
 		<div>
 			<Typography>Cannot Upload</Typography>
@@ -36,6 +37,7 @@ function SendButtonTooltip(props) {
 				}
 		</div>
 	)
+
 }
 
 export default SendButtonTooltip;

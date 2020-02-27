@@ -108,7 +108,7 @@ redirectToUpload () {
 	          		</div>
 	        	</div>
 					
-					<Tooltip title={<SendButtonTooltip unmappedHeaders={this.props.unmappedHeaders} flatQuestionnaire={this.props.mapCheck.flatQuestionnaire}/>}>
+					<Tooltip title={!buttonDisabled ? '' : <SendButtonTooltip unmappedHeaders={this.props.unmappedHeaders} flatQuestionnaire={this.props.mapCheck.flatQuestionnaire}/>}>
 						<div style={stylesObj.editCardUploadButtonDiv}>					
 							<Button variant="contained" style={buttonUploadStyling}
 								onClick={this.redirectToUpload.bind(this)}
