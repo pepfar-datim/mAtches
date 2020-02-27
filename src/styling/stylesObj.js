@@ -59,18 +59,16 @@ var stylesObj = {
     "editCardSelectorPadding": {
         "paddingBottom": themeSettings.spacing * 4 + "px"
     },
-    "editCardUploadButtonDisabled": {
+    "editCardUploadButtonDiv": {
         "position": "absolute", 
         "right": "0px", 
         "bottom": "0px", 
-        "margin": "20px", 
+        "margin": "20px"
+    },    
+    "editCardUploadButtonDisabled": {
         "backgroundColor": themeColors.secondaryDark
     },
     "editCardUploadButtonEnabled": {
-        "position": "absolute", 
-        "right": "0px", 
-        "bottom": "0px", 
-        "margin": "20px", 
         "backgroundColor": themeColors.success
     },    
     "gridWidth": {

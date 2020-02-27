@@ -1,5 +1,7 @@
 import React from "react";
-import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelperText, FormControl, Select, Button} from '@material-ui/core';
+import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelperText, FormControl, Select, Button, Tooltip} from '@material-ui/core';
+
+import SendButtonTooltip from "./SendButtonTooltip.js";
 
 import PublishIcon from '@material-ui/icons/Publish';
 import MapIcon from '@material-ui/icons/Map';
@@ -105,15 +107,19 @@ redirectToUpload () {
 	                }  
 	          		</div>
 	        	</div>
-					<div>
-					<Button variant="contained" style={buttonUploadStyling}
-						onClick={this.redirectToUpload.bind(this)}
-						disabled={buttonDisabled}
-					>
-					Upload Data
-					<PublishIcon style={stylesObj.marginQuarter} />
-					</Button>			
-					</div>   	        	            
+					
+					<Tooltip title={<SendButtonTooltip unmappedHeaders={this.props.unmappedHeaders} flatQuestionnaire={this.props.mapCheck.flatQuestionnaire}/>}>
+						<div style={stylesObj.editCardUploadButtonDiv}>					
+							<Button variant="contained" style={buttonUploadStyling}
+								onClick={this.redirectToUpload.bind(this)}
+								disabled={buttonDisabled}
+							>
+								Upload Data
+								<PublishIcon style={stylesObj.marginQuarter} />
+							</Button>
+						</div>   	        	            
+					</Tooltip>			
+					
 			</Card>
 		);
 	}
