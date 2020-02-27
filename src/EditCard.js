@@ -6,7 +6,7 @@ import SendButtonTooltip from "./SendButtonTooltip.js";
 import SendIcon from '@material-ui/icons/Send';
 import MapIcon from '@material-ui/icons/Map';
 
-import api from "./api.js";
+import api from "./services/api.js";
 
 import config from '../config.json'
 
