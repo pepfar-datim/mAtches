@@ -25,9 +25,9 @@ var stylesObj = {
     "addHeaderText": {
     	"width": "160px",
     },
-    "csvHeaderChip": {
-        "margin": "5px"
-    },
+    "completeQuestion": {
+      "color": themeColors.success
+    },    
     "editCard": {
         "position": "relative",
         "backgroundColor": themeColors.secondary,
@@ -38,29 +38,37 @@ var stylesObj = {
         "minWidth": "160px",
         "paddingTop": themeSettings.spacing + "px"
     },
-    "editCardSelectorButton": {
+    "editCardSelectorButtonComplete": {
+        "textTransform": "none", 
+        "marginTop": themeSettings.spacing + "px",
+        "backgroundColor": themeColors.success
+    },
+    "editCardSelectorButtonDisabled": {
         "textTransform": "none", 
         "marginTop": themeSettings.spacing + "px",
         "backgroundColor": themeColors.secondaryLight
     },
+    "editCardSelectorButtonIncomplete": {
+        "textTransform": "none", 
+        "marginTop": themeSettings.spacing + "px",
+        "backgroundColor": themeColors.warning
+    },    
     "editCardSelectorButtonIcon": {
         "margin": themeSettings.spacing / 2 + "px"
     },
     "editCardSelectorPadding": {
         "paddingBottom": themeSettings.spacing * 4 + "px"
     },
-    "editCardUploadButtonDisabled": {
+    "editCardUploadButtonDiv": {
         "position": "absolute", 
         "right": "0px", 
         "bottom": "0px", 
-        "margin": "20px", 
+        "margin": "20px"
+    },    
+    "editCardUploadButtonDisabled": {
         "backgroundColor": themeColors.secondaryDark
     },
     "editCardUploadButtonEnabled": {
-        "position": "absolute", 
-        "right": "0px", 
-        "bottom": "0px", 
-        "margin": "20px", 
         "backgroundColor": themeColors.success
     },    
     "gridWidth": {
@@ -77,10 +85,17 @@ var stylesObj = {
     "hidden": {
     	"visibility": "hidden"
     },
+    "incompleteQuestion": {
+      "color": themeColors.warning
+    },    
     "mainCard": {
         "backgroundColor": "lightGrey",
         "height": "100%",
         "minHeight": "750px"        
+    },
+    "mappedChip": {
+        "margin": "5px",
+        "backgroundColor": themeColors.success
     },
     "mappingBoxBanner": {
     	"backgroundColor": themeColors.primaryDark,
@@ -123,6 +138,10 @@ var stylesObj = {
     	"backgroundColor": themeColors.highlightColor,
     	"textColor": themeColors.highlightColor
     },
+    "unmappedChip": {
+        "margin": "5px",
+        "backgroundColor": themeColors.warning
+    },    
     "uploadDestinationRadioGroup": {
         "padding": themeSettings.spacing / 2 + "px",
         "marginLeft": themeSettings.spacing + "px"

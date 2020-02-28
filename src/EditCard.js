@@ -1,8 +1,12 @@
 import React from "react";
-import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelperText, FormControl, Select, Button} from '@material-ui/core';
+import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelperText, FormControl, Select, Button, Tooltip} from '@material-ui/core';
 
-import PublishIcon from '@material-ui/icons/Publish';
+import SendButtonTooltip from "./SendButtonTooltip.js";
+
+import SendIcon from '@material-ui/icons/Send';
 import MapIcon from '@material-ui/icons/Map';
+
+import api from "./services/api.js";
 
 import config from '../config.json'
 
@@ -40,7 +44,8 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
     return(
       <div key={'question-'+i} style={stylesObj.editCardSelectorPadding}>
-        <Typography wrap="noWrap">
+        <Typography wrap="noWrap" style={((mapCheck.flatQuestionnaire[k].header || '').length ? stylesObj.completeQuestion : stylesObj.incompleteQuestion)}>
+
           <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
         </Typography>
 		{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
@@ -48,9 +53,9 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
 		{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
 			<Button 
 				variant="contained" 
-				style={stylesObj.editCardSelectorButton}
+				style={getValueMapButtonStyle(mapCheck.flatQuestionnaire[k], (map[mapCheck.flatQuestionnaire[k].header] || {}))}
 				onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
-				disabled={!mapCheck.flatQuestionnaire[k].hasOwnProperty('header')}
+				disabled={!(mapCheck.flatQuestionnaire[k].header || '').length}
 			>
 			Map values
 			<MapIcon style={stylesObj.editCardSelectorButtonIcon} />			
@@ -63,20 +68,37 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
   })  
 }
 
+function getValueMapButtonStyle (questionnaireItem, mapItem) {
+	if (!(questionnaireItem.header || '').length) {
+		return stylesObj.editCardSelectorButtonDisabled
+	}
+	var tempChoiceMap = (mapItem.choiceMap || {})
+	if (Object.entries(tempChoiceMap).length) {
+		return stylesObj.editCardSelectorButtonComplete
+	}
+	return stylesObj.editCardSelectorButtonIncomplete
+}
+
 class EditCard extends React.Component {
 
 	constructor(props) {
 		super(props);
 		this.state = {
+			buttonDelay: false,
 		};
 	}
 
-redirectToUpload () {
-	window.location = config.base + 'maps/' + this.props.map.uid + '?mode=upload'
+sendMap () {
+	// api.sendMap(JSON.stringify(this.props.map));
+	this.setState({buttonDelay: true, submittedMap: JSON.parse(JSON.stringify(this.props.map))})
+	setTimeout(() => { 
+		this.setState({buttonDelay: false})
+	}, 10000)
 }
 	
 	render() {
-		var buttonDisabled = Object.keys(this.props.unmappedHeaders).length > 0 || !this.props.mapValidity;
+		var mapUnchanged = JSON.stringify(this.state.submittedMap) == JSON.stringify(this.props.map);
+		var buttonDisabled = Object.keys(this.props.unmappedHeaders).length > 0 || !this.props.mapValidity || this.state.buttonDelay || mapUnchanged;
 		var buttonUploadStyling = buttonDisabled ? stylesObj.editCardUploadButtonDisabled : stylesObj.editCardUploadButtonEnabled
 		return(
 	      	<Card style={stylesObj.editCard}>
@@ -93,15 +115,19 @@ redirectToUpload () {
 	                }  
 	          		</div>
 	        	</div>
-					<div>
-					<Button variant="contained" style={buttonUploadStyling}
-						onClick={this.redirectToUpload.bind(this)}
-						disabled={buttonDisabled}
-					>
-					Upload Data
-					<PublishIcon style={stylesObj.marginQuarter} />
-					</Button>			
-					</div>   	        	            
+					
+					<Tooltip title={!buttonDisabled ? '' : <SendButtonTooltip mapUnchanged={mapUnchanged} tempDelay={this.state.buttonDelay} unmappedHeaders={this.props.unmappedHeaders} flatQuestionnaire={this.props.mapCheck.flatQuestionnaire}/>}>
+						<div style={stylesObj.editCardUploadButtonDiv}>					
+							<Button variant="contained" style={buttonUploadStyling}
+								onClick={this.sendMap.bind(this)}
+								disabled={buttonDisabled}
+							>
+								Submit to {config.externalMappingLocation}
+								<SendIcon style={stylesObj.marginQuarter} />
+							</Button>
+						</div>   	        	            
+					</Tooltip>			
+					
 			</Card>
 		);
 	}

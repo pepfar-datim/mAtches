@@ -41,6 +41,10 @@ export default class api {
         });        
     }
 
+    static sendMap(map) {
+        //where POST to OCL will go
+    }
+
     static post(url, data) {
         return this.sendData(url, data, "POST");
     }

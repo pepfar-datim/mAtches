@@ -10,6 +10,7 @@ function getSpecificMap(id, _this) {
 	api.get('api/maps/' + id)
 	.then(map => {
 	  _this.setState({"map": map, "mapValidity": map.complete })
+	  extractUnmappedHeaders(map.map, _this);
 	  var questionnaireUID = map.questionnaireuid;
 	  _this.setState({"questionnaireUID":questionnaireUID});  
 	  return questionnaireUID
@@ -27,6 +28,16 @@ function getSpecificQuestionnaire(id, _this) {
 	  mapCheck = validateMap(_this.state.map, questionnaire)
 	  _this.setState({mapCheck: mapCheck})
 	})
+}
+
+function extractUnmappedHeaders (map, _this) {
+	var tempUnmappedHeaders = {}
+	for (var k in map) {
+		if (Object.keys(map[k]).length === 0 && map[k].constructor === Object) {
+			tempUnmappedHeaders[k] = {};
+		}
+	}
+	_this.setState({unmappedHeaders: tempUnmappedHeaders})
 }
 
 export default loadMapQuestionnaire;
