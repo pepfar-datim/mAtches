@@ -61,7 +61,9 @@ function populateWithMap(map, vc) {
 
 function checkAllQuestions(vc) {
 	for (var key in vc['flatQuestionnaire']) {
-		if (!vc['flatQuestionnaire'][key].hasOwnProperty('header')) {
+		let mappedToHeader = !!(vc['flatQuestionnaire'][key].header || '').length;
+		let mappedToConstant = !!(vc['flatQuestionnaire'][key].constant || '').length;
+		if (!mappedToHeader && !mappedToConstant) {
 			vc['incompleteMap'] = true;
 		}
 	}

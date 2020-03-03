@@ -44,10 +44,12 @@ function formatSelect(header,key,map,associationFunction) {
 
 function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, constantChange) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
-  	let mappedToConstant = !!((mapCheck.flatQuestionnaire[k].constant || '').length)
+  	let mappedToConstant = !!((mapCheck.flatQuestionnaire[k].constant || '').length);
+  	let mappedToHeader = !!((mapCheck.flatQuestionnaire[k].header || '').length);
+  	let mappedItem = mappedToConstant || mappedToHeader
     return(
       <div key={'question-'+i} style={stylesObj.editCardSelectorPadding}>
-        <Typography wrap="noWrap" style={((mapCheck.flatQuestionnaire[k].header || '').length ? stylesObj.completeQuestion : stylesObj.incompleteQuestion)}>
+        <Typography wrap="noWrap" style={mappedItem ? stylesObj.completeQuestion : stylesObj.incompleteQuestion}>
 
           <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
           {!mappedToConstant && 

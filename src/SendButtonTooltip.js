@@ -4,7 +4,9 @@ import {Typography} from '@material-ui/core';
 function generateEmptyQuestions(flatQuestionnaire) {
 	let tempEmptyQuestions = [];
 	Object.keys(flatQuestionnaire).map(k => {
-		if (!(flatQuestionnaire[k].header || '').length) {
+		let mappedToHeader = !!(flatQuestionnaire[k].header || '').length;
+		let mappedToConstant = !!(flatQuestionnaire[k].constant || '').length;
+		if (!mappedToHeader && !mappedToConstant) {
 			tempEmptyQuestions.push(flatQuestionnaire[k].text);
 		}
 	}, tempEmptyQuestions)

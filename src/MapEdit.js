@@ -40,24 +40,28 @@ function getCurrentAssociation(tempCheck, prop) {
 }
 
 function checkValidity(flatQuestionnaire, mappings) {
-  var mapValidity = true;
-  for (var i in flatQuestionnaire) {
-    if (!flatQuestionnaire[i].hasOwnProperty("header")) {
-      mapValidity = false;
-      break;
+  let mapValidity = true;
+  for (var k in flatQuestionnaire) {
+    let mappedToHeader = (flatQuestionnaire[k].header || '').length;
+    let mappedToConstant = (flatQuestionnaire[k].constant || '').length;
+    mapValidity = !(mappedToHeader == mappedToConstant);
+    if (mappedToHeader) {
+      mapValidity = mappings.headers.hasOwnProperty(flatQuestionnaire[k].header);
     }
-    if (flatQuestionnaire[i].header == "") {
-      mapValidity = false;
-      break;
+    if (mappedToConstant) {
+      mapValidity = mappings.constants.hasOwnProperty(k);
     }
+    if (!mapValidity) {
+      break;
+    }    
   }
-  for (var i in mappings) {
-    if (mappings[i].valueType == "choice") {
-      if (!mappings[i].hasOwnProperty("choiceMap")) {
+  for (var i in mappings.headers) {
+    if (mappings.headers[i].valueType == "choice") {
+      if (!mappings.headers[i].hasOwnProperty("choiceMap")) {
         mapValidity = false;
         break;
       }
-      if (Object.keys(mappings[i].choiceMap).length == 0) {
+      if (Object.keys(mappings.headers[i].choiceMap).length == 0) {
         mapValidity = false;
         break;
       }
@@ -259,12 +263,14 @@ class MapEdit extends Component {
   handleConstantChange(qLocation, changeType, constantValue) {
     let tempMap = this.state.map;
     let tempCheck = this.state.mapCheck;
+    let tempUnmappedHeaders = this.state.unmappedHeaders;
     if (changeType == 'add') {
       let tempHeader = tempCheck.flatQuestionnaire[qLocation].header || '';
       tempCheck.flatQuestionnaire[qLocation].constant = constantValue;
       tempCheck.flatQuestionnaire[qLocation].header = '';
       if (tempMap.map.headers.hasOwnProperty(tempHeader)) {
         tempMap.map.headers[tempHeader] = {};
+        tempUnmappedHeaders[tempHeader] = {};
       }
       tempMap.map.constants[qLocation] = constantValue;      
     } 
@@ -272,9 +278,9 @@ class MapEdit extends Component {
         delete tempCheck.flatQuestionnaire[qLocation].constant;
         delete tempMap.map.constants[qLocation];      
     }
-    this.setState({mapCheck:tempCheck, map: tempMap});
-    let mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
-    pushMapBack(tempMap, mapValidity);
+    let tempMapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
+    this.setState({mapCheck:tempCheck, map: tempMap, unmappedHeaders: tempUnmappedHeaders, mapValidity: tempMapValidity});
+    pushMapBack(tempMap, tempMapValidity);
   }
 
   handleValueMap(tempHeader, tempID) {
