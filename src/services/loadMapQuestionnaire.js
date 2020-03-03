@@ -32,8 +32,8 @@ function getSpecificQuestionnaire(id, _this) {
 
 function extractUnmappedHeaders (map, _this) {
 	var tempUnmappedHeaders = {}
-	for (var k in map) {
-		if (Object.keys(map[k]).length === 0 && map[k].constructor === Object) {
+	for (var k in map.headers) {
+		if (Object.keys(map.headers[k]).length === 0 && map.headers[k].constructor === Object) {
 			tempUnmappedHeaders[k] = {};
 		}
 	}

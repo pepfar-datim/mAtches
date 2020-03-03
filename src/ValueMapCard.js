@@ -60,7 +60,7 @@ class ValueMapCard extends React.Component {
 
 	componentDidMount() {
 		var tempValueSet = this.props.mapCheck.flatQuestionnaire[this.props.mapID].answerValueSet;
-		var tempChoiceMap = generateChoiceMap(this.props.map.map[this.props.header], tempValueSet);
+		var tempChoiceMap = generateChoiceMap(this.props.map.map.headers[this.props.header], tempValueSet);
 		tempValueSet = loadValueSet(tempChoiceMap, tempValueSet)
 		this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
 	}

@@ -72,10 +72,10 @@ function handleDelete(header) {
   var tempUnmappedHeaders = this.state.unmappedHeaders;
   tempCheck = removeAssociationQuestionnaire(
     tempCheck,
-    tempMap.map[header],
+    tempMap.map.headers[header],
     header
   );
-  delete tempMap.map[header];
+  delete tempMap.map.headers[header];
   delete tempUnmappedHeaders[header];
   var mapValidity = false; //mapValidity false if there are unmapped headers
   if (Object.keys(tempUnmappedHeaders).length == 0) {
@@ -109,8 +109,8 @@ function checkName(tempName) {
 }
 
 function processAdd(tempMap, tempUnmappedHeaders, tempHeader) {
-  if (!tempMap.map.hasOwnProperty(tempHeader)) {
-    tempMap.map[tempHeader] = {};
+  if (!tempMap.map.headers.hasOwnProperty(tempHeader)) {
+    tempMap.map.headers[tempHeader] = {};
     if (!tempUnmappedHeaders.hasOwnProperty(tempHeader)) {
       tempUnmappedHeaders[tempHeader] = {};
     }
@@ -121,7 +121,7 @@ function processAdd(tempMap, tempUnmappedHeaders, tempHeader) {
 function handleAdd() {
   var tempMap = this.state.map;
   var tempHeader = this.state.newHeaderName;
-  if (!tempMap.map.hasOwnProperty(tempHeader)) {
+  if (!tempMap.map.headers.hasOwnProperty(tempHeader)) {
     var tempUnmappedHeaders = this.state.unmappedHeaders;
     var addResult = processAdd(tempMap, tempUnmappedHeaders, tempHeader);
     tempMap = addResult[0];
@@ -155,13 +155,13 @@ function a11yProps(index) {
 
 class MapEdit extends Component {
   formatHeaders(currentMap, _this) {
-    return Object.keys(currentMap).map(function(k, i) {
+    return Object.keys(currentMap.headers).map(function(k, i) {
       return (
         <div key={"chip_" + i}>
           <Chip
             label={k}
             onDelete={handleDelete.bind(_this, k)}
-            style={currentMap[k].hasOwnProperty('path') ? stylesObj.mappedChip : stylesObj.unmappedChip}
+            style={currentMap.headers[k].hasOwnProperty('path') ? stylesObj.mappedChip : stylesObj.unmappedChip}
             data-cy={"chip_" + k}
           />
         </div>
@@ -182,7 +182,8 @@ class MapEdit extends Component {
       unmappedHeaders: {},
       value: 0
     };
-    this.handleAssociationChange = this.handleAssociationChange.bind(this);
+    this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(this);
+    this.handleConstantChange = this.handleConstantChange.bind(this);
     this.handleValueMap = this.handleValueMap.bind(this);
     this.handleValueMapClose = this.handleValueMapClose.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
@@ -211,7 +212,7 @@ class MapEdit extends Component {
 
   }
 
-  handleAssociationChange(event) {
+  handleAssociationChangeHeader(event) {
     var tempMap = this.state.map;
     var tempCheck = this.state.mapCheck;
     var tempUnmappedHeaders = this.state.unmappedHeaders;
@@ -222,21 +223,21 @@ class MapEdit extends Component {
       event.target.name
     );
     if (currentAssociation.length && (currentAssociation != event.target.value)) {
-      tempMap.map[currentAssociation] = {};
+      tempMap.map.headers[currentAssociation] = {};
       tempUnmappedHeaders[currentAssociation] = {};
     }
 
-    // clear out assocation in flat questtionaire
+    // clear out assocation in flat questionnaire
     tempCheck = removeAssociationQuestionnaire(
       tempCheck,
-      tempMap.map[event.target.value],
+      tempMap.map.headers[event.target.value],
       event.target.value
     );
 
     tempCheck.flatQuestionnaire[event.target.name].header =
       event.target.value;
-    tempMap.map[event.target.value].path = tempCheck.flatQuestionnaire[event.target.name].path.slice();
-    tempMap.map[event.target.value].valueType =
+    tempMap.map.headers[event.target.value].path = tempCheck.flatQuestionnaire[event.target.name].path.slice();
+    tempMap.map.headers[event.target.value].valueType =
       tempCheck.flatQuestionnaire[event.target.name].valueType;
     delete tempUnmappedHeaders[event.target.value];
     var mapValidity = false; //assume false until proven otherwise
@@ -255,13 +256,34 @@ class MapEdit extends Component {
     pushMapBack(tempMap, mapValidity);
   }
 
+  handleConstantChange(qLocation, changeType, constantValue) {
+    let tempMap = this.state.map;
+    let tempCheck = this.state.mapCheck;
+    if (changeType == 'add') {
+      let tempHeader = tempCheck.flatQuestionnaire[qLocation].header || '';
+      tempCheck.flatQuestionnaire[qLocation].constant = constantValue;
+      tempCheck.flatQuestionnaire[qLocation].header = '';
+      if (tempMap.map.headers.hasOwnProperty(tempHeader)) {
+        tempMap.map.headers[tempHeader] = {};
+      }
+      tempMap.map.constants[qLocation] = constantValue;      
+    } 
+    if (changeType == 'delete') {
+        delete tempCheck.flatQuestionnaire[qLocation].constant;
+        delete tempMap.map.constants[qLocation];      
+    }
+    this.setState({mapCheck:tempCheck, map: tempMap});
+    let mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
+    pushMapBack(tempMap, mapValidity);
+  }
+
   handleValueMap(tempHeader, tempID) {
     this.setState({ editValueMap: true, header: tempHeader, mapID: tempID });
   }
 
   handleValueMapClose(event, choiceMap, header) {
     var tempMap = this.state.map;
-    tempMap.map[header].choiceMap = choiceMap;
+    tempMap.map.headers[header].choiceMap = choiceMap;
     var mapValidity = false; //assume false until proven otherwise
     if (Object.keys(this.state.unmappedHeaders).length == 0) {
       mapValidity = checkValidity(
@@ -437,7 +459,8 @@ class MapEdit extends Component {
               <EditCard
                 mapCheck={this.state.mapCheck}
                 map={this.state.map}
-                onAssociation={this.handleAssociationChange}
+                onAssociation={this.handleAssociationChangeHeader}
+                constantChange={this.handleConstantChange}
                 onValueMap={this.handleValueMap}
                 unmappedHeaders={this.state.unmappedHeaders}
                 mapValidity={this.state.mapValidity}

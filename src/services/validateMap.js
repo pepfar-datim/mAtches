@@ -36,20 +36,25 @@ function generateFlatQuestionnaire(obj, fq, path) {
 }
 
 function populateWithMap(map, vc) {
-	for (var key in map) {
-		if (Object.keys(map[key]).length == 0) {
-			vc['invalidMap'] = true;
-		}
-		else {
-			var tempId = map[key]['path'][map[key]['path'].length - 1]['linkid'];
-			if (!vc['flatQuestionnaire'].hasOwnProperty(tempId)) {
-				vc['invalidMap'] = true;
-			}
-			else {
-				vc['flatQuestionnaire'][tempId]['header'] = key;
+	for (var key in map.headers) {
+		if (Object.keys(map.headers[key]).length == 0) {
+			vc.invalidMap = true;
+		} else {
+			var tempId = map.headers[key]['path'][map.headers[key]['path'].length - 1]['linkid'];
+			if (!vc.flatQuestionnaire.hasOwnProperty(tempId)) {
+				vc.invalidMap = true;
+			} else {
+				vc.flatQuestionnaire[tempId].header = key;
 			}			
 		}
 
+	}
+	for (var key in map.constants) {
+		if (!vc.flatQuestionnaire.hasOwnProperty(key)) {
+			vc.invalidMap = true;
+		} else {
+			vc.flatQuestionnaire[key].constant = map.constants[key];
+		}
 	}
 	return vc
 }

@@ -5,6 +5,8 @@ import SendButtonTooltip from "./SendButtonTooltip.js";
 
 import SendIcon from '@material-ui/icons/Send';
 import MapIcon from '@material-ui/icons/Map';
+import LinkIcon from '@material-ui/icons/Link';
+import LinkOffIcon from '@material-ui/icons/LinkOff';
 
 import api from "./services/api.js";
 
@@ -17,7 +19,7 @@ function handleChange(event) {
 }
 
 function formatMenuItems(currentMap) {
- 	return Object.keys(currentMap).map(function (k, i) {
+ 	return Object.keys(currentMap.headers).map(function (k, i) {
 		return(
 			  <MenuItem value={k}>{k}</MenuItem>
 		)	
@@ -40,27 +42,52 @@ function formatSelect(header,key,map,associationFunction) {
     )
 }
 
-function formatQuestions(mapCheck,map, associationFunction, valueMapFunction) {
+function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, constantChange) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
+  	let mappedToConstant = !!((mapCheck.flatQuestionnaire[k].constant || '').length)
     return(
       <div key={'question-'+i} style={stylesObj.editCardSelectorPadding}>
         <Typography wrap="noWrap" style={((mapCheck.flatQuestionnaire[k].header || '').length ? stylesObj.completeQuestion : stylesObj.incompleteQuestion)}>
 
           <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
+          {!mappedToConstant && 
+	          <Tooltip title="Replace this item with a constant value">
+		          <IconButton
+		          	onClick={() => {constantChange(k, 'add', 'hedgehog')}}
+		          >		          	
+		          	<LinkIcon />
+		          </IconButton>
+		      </Tooltip>
+		   }
         </Typography>
-		{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
-		<br />
-		{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
-			<Button 
-				variant="contained" 
-				style={getValueMapButtonStyle(mapCheck.flatQuestionnaire[k], (map[mapCheck.flatQuestionnaire[k].header] || {}))}
-				onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
-				disabled={!(mapCheck.flatQuestionnaire[k].header || '').length}
-			>
-			Map values
-			<MapIcon style={stylesObj.editCardSelectorButtonIcon} />			
-			</Button>
-
+        {!mappedToConstant && 
+        	<div>
+				{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
+				<br />
+				{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
+					<Button 
+						variant="contained" 
+						style={getValueMapButtonStyle(mapCheck.flatQuestionnaire[k], (map.headers[mapCheck.flatQuestionnaire[k].header] || {}))}
+						onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
+						disabled={!(mapCheck.flatQuestionnaire[k].header || '').length}
+					>
+					Map values
+					<MapIcon style={stylesObj.editCardSelectorButtonIcon} />			
+					</Button>
+				}
+			</div>
+		}
+		{mappedToConstant && 
+			<Typography wrap="noWrap">
+				<span>{'Constant value: ' + mapCheck.flatQuestionnaire[k].constant}</span>
+				<Tooltip title="Remove link to constant value and map to header">
+					<IconButton
+						onClick = {() => {constantChange(k, 'delete')}}
+					>
+						<LinkOffIcon />
+					</IconButton>
+				</Tooltip>
+			</Typography>	
 		}
       </div>
 
@@ -109,7 +136,7 @@ sendMap () {
 	          		<div style={stylesObj.themePaddingQuarter}>
 	                {this.props.mapCheck && this.props.map &&
 	                <div>
-	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap)}
+	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap, this.props.constantChange)}
 	                </div>
 
 	                }  
