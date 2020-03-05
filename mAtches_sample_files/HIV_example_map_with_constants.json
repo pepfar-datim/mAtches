@@ -1,0 +1,98 @@
+{
+	"name": "HIV_example_map",
+	"created": "2020-03-05T13:53:37.444Z",
+	"updated": "2020-03-05T13:53:37.444Z",
+	"uid": "4CmFkf",
+	"questionnaireuid": "HIVque",
+	"complete": true,
+	"map": {
+		"headers": {
+			"DOB": {
+				"path": [{
+					"linkid": "/Patient",
+					"text": "Patient ID"
+				}, {
+					"linkid": "/Patient/birthDate",
+					"text": "Birth Date"
+				}],
+				"valueType": "date"
+			},
+			"LocationCode": {
+				"path": [{
+					"linkid": "/Encounter",
+					"text": "Encounter"
+				}, {
+					"linkid": "/Encounter/location",
+					"text": "Location ID"
+				}],
+				"valueType": "string"
+			},
+			"PractitionerCode": {
+				"path": [{
+					"linkid": "/Observation",
+					"text": "Practitioner"
+				}, {
+					"linkid": "/Observation/performer",
+					"text": "Practitioner ID"
+				}],
+				"valueType": "string"
+			},
+			"DateObserved": {
+				"path": [{
+					"linkid": "/Observation",
+					"text": "Practitioner"
+				}, {
+					"linkid": "/Observation/date",
+					"text": "Observation Date"
+				}],
+				"valueType": "dateTime"
+			},
+			"VLC": {
+				"path": [{
+					"linkid": "/Observation",
+					"text": "Practitioner"
+				}, {
+					"linkid": "/Observation/viralLoad",
+					"text": "Viral Load Count"
+				}],
+				"valueType": "integer"
+			},
+			"ART_Start": {
+				"path": [{
+					"linkid": "/MedicationStatement",
+					"text": "MedicationStatement"
+				}, {
+					"linkid": "/MedicationStatement/startDate",
+					"text": "ART Start Date"
+				}],
+				"valueType": "dateTime"
+			}
+		},
+		"constants": {
+			"/Patient/id": {
+				"display": "123",
+				"code": "123",
+				"valueType": "string",
+				"path": [{
+					"linkid": "/Patient",
+					"text": "Patient ID"
+				}, {
+					"linkid": "/Patient/id",
+					"text": "Patient ID"
+				}]
+			},
+			"/Patient/gender": {
+				"display": "Female",
+				"code": "female",
+				"valueType": "choice",
+				"path": [{
+					"linkid": "/Patient",
+					"text": "Patient ID"
+				}, {
+					"linkid": "/Patient/gender",
+					"text": "Gender"
+				}]
+			}
+		}
+	}
+}

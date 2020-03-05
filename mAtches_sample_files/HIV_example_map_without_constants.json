@@ -1,0 +1,98 @@
+{
+	"name": "HIV_example_map",
+	"created": "2020-02-17T11:24:50.683Z",
+	"updated": "2020-02-17T11:24:50.683Z",
+	"uid": "K33t41",
+	"questionnaireuid": "HIVque",
+	"complete": true,
+	"map": {
+		"headers": {
+			"PatientNum": {
+				"path": [{
+					"linkid": "/Patient",
+					"text": "Patient ID"
+				}, {
+					"linkid": "/Patient/id",
+					"text": "Patient ID"
+				}],
+				"valueType": "string"
+			},
+			"DOB": {
+				"path": [{
+					"linkid": "/Patient",
+					"text": "Patient ID"
+				}, {
+					"linkid": "/Patient/birthDate",
+					"text": "Birth Date"
+				}],
+				"valueType": "date"
+			},
+			"Gender": {
+				"path": [{
+					"linkid": "/Patient",
+					"text": "Patient ID"
+				}, {
+					"linkid": "/Patient/gender",
+					"text": "Gender"
+				}],
+				"valueType": "choice",
+				"choiceMap": {
+					"M": "male",
+					"F": "female",
+					"U": "unknown"
+				}
+			},
+			"LocationCode": {
+				"path": [{
+					"linkid": "/Encounter",
+					"text": "Encounter"
+				}, {
+					"linkid": "/Encounter/location",
+					"text": "Location ID"
+				}],
+				"valueType": "string"
+			},
+			"PractitionerCode": {
+				"path": [{
+					"linkid": "/Observation",
+					"text": "Practitioner"
+				}, {
+					"linkid": "/Observation/performer",
+					"text": "Practitioner ID"
+				}],
+				"valueType": "string"
+			},
+			"DateObserved": {
+				"path": [{
+					"linkid": "/Observation",
+					"text": "Practitioner"
+				}, {
+					"linkid": "/Observation/date",
+					"text": "Observation Date"
+				}],
+				"valueType": "dateTime"
+			},
+			"VLC": {
+				"path": [{
+					"linkid": "/Observation",
+					"text": "Practitioner"
+				}, {
+					"linkid": "/Observation/viralLoad",
+					"text": "Viral Load Count"
+				}],
+				"valueType": "integer"
+			},
+			"ART_Start": {
+				"path": [{
+					"linkid": "/MedicationStatement",
+					"text": "MedicationStatement"
+				}, {
+					"linkid": "/MedicationStatement/startDate",
+					"text": "ART Start Date"
+				}],
+				"valueType": "dateTime"
+			}
+		},
+		"constants": {}
+	}
+}
