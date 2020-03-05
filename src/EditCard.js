@@ -2,6 +2,7 @@ import React from "react";
 import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelperText, FormControl, Select, Button, Tooltip} from '@material-ui/core';
 
 import SendButtonTooltip from "./SendButtonTooltip.js";
+import ConstantDialog from "./ConstantDialog.js";
 
 import SendIcon from '@material-ui/icons/Send';
 import MapIcon from '@material-ui/icons/Map';
@@ -42,9 +43,10 @@ function formatSelect(header,key,map,associationFunction) {
     )
 }
 
-function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, constantChange) {
+function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, constantChange, setConstantDialogOpen) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
-  	let mappedToConstant = !!((mapCheck.flatQuestionnaire[k].constant || '').length);
+  	//let mappedToConstant = !!((Object.keys(mapCheck.flatQuestionnaire[k].constant) || '').length);
+  	let mappedToConstant = !!(Object.keys((mapCheck.flatQuestionnaire[k].constant || {})).length);
   	let mappedToHeader = !!((mapCheck.flatQuestionnaire[k].header || '').length);
   	let mappedItem = mappedToConstant || mappedToHeader
     return(
@@ -55,7 +57,13 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, co
           {!mappedToConstant && 
 	          <Tooltip title="Replace this item with a constant value">
 		          <IconButton
-		          	onClick={() => {constantChange(k, 'add', 'hedgehog')}}
+		          	onClick={() => {
+		          		let tempValueMap = [];
+		          		if (mapCheck.flatQuestionnaire[k].valueType == 'choice') {
+		          			tempValueMap = mapCheck.flatQuestionnaire[k]['answerValueSet'];
+		          		}
+		          		setConstantDialogOpen(mapCheck.flatQuestionnaire[k].text, k, tempValueMap)}
+		          	}
 		          >		          	
 		          	<LinkIcon />
 		          </IconButton>
@@ -81,7 +89,7 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, co
 		}
 		{mappedToConstant && 
 			<Typography wrap="noWrap">
-				<span>{'Constant value: ' + mapCheck.flatQuestionnaire[k].constant}</span>
+				<span>{'Constant value: ' + mapCheck.flatQuestionnaire[k].constant.display}</span>
 				<Tooltip title="Remove link to constant value and map to header">
 					<IconButton
 						onClick = {() => {constantChange(k, 'delete')}}
@@ -114,16 +122,28 @@ class EditCard extends React.Component {
 		super(props);
 		this.state = {
 			buttonDelay: false,
+			constantDialogOpen: false,
+			constantHeader: '',
+			qID: '',
+			valueArray: []
 		};
+		this.setConstantDialogOpen = this.setConstantDialogOpen.bind(this);
 	}
 
-sendMap () {
-	// api.sendMap(JSON.stringify(this.props.map));
-	this.setState({buttonDelay: true, submittedMap: JSON.parse(JSON.stringify(this.props.map))})
-	setTimeout(() => { 
-		this.setState({buttonDelay: false})
-	}, 10000)
-}
+	setConstantDialogOpen(ch, qID, vm) {
+		let tempConstantHeader = (typeof(ch) == 'string') ? ch : '';
+		let tempQID = (typeof(qID) == 'string') ? qID : '';
+		let tempValueMap = (Array.isArray(vm)) ? vm : [];
+		this.setState({constantDialogOpen:!this.state.constantDialogOpen, constantHeader: tempConstantHeader, qID: tempQID, valueMap: tempValueMap});
+	}
+
+	sendMap () {
+		// api.sendMap(JSON.stringify(this.props.map));
+		this.setState({buttonDelay: true, submittedMap: JSON.parse(JSON.stringify(this.props.map))})
+		setTimeout(() => { 
+			this.setState({buttonDelay: false})
+		}, 10000)
+	}
 	
 	render() {
 		var mapUnchanged = JSON.stringify(this.state.submittedMap) == JSON.stringify(this.props.map);
@@ -138,7 +158,7 @@ sendMap () {
 	          		<div style={stylesObj.themePaddingQuarter}>
 	                {this.props.mapCheck && this.props.map &&
 	                <div>
-	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap, this.props.constantChange)}
+	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap, this.props.constantChange, this.setConstantDialogOpen)}
 	                </div>
 
 	                }  
@@ -156,7 +176,9 @@ sendMap () {
 							</Button>
 						</div>   	        	            
 					</Tooltip>			
-					
+				{this.state.constantDialogOpen && 
+					<ConstantDialog open={this.state.constantDialogOpen} closeConstantMapDialog={this.setConstantDialogOpen} constantHeader={this.state.constantHeader} qID={this.state.qID} setConstant={this.props.constantChange} valueArray={this.state.valueMap}/>
+				}
 			</Card>
 		);
 	}
