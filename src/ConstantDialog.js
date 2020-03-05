@@ -53,7 +53,7 @@ export default function ConstantDialog(props) {
           </Button>
           <Button 
             onClick={() => {
-              props.setConstant(props.qID, 'add', {'display': constantText, 'code': constantCode});
+              props.setConstant(props.qID, 'add', {'display': constantText, 'code': constantCode, 'valueType':props.valueType, 'path': props.path});
               props.closeConstantMapDialog()
             }} 
             color="primary"

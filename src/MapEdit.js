@@ -42,8 +42,8 @@ function getCurrentAssociation(tempCheck, prop) {
 function checkValidity(flatQuestionnaire, mappings) {
   let mapValidity = true;
   for (var k in flatQuestionnaire) {
-    let mappedToHeader = (flatQuestionnaire[k].header || '').length;
-    let mappedToConstant = (flatQuestionnaire[k].constant || '').length;
+    let mappedToHeader = !!(flatQuestionnaire[k].header || '').length;
+    let mappedToConstant = !!(Object.keys((flatQuestionnaire[k].constant || {})).length);
     mapValidity = !(mappedToHeader == mappedToConstant);
     if (mappedToHeader) {
       mapValidity = mappings.headers.hasOwnProperty(flatQuestionnaire[k].header);
@@ -278,7 +278,10 @@ class MapEdit extends Component {
         delete tempCheck.flatQuestionnaire[qLocation].constant;
         delete tempMap.map.constants[qLocation];      
     }
-    let tempMapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
+    let tempMapValidity = false;
+    if (Object.keys(this.state.unmappedHeaders).length == 0) {
+      tempMapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
+    }
     this.setState({mapCheck:tempCheck, map: tempMap, unmappedHeaders: tempUnmappedHeaders, mapValidity: tempMapValidity});
     pushMapBack(tempMap, tempMapValidity);
   }

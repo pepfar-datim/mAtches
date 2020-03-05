@@ -62,7 +62,7 @@ function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, co
 		          		if (mapCheck.flatQuestionnaire[k].valueType == 'choice') {
 		          			tempValueMap = mapCheck.flatQuestionnaire[k]['answerValueSet'];
 		          		}
-		          		setConstantDialogOpen(mapCheck.flatQuestionnaire[k].text, k, tempValueMap)}
+		          		setConstantDialogOpen(mapCheck.flatQuestionnaire[k].text, k, tempValueMap, mapCheck.flatQuestionnaire[k].valueType, mapCheck.flatQuestionnaire[k].path)}
 		          	}
 		          >		          	
 		          	<LinkIcon />
@@ -125,16 +125,20 @@ class EditCard extends React.Component {
 			constantDialogOpen: false,
 			constantHeader: '',
 			qID: '',
-			valueArray: []
+			valueArray: [],
+			valueType: '',
+			path: []
 		};
 		this.setConstantDialogOpen = this.setConstantDialogOpen.bind(this);
 	}
 
-	setConstantDialogOpen(ch, qID, vm) {
+	setConstantDialogOpen(ch, qID, vm, vt, path) {
 		let tempConstantHeader = (typeof(ch) == 'string') ? ch : '';
 		let tempQID = (typeof(qID) == 'string') ? qID : '';
 		let tempValueMap = (Array.isArray(vm)) ? vm : [];
-		this.setState({constantDialogOpen:!this.state.constantDialogOpen, constantHeader: tempConstantHeader, qID: tempQID, valueMap: tempValueMap});
+		let tempValueType = (typeof(vt) == 'string') ? vt : '';
+		let tempPath = (Array.isArray(path)) ? path : [];
+		this.setState({constantDialogOpen:!this.state.constantDialogOpen, constantHeader: tempConstantHeader, qID: tempQID, valueMap: tempValueMap, valueType: tempValueType, path: tempPath});
 	}
 
 	sendMap () {
@@ -177,7 +181,7 @@ class EditCard extends React.Component {
 						</div>   	        	            
 					</Tooltip>			
 				{this.state.constantDialogOpen && 
-					<ConstantDialog open={this.state.constantDialogOpen} closeConstantMapDialog={this.setConstantDialogOpen} constantHeader={this.state.constantHeader} qID={this.state.qID} setConstant={this.props.constantChange} valueArray={this.state.valueMap}/>
+					<ConstantDialog open={this.state.constantDialogOpen} closeConstantMapDialog={this.setConstantDialogOpen} constantHeader={this.state.constantHeader} qID={this.state.qID} setConstant={this.props.constantChange} valueArray={this.state.valueMap} valueType={this.state.valueType} path={this.state.path}/>
 				}
 			</Card>
 		);

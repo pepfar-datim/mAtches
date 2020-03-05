@@ -48,7 +48,7 @@ checkName(name, _this){
 handleAdd() {
 	if (!this.state.invalidName) {
 	    var payload = {
-	    	"map": {},
+	    	"map": {"headers": {}, "constants": {}},
 	    	"name": this.state.name,
 	    	"questionnaireuid": this.state.questionnaire
 	    }
