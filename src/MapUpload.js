@@ -17,7 +17,7 @@ function formatQuestions(mapCheck) {
           <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
         </Typography>
         <Typography wrap="noWrap">
-          {mapCheck.flatQuestionnaire[k].header || ''}
+          {mapCheck.flatQuestionnaire[k].header || mapCheck.flatQuestionnaire[k].constant.code + ' (constant)' || ''}
         </Typography>
         <br />
       </div>  
