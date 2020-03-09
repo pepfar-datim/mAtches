@@ -33,32 +33,38 @@ var data = {
       var pathsChecked = {};
       Object.keys(this.csvData[i]).forEach(key => {
         var tempValue = this.csvData[i][key];
-        if (this.map.hasOwnProperty(key)) {
-          if (this.map[key].valueType == "choice") {
+        if (this.map.headers.hasOwnProperty(key)) {
+          if (this.map.headers[key].valueType == "choice") {
             tempValue = this.convertValue(
               tempValue,
-              this.map[key].choiceMap,
+              this.map.headers[key].choiceMap,
               i,
               key
             );
           } else {
             tempValue = this.evaluateValue(
               this.csvData[i][key],
-              this.map[key].valueType,
+              this.map.headers[key].valueType,
               i,
               key
             );
           }
           this.addQRItems(
             QR.item,
-            this.map[key].path,
+            this.map.headers[key].path,
             pathsChecked,
             tempValue,
-            this.map[key].valueType.charAt(0).toUpperCase() +
-              this.map[key].valueType.slice(1)
+            this.map.headers[key].valueType.charAt(0).toUpperCase() +
+              this.map.headers[key].valueType.slice(1)
           );
         }
       });
+      Object.keys(this.map.constants).forEach(key => {
+      	let tempValue = this.map.constants[key].code;
+      	//there could be collision in keys between constants and headers here (though unlikely)
+      	tempValue = this.evaluateValue(tempValue, this.map.constants[key].valueType, i, key)
+      	this.addQRItems(QR.item, this.map.constants[key].path, pathsChecked, tempValue, this.map.constants[key].valueType.charAt(0).toUpperCase() + this.map.constants[key].valueType.slice(1));
+      })
       if (!this.rowErrors.hasOwnProperty(i)) {
         this.QuestionnaireResponses.push(QR);
       }

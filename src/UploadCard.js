@@ -48,7 +48,7 @@ class UploadCard extends React.Component {
 	uploadCallback(csvFile) {
 		csvFile = checkHeaders(
 			csvFile,
-			JSON.parse(JSON.stringify(this.props.map.map))
+			JSON.parse(JSON.stringify(this.props.map.map.headers))
 		);
 		this.setState({
 			invalidHeaders: csvFile.invalidHeaders,

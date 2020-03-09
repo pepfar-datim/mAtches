@@ -55,24 +55,24 @@ export function checkHeadersGeneral(actualHeaders, desiredHeaders) {
 
 }
 
-export function checkHeaders(csvFile, map) {
+export function checkHeaders(csvFile, mapHeaders) {
 	var columnRow = csvFile.split('\n')[0];
 	var columns = columnRow.split(',');
 	let i = 0
 	let invalidHeaders = [];
 	for (let i = 0; i < columns.length; i++) {
-		if(!map.hasOwnProperty(columns[i].trim())) {
+		if(!mapHeaders.hasOwnProperty(columns[i].trim())) {
 			invalidHeaders.push(columns[i].trim());
 		}
 		else {
-			delete map[columns[i].trim()]
+			delete mapHeaders[columns[i].trim()]
 		}
 	}
 	var validity = true;
-	if (Object.keys(map).length>0) {
+	if (Object.keys(mapHeaders).length>0) {
 		validity = false;
 	}
 	
-	return({validity: validity, invalidHeaders: invalidHeaders, missingHeaders: Object.keys(map), text: csvFile})
+	return({validity: validity, invalidHeaders: invalidHeaders, missingHeaders: Object.keys(mapHeaders), text: csvFile})
 }
 export default {uploadFile, checkHeaders}
