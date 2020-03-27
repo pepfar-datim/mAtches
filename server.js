@@ -33,11 +33,9 @@ app.post(basePath + 'api/maps/:id/upload/valueMap/:header', api.validateValueMap
 
 app.delete(basePath + 'api/maps/:id', api.deleteSpecificResource);
 
-app.get(basePath + 'api/questionnaires', api.getAll)
+app.get(basePath + 'api/questionnaires', api.getFHIRQuestionnaires)
 
-app.get(basePath + 'api/questionnaires/:id', api.getSpecificResource);
-
-app.post(basePath + 'api/questionnaires', api.createQuestionnaire);
+app.get(basePath + 'api/questionnaires/:id', api.getSpecificQuestionnaire);
 
 app.delete(basePath + 'api/questionnaires/:id', api.deleteSpecificResource);
 

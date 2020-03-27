@@ -27,37 +27,12 @@ class MapUpdate extends Component {
 
  // Fetch the list on first mount
   componentDidMount() {
-    this.getSpecificMap(this.state.mapID);
     var mode = 'invalid';
     if(this.state.queryParams.hasOwnProperty('mode')){
       if(this.state.queryParams.mode.toLowerCase() == 'upload'){mode = 'upload'}
       if(this.state.queryParams.mode.toLowerCase() == 'edit'){mode = 'edit'}
     }
     this.setState({'mode': mode});
-  }
-
-  // Retrieves the list of items from the Express app
-  getSpecificMap(id) {
-    api.get('api/maps/' + id)
-    .then(map => {
-      this.setState({"map": map })
-      var questionnaireUID = map.questionnaireuid;
-      this.setState({"questionnaireUID":questionnaireUID});  
-      return questionnaireUID
-    })
-    .then(questionnaireUID =>{
-      this.getSpecificQuestionnaire(questionnaireUID)
-    })  
-  }
-  
-  getSpecificQuestionnaire(id) {
-    api.get('api/questionnaires/' + id)
-    .then(questionnaire => {
-      this.setState({"questionnaire": questionnaire});
-      var mapCheck = {}
-      mapCheck = validateMap(this.state.map, questionnaire)
-      this.setState({mapCheck: mapCheck})
-    })
   }
   
   render() {
@@ -67,7 +42,7 @@ class MapUpdate extends Component {
           <div>        
             <Redirect to={config.base + 'maps/' + this.state.mapID + '?mode=edit'} />
             <HeaderBar />
-            <MapEdit id={this.state.mapID} map={this.state.map} questionnaire={this.state.questionnaire}/>
+            <MapEdit id={this.state.mapID} />
           </div>
         )
     }
@@ -78,13 +53,13 @@ class MapUpdate extends Component {
           {this.state.mode=='edit' && this.state.map && (
             <div>
               <HeaderBar />
-              <MapEdit id={this.state.mapID} questionnaireName={this.state.questionnaire.name} />
+              <MapEdit id={this.state.mapID} />
             </div>
           )}
           {this.state.mode=='upload' && (
             <div>
               <HeaderBar />
-              <MapUpload id={this.state.mapID} map={this.state.map} questionnaireName={this.state.questionnaire.name} mapCheck={this.state.mapCheck}/>
+              <MapUpload id={this.state.mapID} />
             </div>
           )}      
         </div>

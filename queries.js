@@ -88,6 +88,14 @@ const getAll = (request, response) => {
   });
 }
 
+const getFHIRQuestionnaires = (request, response) => {
+    fetch('https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/Questionnaire?_format=json')
+    .then(response => response.json())
+    .then(data => {
+      response.status(200).end(JSON.stringify(data.entry));
+    })
+}
+
 const getAllClean = (data) => {
   var dataArray = []
   for (var i in data) {
@@ -123,6 +131,74 @@ const getSpecificResource = (request, response) => {
     if (data.hasOwnProperty('error')) response.status(200).send('');
     response.status(400).end('problem accessing resource');
   });  
+}
+
+const getSpecificQuestionnaire = (request, response) => {
+  fetch('https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/Questionnaire/?url=' + request.params.id + '&_format=json')
+  .then(response => response.json())
+  .then(data => {
+    var questionnaire = data.entry[0];
+    var valueSetURLS = [];
+    valueSetURLS = getValueMaps(questionnaire.resource.item, [], []);
+    Promise.all(
+      valueSetURLS.map(url => 
+        fetch(url.fetchURL)
+          .then(res => res.json())
+          .then(res => [res.expansion.contains, url.path])
+      )
+    )
+    .then(valueSets => {
+      for (vs of valueSets) {
+        questionnaire.resource.item = loadValueMaps(questionnaire.resource.item, vs)
+      }
+      //console.log(JSON.stringify(questionnaire))
+      response.status(200).end(JSON.stringify(questionnaire));
+    });
+    
+    
+  })
+}
+
+const loadValueMaps = (items, vs) => {
+  if (vs[1].length > 1) {
+    var newPath = vs[1].slice(1);
+    items[vs[1][0]].item = loadValueMaps(items[vs[1][0]].item, [vs[0], newPath])
+  } else {
+    items[vs[1][0]].answerValueSet = {}
+    items[vs[1][0]].answerValueSet.concept = vs[0];
+  }
+  return items
+}
+
+const getValueMaps = (items, valueSetArray, tempPath) => {
+    for (let i =0; i<items.length; i++) {
+      if (items[i].hasOwnProperty('item')) {
+        var tempPathCopy = [...tempPath];
+        tempPathCopy.push(i);
+        valueSetArray = getValueMaps(items[i].item, valueSetArray, tempPathCopy);
+      } else {
+        if (items[i].hasOwnProperty('answerValueSet')) {
+          var tempPathCopy = [...tempPath];
+          tempPathCopy.push(i);
+
+          var fetchURL = 'https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/ValueSet/$expand?url=' + encodeURI(items[i].answerValueSet) + '&_format=json';
+
+          valueSetArray.push({"fetchURL": fetchURL, path: tempPathCopy})
+        }
+      }
+    }
+    return valueSetArray
+}
+
+const getValueMap = () => {
+  var promise = new Promise(function(resolve, reject) {
+    fetch('https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/ValueSet/$expand?url=http%3A%2F%2Fhl7.org%2Ffhir%2FValueSet%2Fadministrative-gender&_format=json')
+    .then(response => response.json())
+    .then(data => {
+      resolve(data.expansion.contains)
+    })    
+  })
+  return promise
 }
 
 const checkForSpecificProp = (value, resource, prop) => {
@@ -240,16 +316,8 @@ const validateMapPayload = (payload, uid, update) => {
       }
       if (nameConflict) {
         resolve('Name (' + payload.name + ') already exists(, or request is invalid)')
-      }
-      checkForUID(payload.questionnaireuid, 'questionnaires').then(questFound => {     
-        if (!questFound) {
-          resolve('questionnaireuid (' + payload.questionnaireuid + ') is invalid(, or request is invalid)')
-        }
-        if (questFound.hasOwnProperty('error')) {
-          response.status(400).end(questFound.error);
-        }           
-        resolve(true)
-      })
+      }          
+      resolve(true)
     })
         
   })
@@ -423,8 +491,10 @@ const uploadData = (request, response) => {
 
 module.exports = {
   getAll,
+  getFHIRQuestionnaires,
   checkName,
   getSpecificResource,
+  getSpecificQuestionnaire,
   createMap,
   updateMap,
   deleteSpecificResource,

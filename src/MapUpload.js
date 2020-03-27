@@ -32,7 +32,7 @@ class MapUpload extends Component {
     super(props);
     this.state = {
       map: {"name":"","uid":""},
-      questionnaire: {"name":""},
+      questionnaire: {resource: {"name":""}},
       mapCheck: {"flatQuestionnaire":{}}
     }    
   }
@@ -52,7 +52,7 @@ class MapUpload extends Component {
                       <strong>Map name: </strong>{this.state.map.name}
                     </Typography>
                     <Typography variant="body1">
-                      <strong>Questionnaire: </strong>{this.state.questionnaire.name}
+                      <strong>Questionnaire: </strong>{this.state.questionnaire.resource.name}
                     </Typography>                
                     <IconButton
                       edge="start"

@@ -177,7 +177,7 @@ class MapEdit extends Component {
     super(props);
     this.state = {
       map: { name: "", uid: "" },
-      questionnaire: { name: "" },
+      questionnaire: { resource: {name: "" }},
       mapCheck: { flatQuestionnaire: {} },
       newHeaderName: "",
       editValueMap: false,
@@ -364,7 +364,7 @@ class MapEdit extends Component {
                   </Typography>
                   <Typography variant="body1">
                     <strong>Questionnaire: </strong>
-                    {this.state.questionnaire.name}
+                    {this.state.questionnaire.resource.name}
                   </Typography>
                   <br />
                   <br />

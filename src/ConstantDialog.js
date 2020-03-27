@@ -41,7 +41,7 @@ export default function ConstantDialog(props) {
               </InputLabel>
               <Select value={constantCode} displayEmpty name="questionnaire" onChange={(e) => {setConstantText(choiceCodeMap[e.target.value]); setConstantCode(e.target.value)} }>
                 {props.valueArray.map((i, index) =>
-                    <MenuItem key={index + '_ConstantMap'} value={i.Code}>{i.Display}</MenuItem>
+                    <MenuItem key={index + '_ConstantMap'} value={i.code}>{i.display}</MenuItem>
                 )}     
               </Select>
             </FormControl>

@@ -2,7 +2,7 @@ function validateMap(map, questionnaire) {
 	
 	var flatQuestionnaire = {};
 	var path = [];
-	flatQuestionnaire = generateFlatQuestionnaire(questionnaire['questionnaire']['item'], flatQuestionnaire, path.slice());
+	flatQuestionnaire = generateFlatQuestionnaire(questionnaire.resource.item, flatQuestionnaire, path.slice());
 	
 	var validityCheck = {flatQuestionnaire: flatQuestionnaire};
 	validityCheck = populateWithMap(map['map'], validityCheck)

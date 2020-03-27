@@ -21,7 +21,7 @@ function getSpecificMap(id, _this) {
 }
 
 function getSpecificQuestionnaire(id, _this) {
-	api.get('api/questionnaires/' + id)
+	api.get('api/questionnaires/' + encodeURIComponent(id))
 	.then(questionnaire => {
 	  _this.setState({"questionnaire": questionnaire});
 	  var mapCheck = {}

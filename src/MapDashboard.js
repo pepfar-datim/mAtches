@@ -22,8 +22,8 @@ class MapDashboard extends Component {
     api.get('api/questionnaires')
     .then(questionnaires => {
       var questionnaireHash = questionnaires.reduce(function(mappedQs, q) {
-        if (!mappedQs.hasOwnProperty(q.uid)){
-          mappedQs[q.uid] = q.name;
+        if (!mappedQs.hasOwnProperty(q.resource.url)){
+          mappedQs[q.resource.url] = q.resource.name;
           return mappedQs
         }
       },{})
