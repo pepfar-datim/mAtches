@@ -16,14 +16,15 @@ function generateChoiceMap(headerDefinitions, tempValueSet) {
 	}
 	else {
 		for (let i =0; i<tempValueSet.length; i++) {
-			tempChoiceMap[tempValueSet[i].Code] = tempValueSet[i].Code;
+			tempChoiceMap[tempValueSet[i].code] = tempValueSet[i].code;
 		}
 	}
 	return tempChoiceMap
 }
 
 function loadValueSet(tempChoiceMap, tempValueSet) {
-	//maybe want to get reversed object from server side in case these become large?
+	console.log(JSON.stringify(tempChoiceMap));
+	console.log(JSON.stringify(tempValueSet));
 	var reverseChoiceMap = {}
 
 	for (var k in tempChoiceMap) {
@@ -34,10 +35,10 @@ function loadValueSet(tempChoiceMap, tempValueSet) {
 	}
 	
 	tempValueSet = tempValueSet.map(function(mapItem) {
-		mapItem.maps = reverseChoiceMap.hasOwnProperty(mapItem.Code) ? reverseChoiceMap[mapItem.Code] : [];
+		mapItem.maps = reverseChoiceMap.hasOwnProperty(mapItem.code) ? reverseChoiceMap[mapItem.code] : [];
 		return mapItem
 	})
-
+	console.log(JSON.stringify(tempValueSet));
 	return tempValueSet
 }
 
@@ -70,9 +71,9 @@ class ValueMapCard extends React.Component {
 			return(
 				<div>
 					<Typography variant="h6" style={stylesObj.marginQuarter}>
-						<strong>{o.Display}</strong>
+						<strong>{o.display}</strong>
 						<br />
-						{this.formatChips(o.maps, i, o.Code)}
+						{this.formatChips(o.maps, i, o.code)}
 					</Typography>
 					<br />
 				</div>

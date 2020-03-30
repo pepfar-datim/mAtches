@@ -25,7 +25,7 @@ const validateValueMap = body => {
 	var promise = new Promise(function(resolve, reject) {
 		loadCsv(body.csvText).then(output => {
 			var valueSetMap = body.valueSet.reduce((m,i,index) => {
-				m[i.Code] = index;
+				m[i.code] = index;
 				return m
 			}, {});
 			returnObject.valueSet = returnObject.valueSet.map(prop => {
