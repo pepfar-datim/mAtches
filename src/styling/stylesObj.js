@@ -87,7 +87,11 @@ var stylesObj = {
     },
     "incompleteQuestion": {
       "color": themeColors.warning
-    },    
+    },
+    "loaderStyling": {
+        "marginLeft": "50%", 
+        "marginTop": "20%"
+    },        
     "mainCard": {
         "backgroundColor": "lightGrey",
         "height": "100%",

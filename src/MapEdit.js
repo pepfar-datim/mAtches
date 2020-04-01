@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Grid, Paper, Card, Typography, IconButton, Edit, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box} from "@material-ui/core";
+import {Grid, Paper, Card, Typography, IconButton, Edit, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box, CircularProgress} from "@material-ui/core";
 
 import {AddCircleOutlined, Publish, ImageSearch}  from "@material-ui/icons";
 
@@ -184,7 +184,8 @@ class MapEdit extends Component {
       header: "",
       mapID: "",
       unmappedHeaders: {},
-      value: 0
+      value: 0,
+      loading: true
     };
     this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(this);
     this.handleConstantChange = this.handleConstantChange.bind(this);
@@ -340,6 +341,8 @@ class MapEdit extends Component {
   render() {
     const value = 1;
     return (
+      <>{ this.state.loading ? <CircularProgress style={stylesObj.loaderStyling} /> : 
+      <>
       <div style={stylesObj.themePadding}>
         {this.state.editValueMap && (
           <ValueMapCard
@@ -478,6 +481,8 @@ class MapEdit extends Component {
           </Grid>
         )}
       </div>
+      </>
+    }</>
     );
   }
 }

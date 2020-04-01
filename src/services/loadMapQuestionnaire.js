@@ -26,7 +26,7 @@ function getSpecificQuestionnaire(id, _this) {
 	  _this.setState({"questionnaire": questionnaire});
 	  var mapCheck = {}
 	  mapCheck = validateMap(_this.state.map, questionnaire)
-	  _this.setState({mapCheck: mapCheck})
+	  _this.setState({mapCheck: mapCheck, loading: false})
 	})
 }
 

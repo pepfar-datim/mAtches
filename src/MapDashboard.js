@@ -1,9 +1,12 @@
 import React, { Component } from 'react';
+import {CircularProgress} from "@material-ui/core";
 import HeaderBar from "./HeaderBar.js";
 import MapList from "./MapList.js";
 import MapAdd from "./MapAdd.js";
 
 import api from "./services/api.js";
+
+import {stylesObj} from './styling/stylesObj.js'
 
 class MapDashboard extends Component {
   // Initialize the state
@@ -27,7 +30,7 @@ class MapDashboard extends Component {
           return mappedQs
         }
       },{})
-      this.setState({"questionnaireHash": questionnaireHash })
+      this.setState({"questionnaireHash": questionnaireHash})
     })  
   }
 
@@ -40,6 +43,9 @@ class MapDashboard extends Component {
             <MapList questionnaireHash={this.state.questionnaireHash}/>        
             <MapAdd questionnaireHash={this.state.questionnaireHash}/>
           </div>
+        }
+        {!this.state.questionnaireHash &&
+          <CircularProgress style={stylesObj.loaderStyling} />
         }
       </div>
     );

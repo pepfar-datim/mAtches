@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import {Grid, Paper, Card, Typography, IconButton} from '@material-ui/core';
+import {Grid, Paper, Card, Typography, IconButton, CircularProgress} from '@material-ui/core';
 import Edit from '@material-ui/icons/Edit';
 
 import UploadCard from "./UploadCard.js";
@@ -33,7 +33,8 @@ class MapUpload extends Component {
     this.state = {
       map: {"name":"","uid":""},
       questionnaire: {resource: {"name":""}},
-      mapCheck: {"flatQuestionnaire":{}}
+      mapCheck: {"flatQuestionnaire":{}},
+      loading: true
     }    
   }
 
@@ -43,6 +44,8 @@ class MapUpload extends Component {
 
   render() {    
     return (
+      <>{ this.state.loading ? <CircularProgress style={stylesObj.loaderStyling} /> : 
+      <>      
         <div style={stylesObj.themePadding}>
         <Grid container className={stylesObj.flexGrow} wrap="nowrap" spacing={2}>
           <Grid item xs={3} style={stylesObj.gridWidth}>
@@ -78,7 +81,8 @@ class MapUpload extends Component {
           </Grid>
         </Grid>      
         </div>
-
+      </>
+    }</>
 
     );
   }
