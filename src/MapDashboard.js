@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import {CircularProgress} from "@material-ui/core";
+import {CircularProgress, Typography} from "@material-ui/core";
 import HeaderBar from "./HeaderBar.js";
 import MapList from "./MapList.js";
 import MapAdd from "./MapAdd.js";
@@ -13,6 +13,7 @@ class MapDashboard extends Component {
   constructor(props){
     super(props);
     this.state = {
+      loading: true
     }
   }
 
@@ -22,6 +23,7 @@ class MapDashboard extends Component {
   }
 
   getQuestionnaires() {
+
     api.get('api/questionnaires')
     .then(questionnaires => {
       var questionnaireHash = questionnaires.reduce(function(mappedQs, q) {
@@ -30,26 +32,32 @@ class MapDashboard extends Component {
           return mappedQs
         }
       },{})
-      this.setState({"questionnaireHash": questionnaireHash})
-    })  
+      this.setState({"questionnaireHash": questionnaireHash, "loading": false})
+    })
+    .catch(e => {
+      this.setState({"failedToLoad": 'Failed to load questionnaires from FHIR Server', "loading": false})
+    })
+
   }
 
   render() {
     return (
-      <div>
-        <HeaderBar />
-        {this.state.questionnaireHash &&
-          <div>  
-            <MapList questionnaireHash={this.state.questionnaireHash}/>        
-            <MapAdd questionnaireHash={this.state.questionnaireHash}/>
-          </div>
-        }
-        {!this.state.questionnaireHash &&
-          <CircularProgress style={stylesObj.loaderStyling} />
-        }
-      </div>
-    );
+      <>
+      <HeaderBar />
+      {this.state.loading ? <CircularProgress style={stylesObj.loaderStyling} /> :
+        <>
+          {this.state.failedToLoad ? <Typography>{this.state.failedToLoad}</Typography> : 
+          <>
+            <div>
+              <MapList questionnaireHash={this.state.questionnaireHash}/>        
+              <MapAdd questionnaireHash={this.state.questionnaireHash}/>
+            </div>          
+          </>
+          }
+        </>
+      }
+      </>
+    )}
   }
-}
 
 export default MapDashboard;

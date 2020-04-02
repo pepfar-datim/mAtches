@@ -90,9 +90,17 @@ const getAll = (request, response) => {
 
 const getFHIRQuestionnaires = (request, response) => {
     fetch(config.fhirServer + '/Questionnaire?_format=json')
-    .then(response => response.json())
+    .then(r => {
+      if (r.status < 200 || r.status >= 300) {
+        response.status(400).send('Unable to retrieve Questionnaires from FHIR Server')
+      } 
+      return r.json()      
+    })
     .then(data => {
       response.status(200).end(JSON.stringify(data.entry));
+    })
+    .catch(e => {
+      response.status(400).send(e);
     })
 }
 
@@ -135,7 +143,12 @@ const getSpecificResource = (request, response) => {
 
 const getSpecificQuestionnaire = (request, response) => {
   fetch(config.fhirServer + '/Questionnaire/?url=' + request.params.id + '&_format=json')
-  .then(response => response.json())
+  .then(r => {
+    if (r.status < 200 || r.status >= 300) {
+      response.status(400).send('Unable to retrieve Questionnaires from FHIR Server')
+    }
+    return r.json() 
+  })
   .then(data => {
     var questionnaire = data.entry[0];
     var valueSetURLS = [];

@@ -185,7 +185,7 @@ class MapEdit extends Component {
       mapID: "",
       unmappedHeaders: {},
       value: 0,
-      loading: true
+      loading: true   
     };
     this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(this);
     this.handleConstantChange = this.handleConstantChange.bind(this);
@@ -341,8 +341,9 @@ class MapEdit extends Component {
   render() {
     const value = 1;
     return (
-      <>{ this.state.loading ? <CircularProgress style={stylesObj.loaderStyling} /> : 
-      <>
+      <>{this.state.loading ? <CircularProgress style={stylesObj.loaderStyling} /> :
+        <>{this.state.failedToLoad ? <><Typography>{this.state.failedToLoad}</Typography></> :
+              <>
       <div style={stylesObj.themePadding}>
         {this.state.editValueMap && (
           <ValueMapCard
@@ -482,6 +483,9 @@ class MapEdit extends Component {
         )}
       </div>
       </>
+
+        }</> 
+
     }</>
     );
   }

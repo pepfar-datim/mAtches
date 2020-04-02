@@ -28,6 +28,9 @@ function getSpecificQuestionnaire(id, _this) {
 	  mapCheck = validateMap(_this.state.map, questionnaire)
 	  _this.setState({mapCheck: mapCheck, loading: false})
 	})
+	.catch(e => {
+		_this.setState({failedToLoad: 'Failed to load questionnaire from FHIR Server', loading: false})
+	})
 }
 
 function extractUnmappedHeaders (map, _this) {
