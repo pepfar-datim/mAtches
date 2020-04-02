@@ -3,5 +3,6 @@
 	"name": "PEPFAR PLM Team",
 	"appName": "mAtches",
 	"allowExternalURL": false,
-	"externalMappingLocation": "OCL"
+	"externalMappingLocation": "OCL",
+	"fhirServer": "https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/"
 }

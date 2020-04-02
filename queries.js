@@ -89,7 +89,7 @@ const getAll = (request, response) => {
 }
 
 const getFHIRQuestionnaires = (request, response) => {
-    fetch('https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/Questionnaire?_format=json')
+    fetch(config.fhirServer + '/Questionnaire?_format=json')
     .then(response => response.json())
     .then(data => {
       response.status(200).end(JSON.stringify(data.entry));
@@ -134,7 +134,7 @@ const getSpecificResource = (request, response) => {
 }
 
 const getSpecificQuestionnaire = (request, response) => {
-  fetch('https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/Questionnaire/?url=' + request.params.id + '&_format=json')
+  fetch(config.fhirServer + '/Questionnaire/?url=' + request.params.id + '&_format=json')
   .then(response => response.json())
   .then(data => {
     var questionnaire = data.entry[0];
@@ -181,8 +181,7 @@ const getValueMaps = (items, valueSetArray, tempPath) => {
           var tempPathCopy = [...tempPath];
           tempPathCopy.push(i);
 
-          var fetchURL = 'https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/ValueSet/$expand?url=' + encodeURI(items[i].answerValueSet) + '&_format=json';
-
+          var fetchURL = config.fhirServer + '/ValueSet/$expand?url=' + encodeURI(items[i].answerValueSet) + '&_format=json';
           valueSetArray.push({"fetchURL": fetchURL, path: tempPathCopy})
         }
       }
@@ -192,7 +191,7 @@ const getValueMaps = (items, valueSetArray, tempPath) => {
 
 const getValueMap = () => {
   var promise = new Promise(function(resolve, reject) {
-    fetch('https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/ValueSet/$expand?url=http%3A%2F%2Fhl7.org%2Ffhir%2FValueSet%2Fadministrative-gender&_format=json')
+    fetch(config.fhirServer + '/ValueSet/$expand?url=http%3A%2F%2Fhl7.org%2Ffhir%2FValueSet%2Fadministrative-gender&_format=json')
     .then(response => response.json())
     .then(data => {
       resolve(data.expansion.contains)
