@@ -44,46 +44,47 @@ class MapUpload extends Component {
 
   render() {    
     return (
-      <>{ this.state.loading ? <CircularProgress style={stylesObj.loaderStyling} /> : 
-      <>      
-        <div style={stylesObj.themePadding}>
-        <Grid container className={stylesObj.flexGrow} wrap="nowrap" spacing={2}>
-          <Grid item xs={3} style={stylesObj.gridWidth}>
-              <Card style={stylesObj.sideCard} wrap="wrap">
-                  <div style={stylesObj.themePadding}>            
-                    <Typography variant="h6">
-                      <strong>Map name: </strong>{this.state.map.name}
-                    </Typography>
-                    <Typography variant="body1">
-                      <strong>Questionnaire: </strong>{this.state.questionnaire.resource.name}
-                    </Typography>                
-                    <IconButton
-                      edge="start"
-                      color="inherit"
-                      aria-label="menu"
-                      onClick = {() => {window.location = config.base + 'maps/' + this.state.map.uid + "?mode=edit"}}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <br />
-                    <br />
-                    <br />
-                    {this.state.mapCheck &&
-                    <div>
-                      {formatQuestions(this.state.mapCheck)}
-                    </div>
-                    }  
-                  </div>        
-              </Card>
-          </Grid>
-          <Grid item xs >
-            <UploadCard map={this.state.map}/>
-          </Grid>
-        </Grid>      
-        </div>
-      </>
-    }</>
-
+      <>{this.state.loading ? <CircularProgress style={stylesObj.loaderStyling} /> :
+        <>{this.state.failedToLoad ? <><Typography>{this.state.failedToLoad}</Typography></> :
+          <>      
+            <div style={stylesObj.themePadding}>
+            <Grid container className={stylesObj.flexGrow} wrap="nowrap" spacing={2}>
+              <Grid item xs={3} style={stylesObj.gridWidth}>
+                  <Card style={stylesObj.sideCard} wrap="wrap">
+                      <div style={stylesObj.themePadding}>            
+                        <Typography variant="h6">
+                          <strong>Map name: </strong>{this.state.map.name}
+                        </Typography>
+                        <Typography variant="body1">
+                          <strong>Questionnaire: </strong>{this.state.questionnaire.resource.name}
+                        </Typography>                
+                        <IconButton
+                          edge="start"
+                          color="inherit"
+                          aria-label="menu"
+                          onClick = {() => {window.location = config.base + 'maps/' + this.state.map.uid + "?mode=edit"}}
+                        >
+                          <Edit />
+                        </IconButton>
+                        <br />
+                        <br />
+                        <br />
+                        {this.state.mapCheck &&
+                        <div>
+                          {formatQuestions(this.state.mapCheck)}
+                        </div>
+                        }  
+                      </div>        
+                  </Card>
+              </Grid>
+              <Grid item xs >
+                <UploadCard map={this.state.map}/>
+              </Grid>
+            </Grid>      
+            </div>
+          </>
+        }</>
+      }</>
     );
   }
 }

@@ -3,12 +3,7 @@ import config from "../../config.json";
 export default class api {
     static get(url) {
         return fetch(config.base + url, { credentials: "include" })
-        .then(resp => {
-            if (resp.status < 200 || resp.status >= 300) {
-                throw new Error('Failed to retrieve resource')
-            }
-            return resp.json()
-        })
+        .then(resp => resp.json())
     }
 
     static sendData(url, data, method) {

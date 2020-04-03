@@ -23,14 +23,15 @@ function getSpecificMap(id, _this) {
 function getSpecificQuestionnaire(id, _this) {
 	api.get('api/questionnaires/' + encodeURIComponent(id))
 	.then(questionnaire => {
+		if (questionnaire.hasOwnProperty('message')) {
+			_this.setState({failedToLoad: questionnaire.message, loading: false})	
+		}
 	  _this.setState({"questionnaire": questionnaire});
 	  var mapCheck = {}
 	  mapCheck = validateMap(_this.state.map, questionnaire)
 	  _this.setState({mapCheck: mapCheck, loading: false})
 	})
-	.catch(e => {
-		_this.setState({failedToLoad: 'Failed to load questionnaire from FHIR Server', loading: false})
-	})
+
 }
 
 function extractUnmappedHeaders (map, _this) {

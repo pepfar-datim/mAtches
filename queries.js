@@ -160,13 +160,18 @@ const getSpecificQuestionnaire = (request, response) => {
           .then(res => [res.expansion.contains, url.path])
       )
     )
+    .catch(e=>{
+      response.status(400).json({'message': 'Unable to retrieve Value Sets from FHIR Server'})
+    })
     .then(valueSets => {
+      console.log(valueSets)
       for (vs of valueSets) {
         questionnaire.resource.item = loadValueMaps(questionnaire.resource.item, vs)
       }
       //console.log(JSON.stringify(questionnaire))
       response.status(200).end(JSON.stringify(questionnaire));
-    });
+    })
+
     
     
   })
