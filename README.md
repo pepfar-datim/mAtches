@@ -8,31 +8,9 @@ Data source to target mapping utility
 A. Fork repo
 App is configured to run on port 5001, to change this, edit server.js file, line 6
 
-B. Configure backend locally
-
-Set up instructions assume that you have PostgresSQL installed locally. If not, you will first need to install. The following guides may prove useful (but have not been reviewed for accuracy)
-Windows: https://www.microfocus.com/documentation/idol/IDOL_12_0/MediaServer/Guides/html/English/Content/Getting_Started/Configure/_TRN_Set_up_PostgreSQL.htm
-Mac: https://www.codementor.io/engineerapart/getting-started-with-postgresql-on-mac-osx-are8jcopb
-
-
-1. Connect to postgres
-`psql postgres`
-
-2. Create new role `me`
-`CREATE ROLE me WITH LOGIN PASSWORD 'password';`
-
-3. Give role the permission to create a database
-`ALTER ROLE me CREATEDB;`
-
-4. Create new database `api`
-CREATE DATABASE api;
-
-5. Run commands contained in createDBtables.sql file in same postgres session, or disconnect and run
-`psql -U me -d api -f database/createDBtables.sql`
-
-6. Load Questionnaires into the backend. mAppr currently uses modified FHIR Questionnaires (modified to incorporate answerValueSet for choice valueTypes) (this is a temporary workaround)
-`curl -X POST http://localhost:5001/api/questionnaires -H 'Content-Type:application/json' -d@public/questionnaires/FPques.json`
-`curl -X POST http://localhost:5001/api/questionnaires -H 'Content-Type:application/json' -d@public/questionnaires/HIVque.json`
+B. Update config.json file
+Change any settings (organization name, appName, FHIR Server) in the config.json file (https://github.com/pepfar-datim/mAtches/blob/master/config.json)
+Note that mAtches app requires a FHIR server to be set up with questionnaires.
 
 C. Set up and start frontend
 <br/>
