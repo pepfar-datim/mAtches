@@ -7,6 +7,7 @@
     "@material-ui/core": "^4.3.2",
     "@material-ui/icons": "^4.2.1",
     "@material-ui/system": "^4.3.3",
+    "csv": "^5.3.2",
     "date-fns": "^2.0.0-beta.3",
     "express": "^4.17.1",
     "file-loader": "^5.0.2",
