@@ -1,3 +1,6 @@
 *.DS_Store
 /node_modules/*
 /dist/*
+/persistency/maps/*
+/persistency/questionnaires/*
+!/persistency/maps/README.md
