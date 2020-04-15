@@ -41,7 +41,20 @@ export default class api {
     }
 
     static sendMap(map) {
-        //where POST to OCL will go
+        return fetch(config.externalMappingLocationURL, {
+            method: "POST",
+            mode: "cors",
+            headers: {
+                "Content-Type": "application/json; charset=UTF-8"
+            },
+            body: JSON.stringify(map)
+        }).then(resp => {
+            if (resp.ok) {
+                return resp.json();
+            } else {
+                throw new Error("HTTP Request error");
+            }
+        });
     }
 
     static post(url, data) {

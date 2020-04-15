@@ -142,7 +142,10 @@ class EditCard extends React.Component {
 	}
 
 	sendMap () {
-		// api.sendMap(JSON.stringify(this.props.map));
+		api.sendMap(JSON.stringify(this.props.map))
+		.then(resp => {
+			console.log(resp)
+		});
 		this.setState({buttonDelay: true, submittedMap: JSON.parse(JSON.stringify(this.props.map))})
 		setTimeout(() => { 
 			this.setState({buttonDelay: false})
