@@ -10,7 +10,7 @@ export default function ConstantDialog(props) {
   const choiceValue = !!props.valueArray.length;
   if (choiceValue == true) {
     var choiceCodeMap = props.valueArray.reduce((tempChoiceCodeMap, currentValue) => {
-      tempChoiceCodeMap[currentValue.Code] = currentValue.Display;
+      tempChoiceCodeMap[currentValue.code] = currentValue.display;
       return tempChoiceCodeMap
     }, {});
   }
