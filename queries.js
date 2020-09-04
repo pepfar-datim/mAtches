@@ -5,6 +5,7 @@ const csv = require('csv');
 var fetch = require('node-fetch');
 
 const config = require('./config.json');
+const package = require('./package.json');
 var convert = require('./convert.js');
 var validateServices = require('./validateValueMap.js');
 var validateValueMap = validateServices.validateValueMap;
@@ -69,6 +70,11 @@ const deleteResource = (fileName) => {
     })  
   })
   return promise  
+}
+
+const getAbout = (request, response) => {
+  let aboutInfo = {appName: package.name, version: package.version, buildDate: package.buildDate, repository: package.repository}
+  response.status(200).json(aboutInfo);
 }
 
 const getAll = (request, response) => {
@@ -142,7 +148,7 @@ const getSpecificResource = (request, response) => {
 }
 
 const getSpecificQuestionnaire = (request, response) => {
-  fetch(config.fhirServer + '/Questionnaire/?url=' + request.params.id + '&_format=json')
+  fetch(config.fhirServer + '/Questionnaire/?url=' + encodeURI(request.params.id) + '&_format=json')
   .then(r => {
     if (r.status < 200 || r.status >= 300) {
       response.status(400).send('Unable to retrieve Questionnaires from FHIR Server')
@@ -161,6 +167,7 @@ const getSpecificQuestionnaire = (request, response) => {
       )
     )
     .catch(e=>{
+      console.log(e)
       response.status(400).json({'message': 'Unable to retrieve Value Sets from FHIR Server'})
     })
     .then(valueSets => {
@@ -507,6 +514,7 @@ const uploadData = (request, response) => {
 }
 
 module.exports = {
+  getAbout,
   getAll,
   getFHIRQuestionnaires,
   checkName,

@@ -17,6 +17,8 @@ app.use(express.static(DIST_DIR));
 const config = require('./config.json');
 const basePath = config.base;
 
+app.get(basePath + 'api/about', api.getAbout);
+
 app.get(basePath + 'api/maps', api.getAll);
 
 app.get(basePath + 'api/maps/names/:name', api.checkName);

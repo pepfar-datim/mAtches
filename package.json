@@ -1,7 +1,11 @@
 {
-  "name": "mAppr",
-  "version": "1.0.0",
+  "name": "mAtches",
+  "version": "1.0.1",
+  "buildDate": "2020-09-04T12:18:22.173Z",
   "description": "proof of concept for mAppr",
+  "repository" : {"type": "git", "url": "https://github.com/pepfar-datim/mAtches"},
+  "author": {"name": "Thomas Zemp","email": "tzemp@baosystems.com"},
+  "contributors": [{"name": "Vlad Shioshvili","email": "Vladimer.Shioshvili@icf.com"}],
   "main": "index.js",
   "dependencies": {
     "@material-ui/core": "^4.3.2",
