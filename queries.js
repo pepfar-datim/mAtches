@@ -82,7 +82,7 @@ const getAll = (request, response) => {
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n')
   }
-  readResource('./persistency/' + type + '/' + type + '.json').then((data) => {
+  readResource(config.persistencyLocation + type + '/' + type + '.json').then((data) => {
     if (data.hasOwnProperty('data')) {
       var cleanedData = getAllClean(data.data);
       response.status(200).json(cleanedData); 
@@ -140,7 +140,7 @@ const getSpecificResource = (request, response) => {
   if (!checkTable(type)) {
      response.status(403).end('Invalid\n') 
   }
-  readResource('./persistency/' + type + '/' + request.params.id + '.json').then((data) => {
+  readResource(config.persistencyLocation + type + '/' + request.params.id + '.json').then((data) => {
     if (data.hasOwnProperty('data')) response.status(200).json(data.data);
     if (data.hasOwnProperty('error')) response.status(200).send('');
     response.status(400).end('problem accessing resource');
@@ -227,7 +227,7 @@ const getValueMap = () => {
 
 const checkForSpecificProp = (value, resource, prop) => {
   var promise = new Promise(function(resolve, reject) {
-    readResource('./persistency/' + resource + '/' + resource + '.json').then((data) => {
+    readResource(config.persistencyLocation + resource + '/' + resource + '.json').then((data) => {
       if (data.hasOwnProperty('error')) resolve(data)
       for (var i in data.data) {
         if (data.data[i].hasOwnProperty(prop)) {
@@ -244,7 +244,7 @@ const checkForSpecificProp = (value, resource, prop) => {
 
 const checkForUID = (uid, resource) => {
   var promise = new Promise(function(resolve, reject) {
-    readResource('./persistency/' + resource + '/' + resource + '.json').then((data) => {
+    readResource(config.persistencyLocation + resource + '/' + resource + '.json').then((data) => {
       if (data.hasOwnProperty('error')) resolve(data)
       resolve(data.data.hasOwnProperty(uid))
     })
@@ -302,10 +302,10 @@ const addToSummary = (payload, uid, endpoint) => {
     for (let i=0; i<desiredProperties[endpoint].length; i++) {
       scrubbedObject[desiredProperties[endpoint][i]] = payload[desiredProperties[endpoint][i]];
     }
-    readResource('./persistency/'+ endpoint + '/' + endpoint + '.json').then(file => {
+    readResource(config.persistencyLocation+ endpoint + '/' + endpoint + '.json').then(file => {
       if (file.hasOwnProperty('data')) {
         file.data[uid] = scrubbedObject;
-        writeResource('./persistency/'+ endpoint + '/' + endpoint + '.json', JSON.stringify(file.data)).then(status => {
+        writeResource(config.persistencyLocation+ endpoint + '/' + endpoint + '.json', JSON.stringify(file.data)).then(status => {
           if (status.hasOwnProperty('success')) {
             //add back in map or questionnaire
             scrubbedObject[undesiredProperties[endpoint]] = payload[undesiredProperties[endpoint]];
@@ -359,7 +359,7 @@ const updateMapFiles = (request, response, uid, update) => {
   validateMapPayload(request.body, uid, update).then(validity => {
     if (validity === true) {
       addToSummary(request.body, uid, 'maps').then(result => {
-        writeResource('./persistency/maps/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
+        writeResource(config.persistencyLocation + 'maps/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
           var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
           if (writeStatus.hasOwnProperty('success')) {
             response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');
@@ -412,12 +412,12 @@ const deleteSpecificResource = (request, response) => {
   }  
   var indType = type.substring(0,type.length - 1);
   var uid = request.params.id;
-  readResource('./persistency/' + type + '/' + type + '.json').then(file => {
+  readResource(config.persistencyLocation + type + '/' + type + '.json').then(file => {
     if (file.hasOwnProperty('data')) {
       if (file.data.hasOwnProperty(uid)) {
         delete file.data[uid]
-        writeResource('./persistency/' + type + '/' + type + '.json', JSON.stringify(file.data)).then(a => {
-          deleteResource('./persistency/' + type + '/' + uid + '.json').then(b => {
+        writeResource(config.persistencyLocation + type + '/' + type + '.json', JSON.stringify(file.data)).then(a => {
+          deleteResource(config.persistencyLocation + type + '/' + uid + '.json').then(b => {
             console.log(b)
             if (b.hasOwnProperty('error')) {
               response.status(400).end(JSON.stringify(b.error));
@@ -452,7 +452,7 @@ const createQuestionnaire = (request, response) => {
     payload.updated = now;
   }
   addToSummary(request.body, uid, 'questionnaires').then(result => {
-    writeResource('./persistency/questionnaires/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
+    writeResource(config.persistencyLocation + 'questionnaires/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
       var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
       if (writeStatus.hasOwnProperty('success')) {
         response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded questionnaire for: ' + uid + '"}');
@@ -465,12 +465,12 @@ const createQuestionnaire = (request, response) => {
 const uploadData = (request, response) => {
   var url = decodeURIComponent(request.query.url);
 
-  readResource('./persistency/maps/' + request.params.id + '.json').then((data) => {
+  readResource(config.persistencyLocation + 'maps/' + request.params.id + '.json').then((data) => {
     if (data.hasOwnProperty('data')) {
       var map = {map: data.data.map};
-        readResource('./persistency/maps/' + request.params.id + '.json').then((dataQ) => {
+        readResource(config.persistencyLocation + 'maps/' + request.params.id + '.json').then((dataQ) => {
           if (dataQ.hasOwnProperty('data')) {
-            var questionnaireURL = dataQ.data.url;
+            var questionnaireURL = dataQ.data.questionnaireuid;
                   convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
                     if (result.hasOwnProperty('errors')) {
                       response.status(200).json(result);  

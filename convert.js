@@ -140,10 +140,10 @@ var data = {
   convertValue: function(value, valueMapLocation, row, key) {
     //if there is an error in mapping the value (e.g. map missing, then push error), else convert
     try {
-      if (!this.map[key].hasOwnProperty("choiceMap")) {
+      if (!this.map.headers[key].hasOwnProperty("choiceMap")) {
         throw new Error("Missing a map for values");
       }
-      var valueMap = this.map[key].choiceMap;
+      var valueMap = this.map.headers[key].choiceMap;
       if (valueMap[value] === undefined) {
         throw new Error("Unmapped choice value");
       }

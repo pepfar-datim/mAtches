@@ -12,6 +12,8 @@ B. Update config.json file
 Change any settings (organization name, appName, FHIR Server) in the config.json file (https://github.com/pepfar-datim/mAtches/blob/master/config.json)
 Note that mAtches app requires a FHIR server to be set up with questionnaires.
 
+Configuration file needs to include persitencyLocation variable that points to the location where locally persisted mappings are stored. Empty /maps/maps.json file is expected within the folder identified by the configuration variable.
+
 C. Set up and start frontend
 <br/>
 
