@@ -4,7 +4,7 @@
 	"appName": "mAtches",
 	"allowExternalURL": false,
 	"externalMappingLocation": "OCL",
-	"externalMappingLocationURL": "https://test.ohie.datim.org:5000/ocl-qmap/matches/qmaps",
-	"fhirServer": "https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir",
+	"externalMappingLocationURL": "https://test.ohie.datim.org:5000/ocl-qmap/matches/qmaps/",
+	"fhirServer": "https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/",
 	"persistencyLocation": "/usr/local/mAtches/data/"
 }
