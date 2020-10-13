@@ -5,6 +5,10 @@ describe('The Home Page', () => {
     cy.visit('/')
   })
 
+  after(() => {
+    cy.unseed_incomplete()  
+  })
+
   it('successfully loads', function() {
     cy.url().should('include', '/maps')
   })
@@ -16,7 +20,7 @@ describe('The Home Page', () => {
 
     cy.get('#select-questionnaire')
       .click()
-      .get('[data-value="HIVque"]')
+      .get('[data-value="http://datim.org/fhir/Questionnaire/PLM-HIV-Questionnaire"]')
       .click()
 
     cy.get('#addMapButton')
@@ -30,16 +34,17 @@ describe('The Home Page', () => {
 
     cy.get('#select-questionnaire')
       .click()
-      .get('[data-value="HIVque"]')
+      .get('[data-value="http://datim.org/fhir/Questionnaire/PLM-HIV-Questionnaire"]')
       .click()
 
     cy.get('#addMapButton')
       .click()
   })    
 
-  it('map is findable in table, editable, deletable, and not uploadable against', () => {
+  it('lets you find, edit, delete, and not upload against the test map', () => {
     cy.get('[data-cy=mapsTable]').find('input').first()
       .type('Cypress')
+      .wait(500)
       .should('have.value', 'Cypress')
     cy.get('[data-cy=mapsTable]').find('td')
       .should('contain', 'Cypress-Test')
@@ -49,6 +54,6 @@ describe('The Home Page', () => {
       .should('be.disabled')
       .get('[title="Delete Map"]')
       .should('not.be.disabled')
-  })
+  })  
 
 })

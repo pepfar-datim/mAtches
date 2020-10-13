@@ -24,6 +24,9 @@
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
+const TEST_MAP_NAME_1 = 'Cypress-Test';
+const TEST_MAP_NAME_2 = 'Cypress-Test2';
+
 Cypress.Commands.add('seed_incomplete', () => {
 	cy.request({
 		method: 'GET',
@@ -40,7 +43,7 @@ Cypress.Commands.add('seed_incomplete', () => {
 
 	cy.request({
 		method: 'GET',
-		url: '/api/maps/names/' + encodeURI('Cypress-Test')
+		url: '/api/maps/names/' + encodeURI(TEST_MAP_NAME_1)
 	})
 	.then((response) => {
 		if (response.body.hasOwnProperty('uid')) {
@@ -53,7 +56,7 @@ Cypress.Commands.add('seed_incomplete', () => {
 
 	cy.request({
 		method: 'GET',
-		url: '/api/maps/names/' + encodeURI('Cypress-Test2')
+		url: '/api/maps/names/' + encodeURI(TEST_MAP_NAME_2)
 	})
 	.then((response) => {
 		if (response.body.hasOwnProperty('uid')) {
@@ -68,13 +71,28 @@ Cypress.Commands.add('seed_incomplete', () => {
 		method: 'POST',
 		url: '/api/maps/',
 		body: {
-			name: 'Cypress-Test',
+			name: TEST_MAP_NAME_1,
 			uid: 'gI4MEZ',
 			questionnaireuid: 'HIVque',
 			complete: false,
 			map:{}			
 		}
 	})	
+})
+
+Cypress.Commands.add('unseed_incomplete', () => {
+	cy.request({
+		method: 'GET',
+		url: '/api/maps/'
+	})
+	.then((response) => {
+		let uid = response.body.filter(m => m.name == TEST_MAP_NAME_1)[0].uid;
+		cy.request({
+			method: 'DELETE',
+			url: '/api/maps/' + uid
+		})
+
+	})
 })
 
 Cypress.Commands.add('seed_complete', () => {
