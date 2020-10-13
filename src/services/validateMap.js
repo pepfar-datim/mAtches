@@ -23,11 +23,30 @@ function generateFlatQuestionnaire(obj, fq, path) {
 					fq[obj[i]['linkId']] = {}
 				}
 				var tempPath = path.slice(); //make temp copy to avoid pass by reference
-				tempPath.push({"linkid": obj[i]['linkId'], "text": obj[i]['text']});
-				fq[obj[i]['linkId']]['text'] = obj[i]['text'];
-				if (obj[i].hasOwnProperty('answerValueSet')) {fq[obj[i]['linkId']]['answerValueSet'] = obj[i]['answerValueSet']['concept']}
-				fq[obj[i]['linkId']]['valueType'] = obj[i]['type'];
-				fq[obj[i]['linkId']]['path'] = tempPath;
+				tempPath.push({"linkid": obj[i].linkId, "text": obj[i].text});
+				fq[obj[i].linkId].text = obj[i].text;
+				if (obj[i].hasOwnProperty('answerValueSet')) {
+					fq[obj[i].linkId].answerValueSet = obj[i].answerValueSet.concept;
+					for (var a of fq[obj[i].linkId].answerValueSet) {
+						a.valueType = 'valueCoding'
+					}
+				}
+				if (obj[i].hasOwnProperty('answerOption')) {
+					fq[obj[i].linkId].answerOption = obj[i].answerOption;
+					fq[obj[i].linkId].answerValueSet = []
+					fq[obj[i].linkId].answerValueSet = obj[i].answerOption.map(ans => {
+						keyName = Object.keys(ans).filter(k => k != 'initialSelected')[0];
+						let tempItem = {};
+						if (keyName != 'valueCoding') {
+							tempItem = {code: ans[keyName], display: ans[keyName], valueType: keyName}	
+						} else {
+							tempItem = Object.assign({}, ans[keyName], {valueType: 'valueCoding'})	
+						}
+						return tempItem
+					});
+				}
+				fq[obj[i].linkId].valueType = obj[i].type;
+				fq[obj[i].linkId].path = tempPath;
 
 			}
 		}

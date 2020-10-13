@@ -163,7 +163,19 @@ const getSpecificQuestionnaire = (request, response) => {
       valueSetURLS.map(url => 
         fetch(url.fetchURL)
           .then(res => res.json())
-          .then(res => [res.expansion.contains, url.path])
+          .then(res => {
+            let valueSetSummary = [[],url.path];
+            if (res && res.expansion && res.expansion.contains) {
+              valueSetSummary[0] = res.expansion.contains;
+            }
+            else if (res && res.compose && res.compose.include && res.compose.include.concept) {
+              valueSetSummary[0] = res.compose.include.concept;
+              if (res.compose.system) {
+                for (x of valueSetSummary[0]) {x.system = res.compose.system}
+              }
+            }
+            return valueSetSummary
+          })
       )
     )
     .catch(e=>{
@@ -212,17 +224,6 @@ const getValueMaps = (items, valueSetArray, tempPath) => {
       }
     }
     return valueSetArray
-}
-
-const getValueMap = () => {
-  var promise = new Promise(function(resolve, reject) {
-    fetch(config.fhirServer + '/ValueSet/$expand?url=http%3A%2F%2Fhl7.org%2Ffhir%2FValueSet%2Fadministrative-gender&_format=json')
-    .then(response => response.json())
-    .then(data => {
-      resolve(data.expansion.contains)
-    })    
-  })
-  return promise
 }
 
 const checkForSpecificProp = (value, resource, prop) => {

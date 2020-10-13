@@ -16,29 +16,26 @@ function generateChoiceMap(headerDefinitions, tempValueSet) {
 	}
 	else {
 		for (let i =0; i<tempValueSet.length; i++) {
-			tempChoiceMap[tempValueSet[i].code] = tempValueSet[i].code;
+			tempChoiceMap[tempValueSet[i].code] = {code: tempValueSet[i].code, valueType: tempValueSet[i].valueType};
 		}
 	}
 	return tempChoiceMap
 }
 
 function loadValueSet(tempChoiceMap, tempValueSet) {
-	console.log(JSON.stringify(tempChoiceMap));
-	console.log(JSON.stringify(tempValueSet));
 	var reverseChoiceMap = {}
 
 	for (var k in tempChoiceMap) {
 		if (!reverseChoiceMap.hasOwnProperty(tempChoiceMap[k])) {
-			reverseChoiceMap[tempChoiceMap[k]] = []
+			reverseChoiceMap[tempChoiceMap[k].code] = []
 		}
-		reverseChoiceMap[tempChoiceMap[k]].push(k)
+		reverseChoiceMap[tempChoiceMap[k].code].push(k)
 	}
 	
 	tempValueSet = tempValueSet.map(function(mapItem) {
 		mapItem.maps = reverseChoiceMap.hasOwnProperty(mapItem.code) ? reverseChoiceMap[mapItem.code] : [];
 		return mapItem
 	})
-	console.log(JSON.stringify(tempValueSet));
 	return tempValueSet
 }
 
@@ -73,7 +70,7 @@ class ValueMapCard extends React.Component {
 					<Typography variant="h6" style={stylesObj.marginQuarter}>
 						<strong>{o.display}</strong>
 						<br />
-						{this.formatChips(o.maps, i, o.code)}
+						{this.formatChips(o.maps, i, o.code, o.valueType)}
 					</Typography>
 					<br />
 				</div>
@@ -82,30 +79,30 @@ class ValueMapCard extends React.Component {
 
 	}	
 
-	formatChips(mapValues, index, code) {
+	formatChips(mapValues, index, code, valueType) {
 		return(
 			<div>
 				<ChipInput
 					value={mapValues}
-					onAdd={(chip) => {this.handleAddChip(chip, index, code)}}
-					onDelete={(chip) => {this.handleDeleteChip(chip, index, code)}}
+					onAdd={(chip) => {this.handleAddChip(chip, index, code, valueType)}}
+					onDelete={(chip) => {this.handleDeleteChip(chip, index, code, valueType)}}
 				/>
 			</div>
 		)
 	}
 
-	handleAddChip(chip, index, code) {
+	handleAddChip(chip, index, code, valueType) {
 		chip = chip.trim();
 		if (!this.state.choiceMap.hasOwnProperty(chip)) {
 			var tempChoiceMap = this.state.choiceMap;
 			var tempValueSet = this.state.valueSet;
-			tempChoiceMap[chip] = code;
+			tempChoiceMap[chip] = {code, valueType};
 			tempValueSet[index].maps.push(chip);
 			this.setState({choiceMap: tempChoiceMap, valueSet: tempValueSet})
 		}
 	}
 
-	handleDeleteChip(chip, index, code) {
+	handleDeleteChip(chip, index, code, valueType) {
 		var tempChoiceMap = this.state.choiceMap;
 		var tempValueSet = this.state.valueSet;
 		delete tempChoiceMap[chip];

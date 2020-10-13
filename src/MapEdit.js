@@ -197,6 +197,7 @@ class MapEdit extends Component {
 
   componentDidMount() {
     loadMapQuestionnaire(this.props.id, this);
+    // need to check the answer option set and load as constant if relevant
   }
 
   handleTabChange(event, newValue) {
