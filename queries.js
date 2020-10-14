@@ -42,7 +42,7 @@ const readResource = (fileName) => {
     fs.readFile(fileName, (err, data) => {
       if (err) {
         console.log(err)
-        resolve({"error": err}) 
+        reject({"error": err}) 
       } else {
         var parsedData = JSON.parse(data);
         resolve({"data": parsedData})
@@ -144,7 +144,8 @@ const getSpecificResource = (request, response) => {
     if (data.hasOwnProperty('data')) response.status(200).json(data.data);
     if (data.hasOwnProperty('error')) response.status(200).send('');
     response.status(400).end('problem accessing resource');
-  });  
+  })
+  .catch(() => {response.status(404).end('not found')});  
 }
 
 const getSpecificQuestionnaire = (request, response) => {
