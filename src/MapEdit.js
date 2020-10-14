@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import {Grid, Paper, Card, Typography, IconButton, Edit, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box, CircularProgress} from "@material-ui/core";
+import {Grid, Paper, Card, Typography, IconButton, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box, CircularProgress} from "@material-ui/core";
 
-import {AddCircleOutlined, Publish, ImageSearch}  from "@material-ui/icons";
+import {AddCircleOutlined, Publish, ImageSearch, Edit, Save}  from "@material-ui/icons";
 
 import EditCard from "./EditCard.js";
 import ValueMapCard from "./ValueMapCard.js";
@@ -185,7 +185,8 @@ class MapEdit extends Component {
       mapID: "",
       unmappedHeaders: {},
       value: 0,
-      loading: true   
+      loading: true,
+      editingName: false  
     };
     this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(this);
     this.handleConstantChange = this.handleConstantChange.bind(this);
@@ -193,12 +194,58 @@ class MapEdit extends Component {
     this.handleValueMapClose = this.handleValueMapClose.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
     this.handleMapUpload = this.handleMapUpload.bind(this);
+    this.handleEditMapName = this.handleEditMapName.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
   }
 
   componentDidMount() {
     loadMapQuestionnaire(this.props.id, this);
   }
 
+  handleEditMapName() {
+    if (this.state.editingName) {
+      if (this.state.tempName != this.state.map.name) {
+        let tempMap = Object.assign({},this.state.map);
+        tempMap.name = this.state.tempName;
+        pushMapBack(tempMap, tempMap.complete);
+        this.setState({editingName: false, tempName: '', map: tempMap})  
+      } else {
+        this.setState({editingName: false, tempName: ''})
+      }
+
+      
+    } else {
+      this.setState({editingName: true, tempName: this.state.map.name, validName: true})
+    }
+
+  }
+
+  handleNameChange(event) {
+    var tempName = event.target.value;
+    if (this.state.timeout) {clearTimeout(this.state.timeout)}
+    this.setState({
+      checking: true,
+      tempName: tempName,
+      timeout: setTimeout(() => {
+        this.checkName(tempName, this);
+      }, 1000) 
+    });
+  }
+
+  checkName(name, _this){
+    if (name) {
+      api.get('api/maps/names/' + encodeURI(name))
+      .then(nameFound => {
+        _this.setState({
+          validName: !nameFound.hasOwnProperty('uid'),
+          checking: false
+        })
+      })      
+    } else {
+      _this.setState({validName: false, checking: false})
+    }
+
+  }
   handleTabChange(event, newValue) {
     this.setState({ value: newValue });
   }
@@ -363,8 +410,45 @@ class MapEdit extends Component {
               >
                 <div style={stylesObj.themePadding}>
                   <Typography variant="h6">
-                    <strong>Map name: </strong>
-                    {this.state.map.name}
+                    <strong>Map name: </strong>                 
+                    
+                    {!this.state.editingName &&
+                      <>
+                      <span>{this.state.map.name}</span>
+                      <IconButton
+                        edge="start"
+                        aria-label="menu"
+                        onClick={this.handleEditMapName}
+                        style={stylesObj.nameEditIcon}
+                      >
+                        <Edit />
+                      </IconButton>
+                      </>
+                    }
+                    {this.state.editingName &&
+                      <>
+                      <TextField
+                        style={stylesObj.addHeaderText}
+                        id="name_editedValue"
+                        value={this.state.tempName}
+                        margin="normal"
+                        onChange={this.handleNameChange}
+                      />
+                      <IconButton
+                        edge="start"
+                        aria-label="menu"
+                        onClick={this.handleEditMapName}
+                        style={stylesObj.nameEditIcon}
+                        disabled={!this.state.validName || this.state.checking}
+                      >
+                        <Save />
+                      </IconButton>
+                      {!this.state.validName && 
+                        <Typography variant="body1" style={stylesObj.invalidName}>
+                          Invalid Name
+                        </Typography>}
+                      </>
+                    }                    
                   </Typography>
                   <Typography variant="body1">
                     <strong>Questionnaire: </strong>
