@@ -88,6 +88,10 @@ var stylesObj = {
     "incompleteQuestion": {
       "color": themeColors.warning
     },
+    "invalidName": {
+      "color": themeColors.error,
+      "fontWeight": "bold"  
+    },
     "loaderStyling": {
         "marginLeft": "50%", 
         "marginTop": "20%"
@@ -113,6 +117,9 @@ var stylesObj = {
     "minWidth": {
     	"minWidth": themeSettings.midWidth
 	},
+    "nameEditIcon": {
+        "marginLeft": themeSettings.spacing / 2 + "px"
+    },
     "themePadding": {
     	"padding": themeSettings.spacing * 2 + "px"
     },
