@@ -32,8 +32,8 @@ var data = {
       };
       var pathsChecked = {};
       Object.keys(this.csvData[i]).forEach(key => {
-        var tempValue = this.csvData[i][key];
         if (this.map.headers.hasOwnProperty(key)) {
+          var tempValue = {valueType: this.map.headers[key].valueType, value: this.csvData[i][key]};
           if (this.map.headers[key].valueType == "choice") {
             tempValue = this.convertValue(
               tempValue,
@@ -42,28 +42,31 @@ var data = {
               key
             );
           } else {
-            tempValue = this.evaluateValue(
+            tempValue.value = this.evaluateValue(
               this.csvData[i][key],
-              this.map.headers[key].valueType,
+              tempValue.valueType,
               i,
               key
             );
           }
-          this.addQRItems(
-            QR.item,
-            this.map.headers[key].path,
-            pathsChecked,
-            tempValue,
-            this.map.headers[key].valueType.charAt(0).toUpperCase() +
-              this.map.headers[key].valueType.slice(1)
-          );
+          if (tempValue) {
+            this.addQRItems(
+              QR.item,
+              this.map.headers[key].path,
+              pathsChecked,
+              tempValue.value,
+              tempValue.valueType.charAt(0).toUpperCase() +
+                tempValue.valueType.slice(1)
+            );            
+          }
+
         }
       });
       Object.keys(this.map.constants).forEach(key => {
-      	let tempValue = this.map.constants[key].code;
+      	let tempValue = {value: this.map.constants[key].code, valueType: this.map.constants[key].valueType};
       	//there could be collision in keys between constants and headers here (though unlikely)
-      	tempValue = this.evaluateValue(tempValue, this.map.constants[key].valueType, i, key)
-      	this.addQRItems(QR.item, this.map.constants[key].path, pathsChecked, tempValue, this.map.constants[key].valueType.charAt(0).toUpperCase() + this.map.constants[key].valueType.slice(1));
+      	tempValue.value = this.evaluateValue(tempValue.value, tempValue.valueType, i, key)
+      	this.addQRItems(QR.item, this.map.constants[key].path, pathsChecked, tempValue.value, tempValue.valueType.charAt(0).toUpperCase() + tempValue.valueType.slice(1));
       })
       if (!this.rowErrors.hasOwnProperty(i)) {
         this.QuestionnaireResponses.push(QR);
@@ -137,19 +140,19 @@ var data = {
       this.errors[key][type].push(row);
     }
   },
-  convertValue: function(value, valueMapLocation, row, key) {
+  convertValue: function(valueObject, valueChoiceMap, row, key) {
     //if there is an error in mapping the value (e.g. map missing, then push error), else convert
     try {
-      if (!this.map.headers[key].hasOwnProperty("choiceMap")) {
+      if (valueChoiceMap == undefined) {
         throw new Error("Missing a map for values");
       }
-      var valueMap = this.map.headers[key].choiceMap;
-      if (valueMap[value] === undefined) {
+      if (!valueChoiceMap.hasOwnProperty(valueObject.value)) {
         throw new Error("Unmapped choice value");
       }
-      return valueMap[value];
+      return {value: valueChoiceMap[valueObject.value].code, valueType: valueChoiceMap[valueObject.value].valueType};
     } catch (e) {
-      this.addError(row, key, "invalidValueMapping", value);
+      this.addError(row, key, "invalidValueMapping", valueObject.value);
+      return undefined
     }
   },
   addQRItems: function(tempObject, pathArray, pathsChecked, value, valueType) {
@@ -184,12 +187,12 @@ var data = {
         valueType
       );
     } else {
-      tempObject[indexPosition].answer = {};
+      tempObject[indexPosition].answer = [{}];
       var valueName = "value" + valueType;
       if (valueName == "valueChoice") {
-        tempObject[indexPosition].answer.valueCoding = { code: value };
+        tempObject[indexPosition].answer[0].valueCoding = { code: value };
       } else {
-        tempObject[indexPosition].answer[valueName] = value;
+        tempObject[indexPosition].answer[0][valueName] = value;
       }
     }
   }

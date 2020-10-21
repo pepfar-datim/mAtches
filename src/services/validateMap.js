@@ -28,19 +28,20 @@ function generateFlatQuestionnaire(obj, fq, path) {
 				if (obj[i].hasOwnProperty('answerValueSet')) {
 					fq[obj[i].linkId].answerValueSet = obj[i].answerValueSet.concept;
 					for (var a of fq[obj[i].linkId].answerValueSet) {
-						a.valueType = 'valueCoding'
+						a.valueType = 'choice'
 					}
 				}
 				if (obj[i].hasOwnProperty('answerOption')) {
 					fq[obj[i].linkId].answerOption = obj[i].answerOption;
 					fq[obj[i].linkId].answerValueSet = []
 					fq[obj[i].linkId].answerValueSet = obj[i].answerOption.map(ans => {
-						keyName = Object.keys(ans).filter(k => k != 'initialSelected')[0];
+						let keyName = Object.keys(ans).filter(k => k != 'initialSelected')[0];
 						let tempItem = {};
 						if (keyName != 'valueCoding') {
-							tempItem = {code: ans[keyName], display: ans[keyName], valueType: keyName}	
+							tempItem = {code: ans[keyName], display: ans[keyName], valueType: keyName.replace('value').toLowerCase()}
 						} else {
-							tempItem = Object.assign({}, ans[keyName], {valueType: 'valueCoding'})	
+							tempItem = Object.assign({}, ans[keyName], {valueType: 'choice'})
+							if (!tempItem.display) {tempItem.display = tempItem.code}
 						}
 						return tempItem
 					});

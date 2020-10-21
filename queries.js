@@ -184,7 +184,6 @@ const getSpecificQuestionnaire = (request, response) => {
       response.status(400).json({'message': 'Unable to retrieve Value Sets from FHIR Server'})
     })
     .then(valueSets => {
-      console.log(valueSets)
       for (vs of valueSets) {
         questionnaire.resource.item = loadValueMaps(questionnaire.resource.item, vs)
       }
@@ -420,7 +419,6 @@ const deleteSpecificResource = (request, response) => {
         delete file.data[uid]
         writeResource(config.persistencyLocation + type + '/' + type + '.json', JSON.stringify(file.data)).then(a => {
           deleteResource(config.persistencyLocation + type + '/' + uid + '.json').then(b => {
-            console.log(b)
             if (b.hasOwnProperty('error')) {
               response.status(400).end(JSON.stringify(b.error));
             }
