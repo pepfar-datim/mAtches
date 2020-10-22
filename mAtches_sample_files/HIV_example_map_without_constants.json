@@ -37,9 +37,9 @@
 				}],
 				"valueType": "choice",
 				"choiceMap": {
-					"M": "male",
-					"F": "female",
-					"U": "unknown"
+					"M": {"code": "male", "valueType": "choice"},
+					"F": {"code": "female", "valueType": "choice"},
+					"U": {"code": "unknown", "valueType": "choice"}
 				}
 			},
 			"LocationCode": {
