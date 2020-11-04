@@ -163,36 +163,49 @@ const getSpecificQuestionnaire = (request, response) => {
     Promise.all(
       valueSetURLS.map(url => 
         fetch(url.fetchURL)
-          .then(res => res.json())
-          .then(res => {
-            let valueSetSummary = [[],url.path];
-            if (res && res.expansion && res.expansion.contains) {
-              valueSetSummary[0] = res.expansion.contains;
-            }
-            else if (res && res.compose && res.compose.include && res.compose.include.concept) {
-              valueSetSummary[0] = res.compose.include.concept;
-              if (res.compose.system) {
-                for (x of valueSetSummary[0]) {x.system = res.compose.system}
-              }
-            }
-            return valueSetSummary
-          })
+        .then(res => res.json())
+        .then(res => {
+          let valueSetSummary = [[],url.path];
+          if (res && res.entry && res.entry[0].resource && res.entry[0].resource.id) {
+            return {url: config.fhirServer + '/ValueSet/' + res.entry[0].resource.id + '/$expand?_format=json', path: url.path}
+          }
+        })
       )
     )
     .catch(e=>{
       console.log(e)
       response.status(400).json({'message': 'Unable to retrieve Value Sets from FHIR Server'})
     })
-    .then(valueSets => {
-      for (vs of valueSets) {
-        questionnaire.resource.item = loadValueMaps(questionnaire.resource.item, vs)
-      }
-      //console.log(JSON.stringify(questionnaire))
-      response.status(200).end(JSON.stringify(questionnaire));
+    .then(valueSetIDURLs => {
+      Promise.all(
+        valueSetIDURLs.map(vs =>
+          fetch(vs.url)
+          .then(res2 => res2.json())
+          .then(res2 => {
+            let valueSetSummary = [[],vs.path];
+            if (res2 && res2.expansion && res2.expansion.contains) {
+              valueSetSummary[0] = res2.expansion.contains;
+            }
+            else if (res2 && res2.compose && res2.compose.include && res2.compose.include[0].concept) {
+              valueSetSummary[0] = res2.compose.include[0].concept;
+              if (res2.compose.include[0].system) {
+                for (x of valueSetSummary[0]) {x.system = res2.compose.include[0].system}
+              }
+            }
+            return valueSetSummary
+          }))
+      )
+      .catch(e=>{
+        console.log(e)
+        response.status(400).json({'message': 'Unable to retrieve Value Sets from FHIR Server'})
+      })
+      .then(valueSets => {
+        for (vs of valueSets) {
+          questionnaire.resource.item = loadValueMaps(questionnaire.resource.item, vs)
+        }
+        response.status(200).end(JSON.stringify(questionnaire));
+      })
     })
-
-    
-    
   })
 }
 
@@ -218,7 +231,7 @@ const getValueMaps = (items, valueSetArray, tempPath) => {
           var tempPathCopy = [...tempPath];
           tempPathCopy.push(i);
 
-          var fetchURL = config.fhirServer + '/ValueSet/$expand?url=' + encodeURI(items[i].answerValueSet) + '&_format=json';
+          var fetchURL = config.fhirServer + '/ValueSet?url=' + encodeURI(items[i].answerValueSet) + '&_format=json';
           valueSetArray.push({"fetchURL": fetchURL, path: tempPathCopy})
         }
       }
