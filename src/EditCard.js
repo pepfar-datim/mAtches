@@ -3,6 +3,7 @@ import {Card, Typography, IconButton, TextField, InputLabel, MenuItem, FormHelpe
 
 import SendButtonTooltip from "./SendButtonTooltip.js";
 import ConstantDialog from "./ConstantDialog.js";
+import RequiredNonRequiredSelector from "./RequiredNonRequiredSelector.js";
 
 import SendIcon from '@material-ui/icons/Send';
 import MapIcon from '@material-ui/icons/Map';
@@ -43,64 +44,67 @@ function formatSelect(header,key,map,associationFunction) {
     )
 }
 
-function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, constantChange, setConstantDialogOpen) {
+function formatQuestions(mapCheck,map, associationFunction, valueMapFunction, constantChange, setConstantDialogOpen, itemVisibility) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
   	//let mappedToConstant = !!((Object.keys(mapCheck.flatQuestionnaire[k].constant) || '').length);
   	let mappedToConstant = !!(Object.keys((mapCheck.flatQuestionnaire[k].constant || {})).length);
   	let mappedToHeader = !!((mapCheck.flatQuestionnaire[k].header || '').length);
   	let mappedItem = mappedToConstant || mappedToHeader
     return(
-      <div key={'question-'+i} style={stylesObj.editCardSelectorPadding}>
-        <Typography wrap="noWrap" style={mappedItem ? stylesObj.completeQuestion : stylesObj.incompleteQuestion}>
+      <>
+      {(itemVisibility=='all' || mapCheck.flatQuestionnaire[k].required) &&
+	      <div key={'question-'+i} style={stylesObj.editCardSelectorPadding}>
+	        <Typography wrap="noWrap" style={mappedItem ? stylesObj.completeQuestion : stylesObj.incompleteQuestion}>
 
-          <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
-          {!mappedToConstant && 
-	          <Tooltip title="Replace this item with a constant value">
-		          <IconButton
-		          	onClick={() => {
-		          		let tempValueMap = [];
-		          		if (mapCheck.flatQuestionnaire[k].valueType == 'choice') {
-		          			tempValueMap = mapCheck.flatQuestionnaire[k]['answerValueSet'];
-		          		}
-		          		setConstantDialogOpen(mapCheck.flatQuestionnaire[k].text, k, tempValueMap, mapCheck.flatQuestionnaire[k].valueType, mapCheck.flatQuestionnaire[k].path)}
-		          	}
-		          >		          	
-		          	<LinkIcon />
-		          </IconButton>
-		      </Tooltip>
-		   }
-        </Typography>
-        {!mappedToConstant && 
-        	<div>
-				{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
-				<br />
-				{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
-					<Button 
-						variant="contained" 
-						style={getValueMapButtonStyle(mapCheck.flatQuestionnaire[k], (map.headers[mapCheck.flatQuestionnaire[k].header] || {}))}
-						onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
-						disabled={!(mapCheck.flatQuestionnaire[k].header || '').length}
-					>
-					Map values
-					<MapIcon style={stylesObj.editCardSelectorButtonIcon} />			
-					</Button>
-				}
-			</div>
-		}
-		{mappedToConstant && 
-			<Typography wrap="noWrap">
-				<span>{'Constant value: ' + mapCheck.flatQuestionnaire[k].constant.display}</span>
-				<Tooltip title="Remove link to constant value and map to header">
-					<IconButton
-						onClick = {() => {constantChange(k, 'delete')}}
-					>
-						<LinkOffIcon />
-					</IconButton>
-				</Tooltip>
-			</Typography>	
-		}
-      </div>
-
+	          <strong>{mapCheck.flatQuestionnaire[k].required && "* "}{mapCheck.flatQuestionnaire[k].text}</strong>
+	          {!mappedToConstant && 
+		          <Tooltip title="Replace this item with a constant value">
+			          <IconButton
+			          	onClick={() => {
+			          		let tempValueMap = [];
+			          		if (mapCheck.flatQuestionnaire[k].valueType == 'choice') {
+			          			tempValueMap = mapCheck.flatQuestionnaire[k]['answerValueSet'];
+			          		}
+			          		setConstantDialogOpen(mapCheck.flatQuestionnaire[k].text, k, tempValueMap, mapCheck.flatQuestionnaire[k].valueType, mapCheck.flatQuestionnaire[k].path)}
+			          	}
+			          >		          	
+			          	<LinkIcon />
+			          </IconButton>
+			      </Tooltip>
+			   }
+	        </Typography>
+	        {!mappedToConstant && 
+	        	<div>
+					{formatSelect(mapCheck.flatQuestionnaire[k].header,k,map,associationFunction)}
+					<br />
+					{(mapCheck.flatQuestionnaire[k].valueType == 'choice') &&
+						<Button 
+							variant="contained" 
+							style={getValueMapButtonStyle(mapCheck.flatQuestionnaire[k], (map.headers[mapCheck.flatQuestionnaire[k].header] || {}))}
+							onClick={() => { valueMapFunction(mapCheck.flatQuestionnaire[k].header,k)}}
+							disabled={!(mapCheck.flatQuestionnaire[k].header || '').length}
+						>
+						Map values
+						<MapIcon style={stylesObj.editCardSelectorButtonIcon} />			
+						</Button>
+					}
+				</div>
+			}
+			{mappedToConstant && 
+				<Typography wrap="noWrap">
+					<span>{'Constant value: ' + mapCheck.flatQuestionnaire[k].constant.display}</span>
+					<Tooltip title="Remove link to constant value and map to header">
+						<IconButton
+							onClick = {() => {constantChange(k, 'delete')}}
+						>
+							<LinkOffIcon />
+						</IconButton>
+					</Tooltip>
+				</Typography>	
+			}
+	      </div>
+	    }
+	    </>
     )
   })  
 }
@@ -127,10 +131,16 @@ class EditCard extends React.Component {
 			qID: '',
 			valueArray: [],
 			valueType: '',
-			path: []
+			path: [],
+			itemVisibility: 'all'
 		};
 		this.setConstantDialogOpen = this.setConstantDialogOpen.bind(this);
+		this.handleVisibilityChange = this.handleVisibilityChange.bind(this)
 	}
+
+	handleVisibilityChange(text) {
+		this.setState({ itemVisibility: text });
+	}	
 
 	setConstantDialogOpen(ch, qID, vm, vt, path) {
 		let tempConstantHeader = (typeof(ch) == 'string') ? ch : '';
@@ -163,10 +173,19 @@ class EditCard extends React.Component {
 	          		<Typography variant="h6" style={stylesObj.marginQuarterBottom}>
 	            		<strong>Map Source Headers to Target Questions</strong>
 	          		</Typography>
+	          		<Typography variant="body1" style={stylesObj.marginQuarterBottom}>
+	            		<strong>*</strong> denotes required item
+	          		</Typography>
+
+					<RequiredNonRequiredSelector
+						itemVisibility={this.state.itemVisibility}
+						handleVisibilityChange={this.handleVisibilityChange}
+					/>	          		
+
 	          		<div style={stylesObj.themePaddingQuarter}>
 	                {this.props.mapCheck && this.props.map &&
 	                <div>
-	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap, this.props.constantChange, this.setConstantDialogOpen)}
+	                  {formatQuestions(this.props.mapCheck, this.props.map.map, this.props.onAssociation, this.props.onValueMap, this.props.constantChange, this.setConstantDialogOpen, this.state.itemVisibility)}
 	                </div>
 
 	                }  

@@ -42,6 +42,9 @@ function getCurrentAssociation(tempCheck, prop) {
 function checkValidity(flatQuestionnaire, mappings) {
   let mapValidity = true;
   for (var k in flatQuestionnaire) {
+    if (!flatQuestionnaire[k].required) {
+      break
+    }
     let mappedToHeader = !!(flatQuestionnaire[k].header || '').length;
     let mappedToConstant = !!(Object.keys((flatQuestionnaire[k].constant || {})).length);
     mapValidity = !(mappedToHeader == mappedToConstant);

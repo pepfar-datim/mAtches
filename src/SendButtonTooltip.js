@@ -4,10 +4,12 @@ import {Typography} from '@material-ui/core';
 function generateEmptyQuestions(flatQuestionnaire) {
 	let tempEmptyQuestions = [];
 	Object.keys(flatQuestionnaire).map(k => {
-		let mappedToHeader = !!(flatQuestionnaire[k].header || '').length;
-		let mappedToConstant = !!((flatQuestionnaire[k].constant || {}).code || '').length;
-		if (!mappedToHeader && !mappedToConstant) {
-			tempEmptyQuestions.push(flatQuestionnaire[k].text);
+		if (flatQuestionnaire[k].required) {
+			let mappedToHeader = !!(flatQuestionnaire[k].header || '').length;
+			let mappedToConstant = !!((flatQuestionnaire[k].constant || {}).code || '').length;
+			if (!mappedToHeader && !mappedToConstant) {
+				tempEmptyQuestions.push(flatQuestionnaire[k].text);
+			}			
 		}
 	}, tempEmptyQuestions)
 	return tempEmptyQuestions
