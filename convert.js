@@ -34,32 +34,35 @@ var data = {
       Object.keys(this.csvData[i]).forEach(key => {
         if (this.map.headers.hasOwnProperty(key)) {
           var tempValue = {valueType: this.map.headers[key].valueType, value: this.csvData[i][key]};
-          if (this.map.headers[key].valueType == "choice") {
-            tempValue = this.convertValue(
-              tempValue,
-              this.map.headers[key].choiceMap,
-              i,
-              key
-            );
-          } else {
-            tempValue.value = this.evaluateValue(
-              this.csvData[i][key],
-              tempValue.valueType,
-              i,
-              key
-            );
+          var requiredItem = this.map.headers[key].path[this.map.headers[key].path.length - 1].required || false
+          // if item is required or if item is not blank, process
+          if (requiredItem || tempValue.value.trim().length) {
+            if (this.map.headers[key].valueType == "choice") {
+              tempValue = this.convertValue(
+                tempValue,
+                this.map.headers[key].choiceMap,
+                i,
+                key
+              );
+            } else {
+              tempValue.value = this.evaluateValue(
+                this.csvData[i][key],
+                tempValue.valueType,
+                i,
+                key
+              );
+            }
+            if (tempValue) {
+              this.addQRItems(
+                QR.item,
+                this.map.headers[key].path,
+                pathsChecked,
+                tempValue.value,
+                tempValue.valueType.charAt(0).toUpperCase() +
+                  tempValue.valueType.slice(1)
+              );            
+            }            
           }
-          if (tempValue) {
-            this.addQRItems(
-              QR.item,
-              this.map.headers[key].path,
-              pathsChecked,
-              tempValue.value,
-              tempValue.valueType.charAt(0).toUpperCase() +
-                tempValue.valueType.slice(1)
-            );            
-          }
-
         }
       });
       Object.keys(this.map.constants).forEach(key => {

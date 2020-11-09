@@ -9,6 +9,16 @@ import loadMapQuestionnaire from './services/loadMapQuestionnaire.js';
 
 import {stylesObj} from './styling/stylesObj.js';
 
+function formatMapping(item) {
+  if (item.hasOwnProperty('header')) {
+    return item.header
+  }
+  if (item.hasOwnProperty('constant')) {
+    return item.constant.code
+  }
+  return ''
+}
+
 function formatQuestions(mapCheck) {
   return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
     return(
@@ -17,7 +27,7 @@ function formatQuestions(mapCheck) {
           <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
         </Typography>
         <Typography wrap="noWrap">
-          {mapCheck.flatQuestionnaire[k].header || mapCheck.flatQuestionnaire[k].constant.code + ' (constant)' || ''}
+          {formatMapping(mapCheck.flatQuestionnaire[k])}
         </Typography>
         <br />
       </div>  
