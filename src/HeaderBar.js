@@ -1,11 +1,15 @@
 import React from "react";
 import {AppBar, Toolbar, Typography, IconButton} from "@material-ui/core";
-import {Settings, Menu, Help} from "@material-ui/icons";
+import {Settings, Home, Help} from "@material-ui/icons";
 import match from '../public/images/match_color.png'; // Tell Webpack this JS file uses this image
 
 import config from '../config.json'
 
 import {stylesObj} from './styling/stylesObj.js';
+
+function goHome() {
+	window.location = config.base + 'maps/';
+}
 
 function HeaderBar() {
 
@@ -13,8 +17,13 @@ function HeaderBar() {
 		<div data-cy="headerBar">
 			<AppBar position="relative" style={stylesObj.headerBar}>
 				<Toolbar>
-					<img src={match} alt="match" />
-					<Typography style={stylesObj.themePadding} variant="h5" color="inherit">
+					<img style={stylesObj.headerLink} src={match} alt="match" onClick={() => { window.location = config.base + 'maps/' }}/>
+					<Typography 
+						style={{...stylesObj.themePadding,...stylesObj.headerLink}}
+						variant="h5" 
+						color="inherit"
+						onClick={() => { window.location = config.base + 'maps/' }}
+					>
 						{config.appName}
 					</Typography>
 					<Typography
@@ -30,7 +39,7 @@ function HeaderBar() {
 							aria-label="menu"
 							onClick={() => { window.location = config.base + 'maps/' }}
 						>
-							<Menu />
+							<Home />
 						</IconButton>
 						<IconButton
 							edge="start"

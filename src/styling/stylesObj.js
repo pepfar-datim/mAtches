@@ -82,6 +82,9 @@ var stylesObj = {
         "position": "absolute",
         "right": "0px"
     },
+    "headerLink": {
+        "cursor": "pointer"
+    },
     "hidden": {
     	"visibility": "hidden"
     },
