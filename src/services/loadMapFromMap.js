@@ -11,33 +11,32 @@ function checkFQ(flatQuestionnaire, path, linkid) {
 
 }
 
-function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {
+function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {	
 	var returnObj = {};
-	for (var header in baseMap) {
-		//if not in newMap, add 
-		if (!newMap.map.hasOwnProperty(header)) {
-			newMap.map[header] = {}
+	for (var header in baseMap.map.headers) {
+		if (!newMap.map.headers.hasOwnProperty(header)) {
+			newMap.map.headers[header] = {}
 			unmappedHeaders[header] = {}
 		}
 
-		if (baseMap[header].hasOwnProperty("path")) {
-			var linkid = baseMap[header]["path"].slice(-1)[0]["linkid"];
-			var match = checkFQ(flatQuestionnaire, baseMap[header]["path"], linkid)
+		if (baseMap.map.headers[header].hasOwnProperty("path")) {
+			var linkid = baseMap.map.headers[header]["path"].slice(-1)[0]["linkid"];
+			var match = checkFQ(flatQuestionnaire, baseMap.map.headers[header]["path"], linkid)
 
 			if (match) {
 
 				//if there is a match to Questionnaire, copy properties from Base Map and make association
 				var propertiesToCopy = ['path', 'valueType', 'choiceMap']
 				for (let i =0; i<propertiesToCopy.length; i++) {
-					if (baseMap[header].hasOwnProperty(propertiesToCopy[i])) {
-						newMap.map[header][propertiesToCopy[i]] = JSON.parse(JSON.stringify(baseMap[header][propertiesToCopy[i]]));
+					if (baseMap.map.headers[header].hasOwnProperty(propertiesToCopy[i])) {
+						newMap.map.headers[header][propertiesToCopy[i]] = JSON.parse(JSON.stringify(baseMap.map.headers[header][propertiesToCopy[i]]));
  					}
 				}
 
 				//remove existing association in flatQuestionnaire from map (if different header)
 				if (flatQuestionnaire[linkid].hasOwnProperty('header')) {
-					if (newMap.map.hasOwnProperty(flatQuestionnaire[linkid]['header']) && flatQuestionnaire[linkid]['header'] != header) {
-						delete newMap.map[flatQuestionnaire[linkid]['header']];
+					if (newMap.map.headers.hasOwnProperty(flatQuestionnaire[linkid]['header']) && flatQuestionnaire[linkid]['header'] != header) {
+						delete newMap.map.headers[flatQuestionnaire[linkid]['header']];
 					}
 				}
 

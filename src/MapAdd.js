@@ -9,18 +9,20 @@ import api from "./services/api.js";
 import {stylesObj} from './styling/stylesObj.js'
 
 class MapAdd extends Component {
-  // Initialize the state
-  constructor(props){
-    super(props);
-    this.state = {
-      'invalidName': false,
-      'questionnaire': '',
-      'name': ''
-    }
-  }
 
-handleQuestionnaireChange(event){
-  this.setState({questionnaire: event.target.value})
+constructor(props){
+  super(props);
+  this.state = {
+    'invalidName': false,
+    'questionnaire': '',
+    'name': '',
+    'fileType': '',
+  }
+  this.handleSelectChange.bind(this)
+}
+
+handleSelectChange(value, key){
+  this.setState({[key]: value})
 }
 
 handleNameChange(event) {
@@ -49,13 +51,13 @@ handleAdd() {
 	if (!this.state.invalidName) {
 	    var payload = {
 	    	"map": {"headers": {}, "constants": {}},
+        "fileType": this.state.fileType,
 	    	"name": this.state.name,
 	    	"questionnaireuid": this.state.questionnaire
 	    }
 	    api.post('api/maps', payload)
-		.then(response => {
-			response = JSON.parse(response) //not sure why this is necessary and why it's a string after .json() step above
-		    window.location = config.base + 'maps/' + response.uid + '?mode=edit'
+    .then(response => {
+		  window.location = config.base + 'maps/' + response.uid + '?mode=edit'
 		})
 	}  
 }
@@ -67,18 +69,39 @@ render() {
       <div style={stylesObj.themePadding}>
         <Paper style={stylesObj.addBox}>
           <div style={stylesObj.themePadding}>
-            <Typography variant="h6" style={{ paddingBottom: "20px" }}>
+            <Typography variant="h6" style={stylesObj.themePaddingBottom}>
               Create a new map
             </Typography>
-            <FormControl style={stylesObj.themeWidth} >
+            <FormControl style={{...stylesObj.themeWidth, ...stylesObj.themePaddingBottom}} >
               <InputLabel shrink htmlFor="questionnaire-select">
                 Questionnaire
               </InputLabel>
-              <Select value={this.state.questionnaire} displayEmpty name="questionnaire" onChange={this.handleQuestionnaireChange.bind(this)}>
+              <Select 
+                value={this.state.questionnaire} 
+                displayEmpty 
+                name="questionnaire" 
+                onChange={e => this.handleSelectChange(e.target.value, 'questionnaire')}
+              >
                 {Object.keys(questionnaireHash).map((uid, index) =>
                     <MenuItem value={uid}>{questionnaireHash[uid]}</MenuItem>
                 )}     
-              </Select>
+              </Select>             
+            </FormControl>
+            <br />
+            <FormControl style={{...stylesObj.themeWidth}} >
+              <InputLabel shrink htmlFor="fileType-select">
+                File Type
+              </InputLabel>
+              <Select 
+                value={this.state.fileType} 
+                displayEmpty 
+                name="fileType"
+                onChange={e => this.handleSelectChange(e.target.value, 'fileType')}>
+              >
+                {['csv', 'json'].map((type) =>
+                    <MenuItem value={type}>{type}</MenuItem>
+                )}     
+              </Select>           
             </FormControl>
             <br />
             <TextField
@@ -95,7 +118,7 @@ render() {
             <IconButton
               edge="start"
               aria-label="menu"
-              disabled={this.state.invalidName || this.state.checking || !this.state.name || !this.state.questionnaire}
+              disabled={this.state.invalidName || this.state.checking || !this.state.name || !this.state.questionnaire || !this.state.fileType}
               id="addMapButton"
               onClick={this.handleAdd.bind(this)}
             >

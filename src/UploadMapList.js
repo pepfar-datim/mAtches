@@ -28,7 +28,7 @@ function formatMapList(maps, searchText, currentMapID, onMapProcess, currentStep
         				    <IconButton
 					            edge="start"
 					            aria-label="menu"
-								onClick={() => {onMapProcess(k.map)}}					            
+								onClick={() => {onMapProcess(k.uid)}}					            
       						>
       							<Sync />
       						</IconButton>

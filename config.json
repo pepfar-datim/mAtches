@@ -2,7 +2,7 @@
 	"base": "/",
 	"name": "PEPFAR PLM Team",
 	"appName": "mAtches",
-	"allowExternalURL": false,
+	"allowExternalURL": true,
 	"externalMappingLocation": "OCL",
 	"externalMappingLocationURL": "https://test.ohie.datim.org:5000/ocl-qmap/matches/qmaps/",
 	"fhirServer": "https://test.ohie.datim.org/hapi-fhir-jpaserver/fhir/",

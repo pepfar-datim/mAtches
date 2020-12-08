@@ -16,10 +16,6 @@ import config from '../config.json'
 
 import {stylesObj} from './styling/stylesObj.js';
 
-function handleChange(event) {
-	console.log(event)
-}
-
 function formatMenuItems(currentMap) {
  	return Object.keys(currentMap.headers).map(function (k, i) {
 		return(

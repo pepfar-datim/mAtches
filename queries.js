@@ -77,6 +77,11 @@ const getAbout = (request, response) => {
   response.status(200).json(aboutInfo);
 }
 
+const getFileTypes = (request, response) => {
+  filesTypes = ['CSV', 'JSON'];
+  response.status(200).json(fileTypes);
+}
+
 const getAll = (request, response) => {
   var type = request.path.split('/')[splitNumber];
   if (!checkTable(type)) {
@@ -304,7 +309,7 @@ const addToSummary = (payload, uid, endpoint) => {
       payload.complete = false;
     }
     var desiredProperties = {
-      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete'],
+      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete', 'fileType'],
       "questionnaires": ['name', 'created', 'updated', 'uid']
     };
     var undesiredProperties = {
@@ -376,7 +381,7 @@ const updateMapFiles = (request, response, uid, update) => {
         writeResource(config.persistencyLocation + 'maps/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
           var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
           if (writeStatus.hasOwnProperty('success')) {
-            response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');
+            response.status(200).json({uid, "message": "success"});
           }
           response.status(400).end(JSON.stringify(error));
         })            
@@ -389,7 +394,6 @@ const updateMapFiles = (request, response, uid, update) => {
 }
 
 const createMap = (request, response) => {
-  var map = request.body;
   var uid = helpers.generateUID(); //should define as random at first and then redefine
 
   if (request.body.hasOwnProperty('uid')) {
@@ -530,6 +534,7 @@ module.exports = {
   getAbout,
   getAll,
   getFHIRQuestionnaires,
+  getFileTypes,
   checkName,
   getSpecificResource,
   getSpecificQuestionnaire,

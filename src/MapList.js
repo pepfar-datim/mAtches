@@ -76,9 +76,10 @@ class MapList extends Component {
 		        title="My maps"
 		        icons={tableIcons}
 		        columns={[
-		          { title: 'Name', field: 'name' },
+		          { title: 'Name', field: 'name' },		          
 		          { title: 'Questionnaire', field: 'questionnaireuid', lookup: this.props.questionnaireHash },
-		          { title: 'Updated', field: 'updated', type: 'numeric' }
+		          { title: 'File Type', field: 'fileType' },
+		          { title: 'Updated', field: 'updated', type: 'date' }
 		        ]}
 		        data={this.state.maps}
 		        actions={[

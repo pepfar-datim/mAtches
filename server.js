@@ -19,6 +19,8 @@ const basePath = config.base;
 
 app.get(basePath + 'api/about', api.getAbout);
 
+app.get(basePath + 'api/fileTypes', api.getFileTypes);
+
 app.get(basePath + 'api/maps', api.getAll);
 
 app.get(basePath + 'api/maps/names/:name', api.checkName);

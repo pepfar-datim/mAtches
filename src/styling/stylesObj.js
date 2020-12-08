@@ -70,6 +70,9 @@ var stylesObj = {
     },
     "editCardUploadButtonEnabled": {
         "backgroundColor": themeColors.success
+    },
+    "errorText": {
+        "color": themeColors.error,
     },    
     "gridWidth": {
     	"maxWidth": "300px"
@@ -111,6 +114,9 @@ var stylesObj = {
     "mappingBoxBanner": {
     	"backgroundColor": themeColors.primaryDark,
     },
+    "mapTextEnd": {
+        "paddingBottom": themeSettings.spacing * 2 + "px"
+    },
     "marginQuarter": {
         "margin": themeSettings.spacing / 2 + "px"
     },    
@@ -151,6 +157,9 @@ var stylesObj = {
     "tabIndicator": {
     	"backgroundColor": themeColors.highlightColor,
     	"textColor": themeColors.highlightColor
+    },
+    "textBold": {
+        "fontWeight": "bold",
     },
     "unmappedChip": {
         "margin": "5px",
