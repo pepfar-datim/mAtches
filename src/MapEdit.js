@@ -97,14 +97,41 @@ function handleDelete(header) {
   pushMapBack(tempMap, mapValidity);
 }
 
-function processAdd(tempMap, tempUnmappedHeaders, tempHeader) {
+function processAdd(tempMap, tempUnmappedHeaders, tempHeader, headerPath) {
   if (!tempMap.map.headers.hasOwnProperty(tempHeader)) {
-    tempMap.map.headers[tempHeader] = {};
+    tempMap.map.headers[tempHeader] = {headerPath};
     if (!tempUnmappedHeaders.hasOwnProperty(tempHeader)) {
-      tempUnmappedHeaders[tempHeader] = {};
+      tempUnmappedHeaders[tempHeader] = {headerPath};
     }
   }
   return {tempMap, tempUnmappedHeaders};
+}
+
+function parseJSON(obj, path, tempMap, tempUnmappedHeaders) {
+  for (let key in obj) {
+    let updatedPath = [...path, key]
+    if (Array.isArray(obj[key])) {
+      for (let i = 0; i < obj[key].length; i++) {
+        if (typeof(obj[key][i]) === 'object') {
+          ({tempMap, tempUnmappedHeaders} = parseJSON(obj[key][i], [...updatedPath, i], tempMap, tempUnmappedHeaders))
+        } else {
+          ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, extractHeaderFromPath([...updatedPath, i]), [...updatedPath, i]))
+        }
+      }
+    } else if (typeof(obj[key]) === 'object') {
+      ({tempMap, tempUnmappedHeaders} = parseJSON(obj[key], updatedPath, tempMap, tempUnmappedHeaders))
+    } else {
+      ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, extractHeaderFromPath(updatedPath), updatedPath))
+    }
+  }
+  return {tempMap, tempUnmappedHeaders}
+}
+
+function extractHeaderFromPath(path) {
+  return path.reduce((accum, cv, ind) => {
+    if (ind > 0 && !Number.isInteger(cv)) {accum = accum + '.'}
+    return Number.isInteger(cv) ? accum + '[' + cv + ']' : accum + cv 
+  }, '')
 }
 
 function readFileContent(file) {
@@ -122,7 +149,7 @@ class MapEdit extends Component {
       return (
         <div key={"chip_" + i}>
           <Chip
-            label={k}
+            label={k.length > 30 ? k.substring(0,30) + '...' : k}
             onDelete={handleDelete.bind(_this, k)}
             style={currentMap.headers[k].hasOwnProperty('path') ? stylesObj.mappedChip : stylesObj.unmappedChip}
             data-cy={"chip_" + k}
@@ -146,7 +173,8 @@ class MapEdit extends Component {
       tabChoice: 0,
       loading: true,
       editingName: false,
-      headerUsed: false, 
+      headerUsed: false,
+      fileError: false,
     };
     this.handleAdd = this.handleAdd.bind(this);
     this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(this);
@@ -159,6 +187,8 @@ class MapEdit extends Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleMapNameChange = this.handleMapNameChange.bind(this);
     this.handleUpload = this.handleUpload.bind(this);
+    this.processCSV = this.processCSV.bind(this);
+    this.processJSON = this.processJSON.bind(this);
   }
 
   componentDidMount() {
@@ -175,7 +205,7 @@ class MapEdit extends Component {
       this.setState({headerUsed: true})
     }
     if (!this.state.map.map.headers.hasOwnProperty(tempHeader)) {
-      let {tempMap, tempUnmappedHeaders} = processAdd(this.state.map, this.state.unmappedHeaders, tempHeader);
+      let {tempMap, tempUnmappedHeaders} = processAdd(this.state.map, this.state.unmappedHeaders, tempHeader, [tempHeader]);
       var mapValidity = false; //map validity is false when you add a header because it's not associated yet
       this.setState({
         map: tempMap,
@@ -218,10 +248,6 @@ class MapEdit extends Component {
         this.checkName(tempName);
       }, 1000)
     });
-  }
-
-  checkName() {
-    // check name
   }
 
   handleMapNameChange(event) {
@@ -363,27 +389,61 @@ class MapEdit extends Component {
   }
 
   processCSV(csvText) {
-    var columnRow = csvText.split(/\r\n|\n/)[0];
-    var columns = columnRow.split(",");
-    var tempMap = this.state.map;
-    var originalMap = JSON.parse(JSON.stringify(tempMap));
-    var tempUnmappedHeaders = this.state.unmappedHeaders;
-    var mapValidity = true;
-    for (let i = 0; i < columns.length; i++) {
-      var addResult = processAdd(tempMap, tempUnmappedHeaders, columns[i]);
-      tempMap = addResult[0];
-      tempUnmappedHeaders = addResult[1];
+    try {
+      let columns = csvText.split(/\r\n|\n/)[0].split(",");
+      let tempMap = JSON.parse(JSON.stringify(this.state.map));
+      let originalMap = JSON.parse(JSON.stringify(tempMap));
+      let tempUnmappedHeaders = JSON.parse(JSON.stringify(this.state.unmappedHeaders));
+      let mapValidity = true;
+      for (let i = 0; i < columns.length; i++) {
+        ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, columns[i], [columns[i]]))
+      }
+      if (tempMap != originalMap) {
+        this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
+        pushMapBack(tempMap, mapValidity);
+      }
+    } catch (e) {
+      console.log(e)
+      this.setState({fileError: true})
     }
-    if (tempMap != originalMap) {
-      this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
-      pushMapBack(tempMap, mapValidity);
+  }
+
+  processJSON(jsonObj) {
+    try {
+      let obj = JSON.parse(jsonObj);
+      if (Array.isArray(obj)) {obj = obj[0]}
+      if (typeof(obj) !== 'object') {throw new Error('File is not a valid JSON object')}
+
+      let tempMap = JSON.parse(JSON.stringify(this.state.map));
+      let originalMap = JSON.parse(JSON.stringify(tempMap));
+      let tempUnmappedHeaders = JSON.parse(JSON.stringify(this.state.unmappedHeaders));
+      let mapValidity = true;
+
+      ({tempMap, tempUnmappedHeaders} = parseJSON(obj, [], tempMap, tempUnmappedHeaders))
+      if (tempMap != originalMap) {
+        this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
+        pushMapBack(tempMap, mapValidity);
+      }
+
+    } catch (e) {
+      console.log(e);
+      this.setState({fileError: true});
     }
   }
 
   handleUpload(e) {
+    this.setState({fileError: false})
     e.preventDefault();
-    uploadFile(e, this).then(csvFile => {
-      this.processCSV(csvFile);
+    uploadFile(e, this).then(fileText => {
+      switch (this.state.map.fileType) {
+        case 'json':
+          this.processJSON(fileText);
+          break;
+        default:
+          this.processCSV(fileText);
+          break;
+      }
+      
     });
   }
 
@@ -465,6 +525,7 @@ class MapEdit extends Component {
                     </span>
                   </Typography>
                   <UploadSource 
+                    fileError = {this.state.fileError}
                     fileType = {this.state.map.fileType || 'csv'}
                     handleAdd = {this.handleAdd}
                     handleMapUpload = {this.handleMapUpload}

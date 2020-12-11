@@ -15,8 +15,8 @@ export function uploadFile(e,_this) {
 		
 		_this.setState({fileName: files[0].name})
 
-		readFileContent(files[0]).then((csvText) => {
-			resolve(csvText)
+		readFileContent(files[0]).then((fileText) => {
+			resolve(fileText)
 		})
 	    
 	})

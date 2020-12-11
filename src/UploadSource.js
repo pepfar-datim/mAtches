@@ -112,6 +112,14 @@ export default function UploadSource(props) {
               onChange={(ev) => props.handleUpload(ev)}
             />
           </form>
+          {props.fileError &&
+            <Typography
+              variant="body1"
+              style = {stylesObj.errorText}
+            >
+              {'Invalid ' + props.fileType + ' file'}
+            </Typography>
+          }          
           <br />
         </div>
         <div hidden={isInteractionHidden(2, undefined)}>
