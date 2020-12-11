@@ -147,6 +147,12 @@ var stylesObj = {
     "flexGrow": {
         "flexGrow": 1
     },
+    "resetSourceButton": {
+        "textTransform": "none",
+        "marginTop": themeSettings.spacing * 2 + "px",
+        "marginBottom": themeSettings.spacing * 2 + "px", 
+        "backgroundColor": themeColors.secondaryDark
+    },    
     "sideCard": {
         "backgroundColor": themeColors.primary,
         "height": "100%"

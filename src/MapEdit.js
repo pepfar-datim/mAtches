@@ -1,7 +1,7 @@
 import React, { Component } from "react";
-import {Grid, Paper, Card, Typography, IconButton, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box, CircularProgress} from "@material-ui/core";
+import {Grid, Paper, Card, Typography, IconButton, Button, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box, CircularProgress} from "@material-ui/core";
 
-import {AddCircleOutlined, Publish, ImageSearch, Edit, Save}  from "@material-ui/icons";
+import {AddCircleOutlined, Publish, ImageSearch, Edit, Save, DeleteForever}  from "@material-ui/icons";
 
 import EditCard from "./EditCard.js";
 import ValueMapCard from "./ValueMapCard.js";
@@ -163,7 +163,22 @@ class MapEdit extends Component {
   formatHeaders(currentMap, _this) {
     if (this.state.map.fileType == 'json' && this.state.map.headersStructure) {
         return (
-          <TreeNavigation data={this.state.map.headersStructure}></TreeNavigation>
+          <>
+            <Button 
+              variant="contained" 
+              style={stylesObj.resetSourceButton}
+              onClick={() => {this.clearJSON()}}
+            >
+              Reset Source
+              <DeleteForever />      
+            </Button>
+            {Object.keys(this.state.map.headersStructure).length &&
+              <TreeNavigation 
+                currentHeaders={this.state.map.map.headers}
+                data={this.state.map.headersStructure}>
+              </TreeNavigation>
+            }
+          </>
         )
     }
     return Object.keys(currentMap.headers).map((k, i) => {
@@ -197,6 +212,7 @@ class MapEdit extends Component {
       headerUsed: false,
       fileError: false,
     };
+    this.clearJSON = this.clearJSON.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
     this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(this);
     this.handleConstantChange = this.handleConstantChange.bind(this);
@@ -260,6 +276,20 @@ class MapEdit extends Component {
       unmappedHeaders: tempUnmappedHeaders,
       mapValidity: mapValidity
     });
+    pushMapBack(tempMap, mapValidity);
+  }
+
+  clearJSON() {
+    let tempMap = this.state.map;
+    tempMap.map.headers = {};
+    delete tempMap.headersStructure
+    let tempUnmappedHeaders = []
+    let mapValidity = false
+    this.setState({
+      map: tempMap, 
+      unmappedHeaders: tempUnmappedHeaders, 
+      mapValidity: mapValidity
+    })  
     pushMapBack(tempMap, mapValidity);
   }
 
@@ -470,7 +500,7 @@ class MapEdit extends Component {
       console.log(JSON.stringify(headersStructure));
       if (tempMap != originalMap) {
         tempMap.headersStructure = headersStructure;
-        this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders, headersStructure: headersStructure });
+        this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
         pushMapBack(tempMap, mapValidity);
       }
 

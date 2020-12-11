@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import {Grid, Paper, Card, Typography, IconButton, Chip, TextField, FormControl, FormHelperText, Input, InputLabel, AppBar, Tabs, Tab, Box, CircularProgress} from "@material-ui/core";
+import {Typography, IconButton, TextField, Tabs, Tab} from "@material-ui/core";
 
 import {AddCircleOutlined, Publish, ImageSearch, Edit, Save}  from "@material-ui/icons";
 import {stylesObj} from './styling/stylesObj.js';

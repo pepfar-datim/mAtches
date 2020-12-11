@@ -309,7 +309,7 @@ const addToSummary = (payload, uid, endpoint) => {
       payload.complete = false;
     }
     var desiredProperties = {
-      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete', 'fileType'],
+      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete', 'fileType', 'headersStructure'],
       "questionnaires": ['name', 'created', 'updated', 'uid']
     };
     var undesiredProperties = {
