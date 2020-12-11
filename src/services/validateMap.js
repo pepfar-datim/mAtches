@@ -58,7 +58,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
 
 function populateWithMap(map, vc) {
 	for (var key in map.headers) {
-		if (Object.keys(map.headers[key]).length == 0) {
+		if (!map.headers[key].hasOwnProperty('path')) {
 			vc.invalidMap = true;
 		} else {
 			var tempId = map.headers[key]['path'][map.headers[key]['path'].length - 1]['linkid'];

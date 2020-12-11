@@ -6,6 +6,7 @@ import {AddCircleOutlined, Publish, ImageSearch, Edit, Save}  from "@material-ui
 import EditCard from "./EditCard.js";
 import ValueMapCard from "./ValueMapCard.js";
 import UploadSource from "./UploadSource.js";
+import TreeNavigation from "./TreeNavigation.js";
 
 import api from "./services/api.js";
 import { uploadFile } from "./services/validateFile.js";
@@ -107,24 +108,39 @@ function processAdd(tempMap, tempUnmappedHeaders, tempHeader, headerPath) {
   return {tempMap, tempUnmappedHeaders};
 }
 
-function parseJSON(obj, path, tempMap, tempUnmappedHeaders) {
+function parseJSON(obj, path, tempMap, tempUnmappedHeaders, headersStructure) {
   for (let key in obj) {
     let updatedPath = [...path, key]
+    let tempType = Array.isArray(obj[key]) ? 'array' : typeof(obj[key])
+    headersStructure.push({"type": tempType, key, "id": extractHeaderFromPath(updatedPath)})
     if (Array.isArray(obj[key])) {
+      headersStructure[headersStructure.length-1]['items'] = []
       for (let i = 0; i < obj[key].length; i++) {
+        headersStructure[headersStructure.length-1]['items'][i] = {"type": typeof(obj[key][i]), "key": i, "id": extractHeaderFromPath([...updatedPath, i])}
         if (typeof(obj[key][i]) === 'object') {
-          ({tempMap, tempUnmappedHeaders} = parseJSON(obj[key][i], [...updatedPath, i], tempMap, tempUnmappedHeaders))
+          //console.log('um hello?')
+          headersStructure[headersStructure.length-1]['items'][i]['items'] = [];
+          //console.log(headersStructure[headersStructure.length-1]['items'][i]['items'])
+          let tempHS = [];
+          ([tempMap, tempUnmappedHeaders, tempHS] = parseJSON(obj[key][i], [...updatedPath, i], tempMap, tempUnmappedHeaders, tempHS))
+          headersStructure[headersStructure.length-1]['items'][i]['items'] = tempHS;
+          //console.log(headersStructure[headersStructure.length-1]['items'][i]['items'])
         } else {
           ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, extractHeaderFromPath([...updatedPath, i]), [...updatedPath, i]))
         }
       }
     } else if (typeof(obj[key]) === 'object') {
-      ({tempMap, tempUnmappedHeaders} = parseJSON(obj[key], updatedPath, tempMap, tempUnmappedHeaders))
+      headersStructure[headersStructure.length-1]['items'] = [];
+      let tempHS = [];
+      ([tempMap, tempUnmappedHeaders, tempHS] = parseJSON(obj[key], updatedPath, tempMap, tempUnmappedHeaders, tempHS))
+      headersStructure[headersStructure.length-1]['items'] = tempHS;
     } else {
       ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, extractHeaderFromPath(updatedPath), updatedPath))
+
     }
   }
-  return {tempMap, tempUnmappedHeaders}
+  console.log(headersStructure)
+  return [tempMap, tempUnmappedHeaders, headersStructure]
 }
 
 function extractHeaderFromPath(path) {
@@ -145,12 +161,17 @@ function readFileContent(file) {
 
 class MapEdit extends Component {
   formatHeaders(currentMap, _this) {
-    return Object.keys(currentMap.headers).map(function(k, i) {
+    if (this.state.map.fileType == 'json' && this.state.map.headersStructure) {
+        return (
+          <TreeNavigation data={this.state.map.headersStructure}></TreeNavigation>
+        )
+    }
+    return Object.keys(currentMap.headers).map((k, i) => {
       return (
         <div key={"chip_" + i}>
           <Chip
             label={k.length > 30 ? k.substring(0,30) + '...' : k}
-            onDelete={handleDelete.bind(_this, k)}
+            onDelete={this.handleDelete.bind(this,k)}
             style={currentMap.headers[k].hasOwnProperty('path') ? stylesObj.mappedChip : stylesObj.unmappedChip}
             data-cy={"chip_" + k}
           />
@@ -179,6 +200,7 @@ class MapEdit extends Component {
     this.handleAdd = this.handleAdd.bind(this);
     this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(this);
     this.handleConstantChange = this.handleConstantChange.bind(this);
+    this.handleDelete = this.handleDelete.bind(this);
     this.handleValueMap = this.handleValueMap.bind(this);
     this.handleValueMapClose = this.handleValueMapClose.bind(this);
     this.handleTabChange = this.handleTabChange.bind(this);
@@ -215,6 +237,30 @@ class MapEdit extends Component {
       });
       pushMapBack(tempMap, mapValidity);
     }
+  }
+
+  handleDelete(header) {
+    var tempMap = this.state.map;
+    var tempCheck = this.state.mapCheck;
+    var tempUnmappedHeaders = this.state.unmappedHeaders;
+    tempCheck = removeAssociationQuestionnaire(
+      tempCheck,
+      tempMap.map.headers[header],
+      header
+    );
+    delete tempMap.map.headers[header];
+    delete tempUnmappedHeaders[header];
+    var mapValidity = false; //mapValidity false if there are unmapped headers
+    if (Object.keys(tempUnmappedHeaders).length == 0) {
+      mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
+    }
+    this.setState({
+      map: tempMap,
+      mapCheck: tempCheck,
+      unmappedHeaders: tempUnmappedHeaders,
+      mapValidity: mapValidity
+    });
+    pushMapBack(tempMap, mapValidity);
   }
 
   handleEditMapName() {
@@ -418,10 +464,13 @@ class MapEdit extends Component {
       let originalMap = JSON.parse(JSON.stringify(tempMap));
       let tempUnmappedHeaders = JSON.parse(JSON.stringify(this.state.unmappedHeaders));
       let mapValidity = true;
+      let headersStructure = [];
 
-      ({tempMap, tempUnmappedHeaders} = parseJSON(obj, [], tempMap, tempUnmappedHeaders))
+      ([tempMap, tempUnmappedHeaders, headersStructure] = parseJSON(obj, [], tempMap, tempUnmappedHeaders, headersStructure))
+      console.log(JSON.stringify(headersStructure));
       if (tempMap != originalMap) {
-        this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
+        tempMap.headersStructure = headersStructure;
+        this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders, headersStructure: headersStructure });
         pushMapBack(tempMap, mapValidity);
       }
 
