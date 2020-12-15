@@ -1,0 +1,7 @@
+# Ignore artifiacts
+build
+mAtches_sample_files
+database
+csvConversion
+dist
+node_modules

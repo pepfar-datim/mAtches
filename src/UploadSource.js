@@ -1,32 +1,32 @@
 import React, { useState } from "react";
-import {Typography, IconButton, TextField, Tabs, Tab} from "@material-ui/core";
+import { Typography, IconButton, TextField, Tabs, Tab } from "@material-ui/core";
 
-import {AddCircleOutlined, Publish, ImageSearch, Edit, Save}  from "@material-ui/icons";
-import {stylesObj} from './styling/stylesObj.js';
+import { AddCircleOutlined, Publish, ImageSearch, Edit, Save } from "@material-ui/icons";
+import { stylesObj } from './styling/stylesObj.js';
 
 import UploadMapList from "./UploadMapList.js";
 
 function a11yProps(index) {
-  return {
-    id: `scrollable-prevent-tab-${index}`,
-    "aria-controls": `scrollable-prevent-tabpanel-${index}`
-  };
+    return {
+        id: `scrollable-prevent-tab-${index}`,
+        "aria-controls": `scrollable-prevent-tabpanel-${index}`
+    };
 }
 
 export default function UploadSource(props) {
 
-  let targetForm = '';
-  
-  const isInteractionHidden = (csvIndex, jsonIndex) => {
-    if (props.fileType == 'csv') {
-      return props.tabChoice != csvIndex
-    } else {
-      return props.tabChoice != jsonIndex
-    }
-  }
+    let targetForm = '';
 
-  return (
-    <div>
+    const isInteractionHidden = (csvIndex, jsonIndex) => {
+        if (props.fileType == 'csv') {
+            return props.tabChoice != csvIndex
+        } else {
+            return props.tabChoice != jsonIndex
+        }
+    }
+
+    return (
+        <div>
       <div style={stylesObj.whiteBackground}>
         <Tabs
           value={props.tabChoice}
@@ -131,5 +131,5 @@ export default function UploadSource(props) {
       </div>
       <br />
     </div>
-  )
+    )
 }
