@@ -21,6 +21,21 @@ var data = {
     });
     return promise;
   },
+  loadJSON: function(rawData) {
+    formattedData = JSON.parse(rawData);
+    if (!Array.isArray(formattedData)) {
+      formattedData = [formattedData]
+    }
+    return formattedData
+  },
+  addInConstants: function(row, QR, pathsChecked) {
+    Object.keys(this.map.constants).forEach(key => {
+      let tempValue = {value: this.map.constants[key].code, valueType: this.map.constants[key].valueType};
+      //there could be collision in keys between constants and headers here (though unlikely)
+      tempValue.value = this.evaluateValue(tempValue.value, tempValue.valueType, row, key)
+      this.addQRItems(QR.item, this.map.constants[key].path, pathsChecked, tempValue.value, tempValue.valueType.charAt(0).toUpperCase() + tempValue.valueType.slice(1));
+    })
+  },
   convertToQR: function() {
     for (let i = 0; i < this.csvData.length; i++) {
       var QR = {
@@ -37,21 +52,7 @@ var data = {
           var requiredItem = this.map.headers[key].path[this.map.headers[key].path.length - 1].required || false
           // if item is required or if item is not blank, process
           if (requiredItem || tempValue.value.trim().length) {
-            if (this.map.headers[key].valueType == "choice") {
-              tempValue = this.convertValue(
-                tempValue,
-                this.map.headers[key].choiceMap,
-                i,
-                key
-              );
-            } else {
-              tempValue.value = this.evaluateValue(
-                this.csvData[i][key],
-                tempValue.valueType,
-                i,
-                key
-              );
-            }
+            tempValue = this.prepareTempValue(this.map.headers[key].valueType, tempValue, i, key, this.csvData[i][key])
             if (tempValue) {
               this.addQRItems(
                 QR.item,
@@ -60,20 +61,56 @@ var data = {
                 tempValue.value,
                 tempValue.valueType.charAt(0).toUpperCase() +
                   tempValue.valueType.slice(1)
-              );            
-            }            
+              );
+            }
           }
         }
       });
-      Object.keys(this.map.constants).forEach(key => {
-      	let tempValue = {value: this.map.constants[key].code, valueType: this.map.constants[key].valueType};
-      	//there could be collision in keys between constants and headers here (though unlikely)
-      	tempValue.value = this.evaluateValue(tempValue.value, tempValue.valueType, i, key)
-      	this.addQRItems(QR.item, this.map.constants[key].path, pathsChecked, tempValue.value, tempValue.valueType.charAt(0).toUpperCase() + tempValue.valueType.slice(1));
-      })
+      this.addInConstants(i, QR, pathsChecked);
       if (!this.rowErrors.hasOwnProperty(i)) {
         this.QuestionnaireResponses.push(QR);
       }
+    }
+    this.convertToBundle();
+  },
+  convertToQRJSON: function() {
+    for (let i=0; i<this.jsonData.length; i++) {
+
+      var QR = {
+        resourceType: "QuestionnaireResponse",
+        id: this.mapDate + "-row" + i,
+        status: "completed",
+        questionnaire: this.questionnaireURL,
+        item: []
+      };
+      var pathsChecked = {};      
+
+      for (header in this.map.headers) {
+        let individualValue = accessValue(this.jsonData[i], this.map.headers[header].headerPath);
+        
+        let requiredItem = this.map.headers[header].path[this.map.headers[header].path.length - 1].required || false
+
+        if (individualValue === undefined && requiredItem) {
+          this.addError(i, header, "valueMissing");
+        } else if(individualValue) {
+          let tempValue = {valueType: this.map.headers[header].valueType, value: individualValue};
+          tempValue = this.prepareTempValue(this.map.headers[header].valueType, tempValue, i, header, individualValue)
+            if (tempValue) {
+              this.addQRItems(
+                QR.item,
+                this.map.headers[header].path,
+                pathsChecked,
+                tempValue.value,
+                tempValue.valueType.charAt(0).toUpperCase() +
+                  tempValue.valueType.slice(1)
+              );
+            }
+        }        
+      }
+      this.addInConstants(i, QR, pathsChecked);
+      if (!this.rowErrors.hasOwnProperty(i)) {
+        this.QuestionnaireResponses.push(QR);
+      }      
     }
     this.convertToBundle();
   },
@@ -143,6 +180,24 @@ var data = {
       this.errors[key][type].push(row);
     }
   },
+  prepareTempValue: function(valueType, tempValue, i, key, individualValue) {
+    if (valueType == "choice") {
+      tempValue = this.convertValue(
+        tempValue,
+        this.map.headers[key].choiceMap,
+        i,
+        key
+      );
+    } else {
+      tempValue.value = this.evaluateValue(
+        individualValue,
+        tempValue.valueType,
+        i,
+        key
+      );
+    }
+    return tempValue
+  },
   convertValue: function(valueObject, valueChoiceMap, row, key) {
     //if there is an error in mapping the value (e.g. map missing, then push error), else convert
     try {
@@ -201,37 +256,69 @@ var data = {
   }
 };
 
-const convertToFHIR = (csvText, map, mapID, questionnaireURL) => {
-  data.map = map.map;
-  data.csvData = [];
-  data.errors = {};
-  data.rowErrors = {};
-  data.QuestionnaireResponses = [];
-  data.questionnaireURL = questionnaireURL;
+const convertToFHIR = (dataText, map, mapID, questionnaireURL) => {
 
-  var end = { status: 400, message: "Something went wrong" };
-  var promise = new Promise(function(resolve, reject) {
-    data.uploadDate = new Date().toISOString();
-    data.mapDate = mapID + "-" + data.uploadDate;
-    data.loadCsv(csvText).then(output => {
-      if (!Array.isArray(output)) {
-        end = { status: 200, message: "Invalid CSV File" };
+  let end = { status: 400, message: "Something went wrong" };
+
+  try {
+    data.map = map.map;
+    data.csvData = [];
+    data.jsonData = {};
+    data.errors = {};
+    data.rowErrors = {};
+    data.QuestionnaireResponses = [];
+    data.questionnaireURL = questionnaireURL;
+
+    var promise = new Promise(function(resolve, reject) {
+      data.uploadDate = new Date().toISOString();
+      data.mapDate = mapID + "-" + data.uploadDate;
+      console.log(map)
+      if (map.fileType == 'json') {
+        let output = data.loadJSON(dataText);
+        data.jsonData = output;
+        data.convertToQRJSON();
+        resolve(populateResponse())
       } else {
-        data.csvData = output;
-        data.convertToQR();
-        end = { status: 200, message: "Converted" };
-
-        if (Object.keys(data.errors).length > 0) {
-          end.errors = data.errors;
-        } else {
-          end.data = data.bundle;
-        }
-        resolve(end);
+        data.loadCsv(dataText).then(output => {
+          if (!Array.isArray(output)) {
+            end = { status: 200, message: "Invalid CSV File" };
+          } else {
+            data.csvData = output;
+            data.convertToQR();
+            resolve(populateResponse())
+          }
+        });
       }
     });
-  });
-  return promise;
+    return promise;
+  } catch (e) {
+    console.log(e);
+    return(end)
+  }
+
 };
+
+const populateResponse = () => {
+  let end = { status: 200, message: "Converted" };
+  if (Object.keys(data.errors).length > 0) {
+    end.errors = data.errors;
+  } else {
+    end.data = data.bundle
+  }
+  return(end)
+};
+
+const accessValue = (tempObj, path) => {
+  try {
+    if (path.length == 1) {
+      return tempObj[path[0]]
+    } else {
+      return accessValue(tempObj[path[0]],path.slice(1))
+    }   
+  } catch(e) {
+      return undefined
+  } 
+}
 
 module.exports = {
   convertToFHIR

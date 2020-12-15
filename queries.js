@@ -484,7 +484,7 @@ const uploadData = (request, response) => {
 
   readResource(config.persistencyLocation + 'maps/' + request.params.id + '.json').then((data) => {
     if (data.hasOwnProperty('data')) {
-      var map = {map: data.data.map};
+      var map = {map: data.data.map, fileType: data.data.fileType};
         readResource(config.persistencyLocation + 'maps/' + request.params.id + '.json').then((dataQ) => {
           if (dataQ.hasOwnProperty('data')) {
             var questionnaireURL = dataQ.data.questionnaireuid;

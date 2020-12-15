@@ -56,6 +56,7 @@ export function checkHeadersGeneral(actualHeaders, desiredHeaders) {
 }
 
 export function checkHeaders(csvFile, mapHeaders) {
+	console.log(mapHeaders)
 	var columnRow = csvFile.split('\n')[0];
 	var columns = columnRow.split(',');
 	let i = 0

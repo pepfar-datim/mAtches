@@ -118,13 +118,10 @@ function parseJSON(obj, path, tempMap, tempUnmappedHeaders, headersStructure) {
       for (let i = 0; i < obj[key].length; i++) {
         headersStructure[headersStructure.length-1]['items'][i] = {"type": typeof(obj[key][i]), "key": i, "id": extractHeaderFromPath([...updatedPath, i])}
         if (typeof(obj[key][i]) === 'object') {
-          //console.log('um hello?')
           headersStructure[headersStructure.length-1]['items'][i]['items'] = [];
-          //console.log(headersStructure[headersStructure.length-1]['items'][i]['items'])
           let tempHS = [];
           ([tempMap, tempUnmappedHeaders, tempHS] = parseJSON(obj[key][i], [...updatedPath, i], tempMap, tempUnmappedHeaders, tempHS))
           headersStructure[headersStructure.length-1]['items'][i]['items'] = tempHS;
-          //console.log(headersStructure[headersStructure.length-1]['items'][i]['items'])
         } else {
           ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, extractHeaderFromPath([...updatedPath, i]), [...updatedPath, i]))
         }
@@ -139,7 +136,6 @@ function parseJSON(obj, path, tempMap, tempUnmappedHeaders, headersStructure) {
 
     }
   }
-  console.log(headersStructure)
   return [tempMap, tempUnmappedHeaders, headersStructure]
 }
 
@@ -282,14 +278,19 @@ class MapEdit extends Component {
   clearJSON() {
     let tempMap = this.state.map;
     tempMap.map.headers = {};
-    delete tempMap.headersStructure
-    let tempUnmappedHeaders = []
-    let mapValidity = false
+    delete tempMap.headersStructure;
+    let tempUnmappedHeaders = [];
+    let mapValidity = false;
+    let tempMapCheck = this.state.mapCheck;
+    for (let k in tempMapCheck.flatQuestionnaire) {
+      delete tempMapCheck.flatQuestionnaire[k].header;
+    }
     this.setState({
       map: tempMap, 
       unmappedHeaders: tempUnmappedHeaders, 
-      mapValidity: mapValidity
-    })  
+      mapValidity: mapValidity,
+      mapCheck: tempMapCheck
+    });
     pushMapBack(tempMap, mapValidity);
   }
 
@@ -472,7 +473,7 @@ class MapEdit extends Component {
       let tempUnmappedHeaders = JSON.parse(JSON.stringify(this.state.unmappedHeaders));
       let mapValidity = true;
       for (let i = 0; i < columns.length; i++) {
-        ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, columns[i], [columns[i]]))
+        ({tempMap, tempUnmappedHeaders} = processAdd(tempMap, tempUnmappedHeaders, columns[i].trim(), [columns[i].trim()]))
       }
       if (tempMap != originalMap) {
         this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
@@ -497,7 +498,6 @@ class MapEdit extends Component {
       let headersStructure = [];
 
       ([tempMap, tempUnmappedHeaders, headersStructure] = parseJSON(obj, [], tempMap, tempUnmappedHeaders, headersStructure))
-      console.log(JSON.stringify(headersStructure));
       if (tempMap != originalMap) {
         tempMap.headersStructure = headersStructure;
         this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });

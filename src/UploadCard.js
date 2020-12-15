@@ -45,18 +45,27 @@ class UploadCard extends React.Component {
 		this.refs.fileInput.click(e);
 	}
 
-	uploadCallback(csvFile) {
-		csvFile = checkHeaders(
-			csvFile,
-			JSON.parse(JSON.stringify(this.props.map.map.headers))
-		);
+	uploadCallback(dataFile) {
+		let dataSummary = {}
+
+		switch (this.props.map.fileType) {
+			case 'json':
+				dataSummary = {validity: true, invalidHeaders: [], missingHeaders: [], text: dataFile};
+				break;
+			default:
+				dataSummary = checkHeaders(
+					dataFile,
+					JSON.parse(JSON.stringify(this.props.map.map.headers))
+				);
+				break;
+		}
 		this.setState({
-			invalidHeaders: csvFile.invalidHeaders,
-			missingHeaders: csvFile.missingHeaders
+			invalidHeaders: dataSummary.invalidHeaders,
+			missingHeaders: dataSummary.missingHeaders
 		});
-		if (csvFile.validity) {
+		if (dataSummary.validity) {
 			var url = (this.state.destination == 'external') ? encodeURIComponent(this.state.externalURL) : null
-			api.postCSV("api/maps/" + this.props.map.uid + "/upload?url=" + url, csvFile.text)
+			api.postCSV("api/maps/" + this.props.map.uid + "/upload?url=" + url, dataSummary.text)
 			.then(response => {
 				if (response.hasOwnProperty("errors")) {
 					this.setState({ errors: response.errors });
@@ -72,8 +81,8 @@ class UploadCard extends React.Component {
 		} else {
 			this.setState({
 				finishedUploading: true,
-				invalidHeaders: csvFile.invalidHeaders,
-				missingHeaders: csvFile.missingHeaders
+				invalidHeaders: dataSummary.invalidHeaders,
+				missingHeaders: dataSummary.missingHeaders
 			});
 		}
 	}
@@ -81,11 +90,11 @@ class UploadCard extends React.Component {
 	upload(e) {
 		e.preventDefault();
 		this.setInitialState();
-		uploadFile(e, this).then(csvFile => {
-			if (!csvFile) {
+		uploadFile(e, this).then(dataFile => {
+			if (!dataFile) {
 				this.setState({fileName: ''});
 			}
-			this.uploadCallback(csvFile);
+			this.uploadCallback(dataFile);
 		});
 	}
 
@@ -108,7 +117,7 @@ class UploadCard extends React.Component {
 					}
 					<div style={stylesObj.themePaddingQuarter}>
 						<Typography variant="body1">
-							Select a CSV file to upload
+							Select a {(this.props.map.fileType || 'CSV').toUpperCase()} file to upload
 						</Typography>
 						<TextField
 							disabled={true}
@@ -129,7 +138,7 @@ class UploadCard extends React.Component {
 							<input
 								type="file"
 								ref="fileInput"
-								accept=".csv"
+								accept={"." + (this.props.map.fileType || "csv")}
 								onChange={ev => {
 									this.upload(ev);
 								}}
