@@ -4,3 +4,4 @@
 /persistency/maps/*
 /persistency/questionnaires/*
 !/persistency/maps/README.md
+/csvConversion
