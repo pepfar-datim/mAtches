@@ -36,7 +36,7 @@ class MapAdd extends Component {
   }
 
   handleNameChange(event) {
-    var tempName = event.target.value;
+    const tempName = event.target.value;
     if (this.state.timeout) {
       clearTimeout(this.state.timeout);
     }
@@ -50,7 +50,7 @@ class MapAdd extends Component {
   }
 
   checkName(name, _this) {
-    api.get("api/maps/names/" + encodeURI(name)).then((nameFound) => {
+    api.get(`api/maps/names/${encodeURI(name)}`).then((nameFound) => {
       _this.setState({
         invalidName: nameFound.hasOwnProperty("uid"),
         checking: false,
@@ -60,20 +60,20 @@ class MapAdd extends Component {
 
   handleAdd() {
     if (!this.state.invalidName) {
-      var payload = {
+      const payload = {
         map: { headers: {}, constants: {} },
         fileType: this.state.fileType,
         name: this.state.name,
         questionnaireuid: this.state.questionnaire,
       };
       api.post("api/maps", payload).then((response) => {
-        window.location = config.base + "maps/" + response.uid + "?mode=edit";
+        window.location = `${config.base}maps/${response.uid}?mode=edit`;
       });
     }
   }
 
   render() {
-    const questionnaireHash = this.props.questionnaireHash;
+    const { questionnaireHash } = this.props;
     return this.state.loading ? (
       <CircularProgress style={stylesObj.loaderStyling} />
     ) : (

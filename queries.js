@@ -26,14 +26,6 @@ const allowableQuery = {
 const checkTable = (table) =>
   Object.prototype.hasOwnProperty.call(allowableQuery, table);
 
-const checkColumn = (table, column) => {
-  let valid = false;
-  if (allowableQuery[table] && allowableQuery[table][column]) {
-    valid = true;
-  }
-  return valid;
-};
-
 const readResource = (fileName) => {
   const promise = new Promise((resolve, reject) => {
     fs.readFile(fileName, (err, data) => {
@@ -167,13 +159,12 @@ const getSpecificResource = (request, response) => {
 };
 
 const getValueMaps = (items, valueSetArray, tempPath) => {
-  let valueSets = []
   for (let i = 0; i < items.length; i += 1) {
     let tempPathCopy = [];
     if (items[i].item) {
       tempPathCopy = [...tempPath];
       tempPathCopy.push(i);
-      valueSets = getValueMaps(items[i].item, valueSetArray, tempPathCopy);
+      valueSetArray = getValueMaps(items[i].item, valueSetArray, tempPathCopy);
     } else if (items[i].answerValueSet) {
       tempPathCopy = [...tempPath];
       tempPathCopy.push(i);
@@ -181,10 +172,24 @@ const getValueMaps = (items, valueSetArray, tempPath) => {
       const fetchURL = `${config.fhirServer}/ValueSet?url=${encodeURI(
         items[i].answerValueSet
       )}&_format=json`;
-      valueSets.push({ fetchURL, path: tempPathCopy });
+      valueSetArray.push({ fetchURL, path: tempPathCopy });
     }
   }
-  return valueSets;
+  return valueSetArray;
+};
+
+const loadValueMaps = (items, vs) => {
+  if (vs[1].length > 1) {
+    const newPath = vs[1].slice(1);
+    items[vs[1][0]].item = loadValueMaps(items[vs[1][0]].item, [
+      vs[0],
+      newPath,
+    ]);
+  } else {
+    items[vs[1][0]].answerValueSet = {};
+    [items[vs[1][0]].answerValueSet.concept] = vs;
+  }
+  return items;
 };
 
 const getSpecificQuestionnaire = (request, response) => {
@@ -220,8 +225,7 @@ const getSpecificQuestionnaire = (request, response) => {
                   url: `${config.fhirServer}/ValueSet/${res.entry[0].resource.id}/$expand?_format=json`,
                   path: url.path,
                 };
-              };
-              return {}
+              }
             })
         )
       )
@@ -248,7 +252,11 @@ const getSpecificQuestionnaire = (request, response) => {
                   ) {
                     valueSetSummary[0] = res2.compose.include[0].concept;
                     if (res2.compose.include[0].system) {
-                      valueSetSummary[0].map(x=> Object.assign(x,{system: res2.compose.include[0].system}))
+                      valueSetSummary[0].map((x) =>
+                        Object.assign(x, {
+                          system: res2.compose.include[0].system,
+                        })
+                      );
                     }
                   }
                   return valueSetSummary;
@@ -262,84 +270,42 @@ const getSpecificQuestionnaire = (request, response) => {
               });
             })
             .then((valueSets) => {
-              for (vs of valueSets) {
+              valueSets.forEach((vs) => {
                 questionnaire.resource.item = loadValueMaps(
                   questionnaire.resource.item,
                   vs
                 );
-              }
+              });
               response.status(200).end(JSON.stringify(questionnaire));
             });
         });
     });
 };
 
-const loadValueMaps = (items, vs) => {
-  if (vs[1].length > 1) {
-    const newPath = vs[1].slice(1);
-    items[vs[1][0]].item = loadValueMaps(items[vs[1][0]].item, [
-      vs[0],
-      newPath,
-    ]);
-  } else {
-    items[vs[1][0]].answerValueSet = {};
-    items[vs[1][0]].answerValueSet.concept = vs[0];
-  }
-  return items;
-};
-
-
 const checkForUID = (uid, resource) => {
   const promise = new Promise((resolve, reject) => {
-    readResource(
-      `${config.persistencyLocation + resource}/${resource}.json`
-    ).then((data) => {
-      if (data.hasOwnProperty("error")) resolve(data);
-      resolve(data.data.hasOwnProperty(uid));
-    });
+    readResource(`${config.persistencyLocation + resource}/${resource}.json`)
+      .then((data) => {
+        resolve(Object.prototype.hasOwnProperty.call(data.data, "uid"));
+      })
+      .catch(() => {
+        reject(new Error("Item not readable"));
+      });
   });
   return promise;
 };
 
-const checkForProp = (value, table, column, uidExclude) => {
-  const promise = new Promise((resolve, reject) => {
-    if (!checkTable(table)) {
-      resolve(true);
-    }
-    if (!checkColumn(table, column)) {
-      resolve(true);
-    }
-
-    const query = {
-      text: `SELECT * FROM ${table} WHERE ${column}=$1;`,
-      values: [value],
-    };
-
-    if (uidExclude) {
-      query.text = `SELECT * FROM ${table} WHERE ${column}=$1 AND uid!=$2;`;
-      query.values = [value, uidExclude];
-    }
-
-    pool.query(query, (error, results) => {
-      if (error) {
-        throw error;
-      }
-      resolve(results.rowCount > 0);
-    });
-  });
-  return promise;
-};
-
-const addToSummary = (payload, uid, endpoint) => {
+const addToSummary = (initialPayload, uid, endpoint) => {
+  const payload = initialPayload;
   const promise = new Promise((resolve, reject) => {
     const now = new Date().toISOString();
-    if (!payload.hasOwnProperty("created")) {
+    if (!payload.created) {
       payload.created = now;
     }
-    if (!payload.hasOwnProperty("updated")) {
+    if (!payload.updated) {
       payload.updated = now;
     }
-    if (!payload.hasOwnProperty("complete")) {
+    if (!payload.complete) {
       payload.complete = false;
     }
     const desiredProperties = {
@@ -361,63 +327,63 @@ const addToSummary = (payload, uid, endpoint) => {
     };
     const scrubbedObject = {};
 
-    for (let i = 0; i < desiredProperties[endpoint].length; i++) {
+    for (let i = 0; i < desiredProperties[endpoint].length; i += 1) {
       scrubbedObject[desiredProperties[endpoint][i]] =
         payload[desiredProperties[endpoint][i]];
     }
-    readResource(
-      `${config.persistencyLocation + endpoint}/${endpoint}.json`
-    ).then((file) => {
-      if (file.hasOwnProperty("data")) {
-        file.data[uid] = scrubbedObject;
-        writeResource(
-          `${config.persistencyLocation + endpoint}/${endpoint}.json`,
-          JSON.stringify(file.data)
-        ).then((status) => {
-          if (status.hasOwnProperty("success")) {
-            // add back in map or questionnaire
-            scrubbedObject[undesiredProperties[endpoint]] =
-              payload[undesiredProperties[endpoint]];
-            resolve(scrubbedObject);
-          } else {
-            resolve(file);
-          }
-        });
-      } else {
-        resolve(file);
-      }
-    });
+    readResource(`${config.persistencyLocation + endpoint}/${endpoint}.json`)
+      .then((readFile) => {
+        const file = readFile;
+        if (file.data) {
+          file.data[uid] = scrubbedObject;
+          writeResource(
+            `${config.persistencyLocation + endpoint}/${endpoint}.json`,
+            JSON.stringify(file.data)
+          ).then((status) => {
+            if (status.success) {
+              // add back in map or questionnaire
+              scrubbedObject[undesiredProperties[endpoint]] =
+                payload[undesiredProperties[endpoint]];
+              resolve(scrubbedObject);
+            } else {
+              resolve(file);
+            }
+          });
+        } else {
+          resolve(file);
+        }
+      })
+      .catch(() => {
+        reject(new Error("could not add"));
+      });
   });
   return promise;
 };
 
 const validateMapPayload = (payload, uid, update) => {
   const promise = new Promise((resolve, reject) => {
-    if (!payload.hasOwnProperty("name")) {
+    if (!payload.name) {
       resolve("Name is required");
     }
-    if (!payload.hasOwnProperty("questionnaireuid")) {
+    if (!payload.questionnaireuid) {
       resolve("Questionnaire UID is required");
     }
     if (update) {
       resolve(true);
     }
 
-    checkForSpecificProp(
-      payload.name.replace(/'/gi, "''"),
-      "maps",
-      "name"
-    ).then((nameConflict) => {
-      if (nameConflict.hasOwnProperty("error")) {
-        response.status(400).end(nameConflict.error);
-      }
-      if (nameConflict) {
-        resolve(
-          `Name (${payload.name}) already exists(, or request is invalid)`
-        );
-      }
-      resolve(true);
-    });
+    checkForSpecificProp(payload.name.replace(/'/gi, "''"), "maps", "name")
+      .then((nameConflict) => {
+        if (nameConflict) {
+          resolve(
+            `Name (${payload.name}) already exists(, or request is invalid)`
+          );
+        }
+        resolve(true);
+      })
+      .catch(() => {
+        reject(new Error("problem with validation"));
+      });
   });
   return promise;
 };
@@ -437,7 +403,7 @@ const updateMapFiles = (request, response, uid, update) => {
             `${config.persistencyLocation}maps/${uid}.json`,
             JSON.stringify(result)
           ).then((writeStatus) => {
-            if (writeStatus.hasOwnProperty("success")) {
+            if (writeStatus.success) {
               response.status(200).json({ uid, message: "success" });
             }
           });
@@ -454,7 +420,7 @@ const updateMapFiles = (request, response, uid, update) => {
 const createMap = (request, response) => {
   let uid = helpers.generateUID(); // should define as random at first and then redefine
 
-  if (request.body.hasOwnProperty("uid")) {
+  if (request.body.uid) {
     uid = request.body.uid;
   } else {
     request.body.uid = uid;
@@ -474,8 +440,7 @@ const createMap = (request, response) => {
 };
 
 const updateMap = (request, response) => {
-  const map = request.body;
-  if (!request.body.hasOwnProperty("uid")) {
+  if (!request.body.uid) {
     response.status(400).end("Missing uid\n");
   }
   const { uid } = request.body;
@@ -492,18 +457,19 @@ const deleteSpecificResource = (request, response) => {
   const indType = type.substring(0, type.length - 1);
   const uid = request.params.id;
   readResource(`${config.persistencyLocation + type}/${type}.json`)
-    .then((file) => {
-      if (file.hasOwnProperty("data")) {
-        if (file.data.hasOwnProperty(uid)) {
+    .then((readFile) => {
+      const file = readFile;
+      if (file.data) {
+        if (file.data.uid) {
           delete file.data[uid];
           try {
             writeResource(
               `${config.persistencyLocation + type}/${type}.json`,
               JSON.stringify(file.data)
-            ).then((a) => {
+            ).then(() => {
               deleteResource(
                 `${config.persistencyLocation + type}/${uid}.json`
-              ).then((b) => {
+              ).then(() => {
                 response
                   .status(200)
                   .send(`Removed ${indType} with uid of ${uid}`);
@@ -525,16 +491,16 @@ const deleteSpecificResource = (request, response) => {
 const createQuestionnaire = (request, response) => {
   const payload = request.body;
   let uid = helpers.generateUID(); // should define as random at first and then redefine
-  if (payload.hasOwnProperty("uid")) {
+  if (payload.uid) {
     uid = payload.uid;
   } else {
     payload.uid = uid;
   }
   const now = new Date().toISOString();
-  if (!payload.hasOwnProperty("created")) {
+  if (!payload.created) {
     payload.created = now;
   }
-  if (!payload.hasOwnProperty("updated")) {
+  if (!payload.updated) {
     payload.updated = now;
   }
   addToSummary(request.body, uid, "questionnaires").then((result) => {
@@ -543,7 +509,7 @@ const createQuestionnaire = (request, response) => {
         `${config.persistencyLocation}questionnaires/${uid}.json`,
         JSON.stringify(result)
       ).then((writeStatus) => {
-        if (writeStatus.hasOwnProperty("success")) {
+        if (writeStatus.success) {
           response
             .status(200)
             .json(
@@ -553,69 +519,72 @@ const createQuestionnaire = (request, response) => {
         }
       });
     } catch (e) {
-      response.status(400).end(JSON.stringify(error));
+      response.status(400).end(JSON.stringify(e));
     }
   });
 };
 
 const uploadData = (request, response) => {
   const url = decodeURIComponent(request.query.url);
-
-  readResource(
-    `${config.persistencyLocation}maps/${request.params.id}.json`
-  ).then((data) => {
-    if (data.hasOwnProperty("data")) {
-      const map = { map: data.data.map, fileType: data.data.fileType };
-      readResource(
-        `${config.persistencyLocation}maps/${request.params.id}.json`
-      ).then((dataQ) => {
-        if (dataQ.hasOwnProperty("data")) {
-          const questionnaireURL = dataQ.data.questionnaireuid;
-          convertToFHIR(
-            request.body,
-            map,
-            request.params.id,
-            questionnaireURL
-          ).then((result) => {
-            if (result.hasOwnProperty("errors")) {
-              response.status(200).json(result);
-            } else {
-              if (url == null || url.trim().toLowerCase() == "null") {
-                response.status(200).json(result);
-              } else {
-                try {
-                  fetch(url, {
-                    method: "POST",
-                    body: JSON.stringify(result.data),
-                    headers: { "Content-Type": "application/json" },
-                  })
-                    // .then(firstRes => firstRes.text())
-                    .then((extRes) => {
-                      result.urlResponse = {
-                        status: extRes.status,
-                        url: extRes.url,
-                        body: extRes.body,
-                      };
-                      response.status(200).json(result);
-                    });
-                } catch (e) {
-                  result.urlResponse = e;
-                  response.status(400).json(result);
-                }
+  try {
+    readResource(`${config.persistencyLocation}maps/${request.params.id}.json`)
+      .then((data) => {
+        if (data.data) {
+          const map = { map: data.data.map, fileType: data.data.fileType };
+          readResource(
+            `${config.persistencyLocation}maps/${request.params.id}.json`
+          )
+            .then((dataQ) => {
+              if (dataQ.data) {
+                const questionnaireURL = dataQ.data.questionnaireuid;
+                convertToFHIR(
+                  request.body,
+                  map,
+                  request.params.id,
+                  questionnaireURL
+                ).then((result) => {
+                  if (result.erros) {
+                    response.status(200).json(result);
+                  } else if (
+                    url === null ||
+                    url.trim().toLowerCase() === "null"
+                  ) {
+                    response.status(200).json(result);
+                  } else {
+                    try {
+                      fetch(url, {
+                        method: "POST",
+                        body: JSON.stringify(result.data),
+                        headers: { "Content-Type": "application/json" },
+                      })
+                        // .then(firstRes => firstRes.text())
+                        .then((extRes) => {
+                          result.urlResponse = {
+                            status: extRes.status,
+                            url: extRes.url,
+                            body: extRes.body,
+                          };
+                          response.status(200).json(result);
+                        });
+                    } catch (e) {
+                      result.urlResponse = e;
+                      response.status(400).json(result);
+                    }
+                  }
+                });
               }
-              // send request to url
-            }
-          });
+            })
+            .catch((e) => {
+              response.status(400).end(e);
+            });
         }
-        if (dataQ.hasOwnProperty("error")) {
-          response.status(400).end(dataQ.error);
-        }
+      })
+      .catch((e) => {
+        response.status(400).end(e);
       });
-    }
-    if (data.hasOwnProperty("error")) {
-      response.status(400).end(data.error);
-    }
-  });
+  } catch (e) {
+    response.status(400).end(e);
+  }
 };
 
 module.exports = {

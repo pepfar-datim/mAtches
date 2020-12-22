@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import PropTypes from "prop-types";
 import {
   Button,
   TextField,
@@ -13,36 +14,50 @@ import {
   MenuItem,
 } from "@material-ui/core/";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "./styling/stylesObj";
 
 export default function ConstantDialog(props) {
+  const {
+    constantHeader,
+    closeConstantMapDialog,
+    open,
+    path,
+    qID,
+    setConstant,
+    valueArray,
+    valueType,
+  } = props;
   const [constantText, setConstantText] = useState("");
   const [constantCode, setConstantCode] = useState("");
-  const choiceValue = !!props.valueArray.length;
-  if (choiceValue == true) {
-    var choiceCodeMap = props.valueArray.reduce(
-      (tempChoiceCodeMap, currentValue) => {
-        tempChoiceCodeMap[currentValue.code] = currentValue.display;
-        return tempChoiceCodeMap;
-      },
+  const choiceValue = !!valueArray.length;
+  let choiceCodeMap = {};
+  if (choiceValue) {
+    choiceCodeMap = valueArray.reduce(
+      (tempChoiceCodeMap, currentValue) =>
+        Object.assign(tempChoiceCodeMap, {
+          [currentValue.code]: currentValue.display,
+        }),
       {}
     );
   }
   return (
     <div>
       <Dialog
-        open={props.open}
-        onClose={props.closeConstantMapDialog}
+        open={open}
+        onClose={closeConstantMapDialog}
         aria-labelledby="form-dialog-title"
       >
         <DialogTitle id="form-dialog-title">
-          map <strong>{props.constantHeader}</strong> to constant
+          map&nbsp;
+          <strong>{constantHeader}</strong>
+          &nbsp;to constant
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {choiceValue ? "Select" : "Enter"} your constant value.
+            {choiceValue ? "Select " : "Enter "}
+            your constant value.
           </DialogContentText>
-          {choiceValue != true && (
+          {choiceValue !== true && (
             <TextField
               autoFocus
               margin="dense"
@@ -56,7 +71,7 @@ export default function ConstantDialog(props) {
               fullWidth
             />
           )}
-          {choiceValue == true && (
+          {choiceValue === true && (
             <FormControl style={stylesObj.themeWidth}>
               <InputLabel shrink htmlFor="questionnaire-select">
                 Select Value
@@ -70,8 +85,8 @@ export default function ConstantDialog(props) {
                   setConstantCode(e.target.value);
                 }}
               >
-                {props.valueArray.map((i, index) => (
-                  <MenuItem key={index + "_ConstantMap"} value={i.code}>
+                {valueArray.map((i) => (
+                  <MenuItem key={`${i.code}_ConstantMap`} value={i.code}>
                     {i.display}
                   </MenuItem>
                 ))}
@@ -80,18 +95,18 @@ export default function ConstantDialog(props) {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.closeConstantMapDialog} color="primary">
+          <Button onClick={closeConstantMapDialog} color="primary">
             Cancel
           </Button>
           <Button
             onClick={() => {
-              props.setConstant(props.qID, "add", {
+              setConstant(qID, "add", {
                 display: constantText,
                 code: constantCode,
-                valueType: props.valueType,
-                path: props.path,
+                valueType,
+                path,
               });
-              props.closeConstantMapDialog();
+              closeConstantMapDialog();
             }}
             color="primary"
             disabled={!constantText.length}
@@ -103,3 +118,14 @@ export default function ConstantDialog(props) {
     </div>
   );
 }
+
+ConstantDialog.propTypes = {
+  constantHeader: PropTypes.string.isRequired,
+  closeConstantMapDialog: PropTypes.func.isRequired,
+  open: PropTypes.bool.isRequired,
+  path: PropTypes.arrayOf(PropTypes.string).isRequired,
+  setConstant: PropTypes.func.isRequired,
+  qID: PropTypes.string.isRequired,
+  valueArray: PropTypes.arrayOf(PropTypes.string).isRequired,
+  valueType: PropTypes.string.isRequired,
+};

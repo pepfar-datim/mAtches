@@ -17,7 +17,7 @@ class MapUpdate extends Component {
     this.state = {
       //queryString delivers object for which hasOwnProperty is removed, so make copy for hack...
       queryParams: JSON.parse(
-        JSON.stringify(queryString.parse(this.props.location.search))
+        JSON.stringify(queryString.parse(props.location.search))
       ),
       mapID: props.match.params.id,
       map: {},

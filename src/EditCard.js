@@ -3,35 +3,31 @@ import {
   Card,
   Typography,
   IconButton,
-  TextField,
-  InputLabel,
   MenuItem,
-  FormHelperText,
   FormControl,
   Select,
   Button,
   Tooltip,
 } from "@material-ui/core";
 
-import SendButtonTooltip from "./SendButtonTooltip.js";
-import ConstantDialog from "./ConstantDialog.js";
-import RequiredNonRequiredSelector from "./RequiredNonRequiredSelector.js";
-
 import SendIcon from "@material-ui/icons/Send";
 import MapIcon from "@material-ui/icons/Map";
 import LinkIcon from "@material-ui/icons/Link";
 import LinkOffIcon from "@material-ui/icons/LinkOff";
+import RequiredNonRequiredSelector from "./RequiredNonRequiredSelector";
+import ConstantDialog from "./ConstantDialog";
+import SendButtonTooltip from "./SendButtonTooltip";
 
-import api from "./services/api.js";
+import api from "./services/api";
 
 import config from "../config.json";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "./styling/stylesObj";
 
 function formatMenuItems(currentMap) {
-  return Object.keys(currentMap.headers).map(function (k, i) {
-    return <MenuItem value={k}>{k}</MenuItem>;
-  });
+  return Object.keys(currentMap.headers).map((k) => (
+    <MenuItem value={k}>{k}</MenuItem>
+  ));
 }
 
 function formatSelect(header, key, map, associationFunction) {
@@ -41,7 +37,7 @@ function formatSelect(header, key, map, associationFunction) {
         value={header || ""}
         onChange={associationFunction}
         name={key}
-        data_cy={key + "_selectItem"}
+        data_cy={`${key}_selectItem`}
       >
         {formatMenuItems(map)}
       </Select>
@@ -58,18 +54,19 @@ function formatQuestions(
   setConstantDialogOpen,
   itemVisibility
 ) {
-  return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
-    //let mappedToConstant = !!((Object.keys(mapCheck.flatQuestionnaire[k].constant) || '').length);
-    let mappedToConstant = !!Object.keys(
+  return Object.keys(mapCheck.flatQuestionnaire).map((k) => {
+    // let mappedToConstant = !!((Object.keys(mapCheck.flatQuestionnaire[k].constant) || '').length);
+    const mappedToConstant = !!Object.keys(
       mapCheck.flatQuestionnaire[k].constant || {}
     ).length;
-    let mappedToHeader = !!(mapCheck.flatQuestionnaire[k].header || "").length;
-    let mappedItem = mappedToConstant || mappedToHeader;
+    const mappedToHeader = !!(mapCheck.flatQuestionnaire[k].header || "")
+      .length;
+    const mappedItem = mappedToConstant || mappedToHeader;
     return (
       <>
-        {(itemVisibility == "all" ||
+        {(itemVisibility === "all" ||
           mapCheck.flatQuestionnaire[k].required) && (
-          <div key={"question-" + i} style={stylesObj.editCardSelectorPadding}>
+          <div key={`question-${k}`} style={stylesObj.editCardSelectorPadding}>
             <Typography
               wrap="noWrap"
               style={
@@ -87,9 +84,11 @@ function formatQuestions(
                   <IconButton
                     onClick={() => {
                       let tempValueMap = [];
-                      if (mapCheck.flatQuestionnaire[k].valueType == "choice") {
+                      if (
+                        mapCheck.flatQuestionnaire[k].valueType === "choice"
+                      ) {
                         tempValueMap =
-                          mapCheck.flatQuestionnaire[k]["answerValueSet"];
+                          mapCheck.flatQuestionnaire[k].answerValueSet;
                       }
                       setConstantDialogOpen(
                         mapCheck.flatQuestionnaire[k].text,
@@ -114,7 +113,7 @@ function formatQuestions(
                   associationFunction
                 )}
                 <br />
-                {mapCheck.flatQuestionnaire[k].valueType == "choice" && (
+                {mapCheck.flatQuestionnaire[k].valueType === "choice" && (
                   <Button
                     variant="contained"
                     style={getValueMapButtonStyle(
@@ -137,8 +136,7 @@ function formatQuestions(
             {mappedToConstant && (
               <Typography wrap="noWrap">
                 <span>
-                  {"Constant value: " +
-                    mapCheck.flatQuestionnaire[k].constant.display}
+                  {`Constant value: ${mapCheck.flatQuestionnaire[k].constant.display}`}
                 </span>
                 <Tooltip title="Remove link to constant value and map to header">
                   <IconButton
@@ -162,7 +160,7 @@ function getValueMapButtonStyle(questionnaireItem, mapItem) {
   if (!(questionnaireItem.header || "").length) {
     return stylesObj.editCardSelectorButtonDisabled;
   }
-  var tempChoiceMap = mapItem.choiceMap || {};
+  const tempChoiceMap = mapItem.choiceMap || {};
   if (Object.entries(tempChoiceMap).length) {
     return stylesObj.editCardSelectorButtonComplete;
   }
@@ -191,11 +189,11 @@ class EditCard extends React.Component {
   }
 
   setConstantDialogOpen(ch, qID, vm, vt, path) {
-    let tempConstantHeader = typeof ch == "string" ? ch : "";
-    let tempQID = typeof qID == "string" ? qID : "";
-    let tempValueMap = Array.isArray(vm) ? vm : [];
-    let tempValueType = typeof vt == "string" ? vt : "";
-    let tempPath = Array.isArray(path) ? path : [];
+    const tempConstantHeader = typeof ch === "string" ? ch : "";
+    const tempQID = typeof qID === "string" ? qID : "";
+    const tempValueMap = Array.isArray(vm) ? vm : [];
+    const tempValueType = typeof vt === "string" ? vt : "";
+    const tempPath = Array.isArray(path) ? path : [];
     this.setState({
       constantDialogOpen: !this.state.constantDialogOpen,
       constantHeader: tempConstantHeader,
@@ -207,7 +205,7 @@ class EditCard extends React.Component {
   }
 
   sendMap() {
-    //disable for testing
+    // disable for testing
     api.sendMap(this.props.map).then((resp) => {
       console.log(resp);
     });
@@ -221,14 +219,14 @@ class EditCard extends React.Component {
   }
 
   render() {
-    var mapUnchanged =
+    const mapUnchanged =
       JSON.stringify(this.state.submittedMap) == JSON.stringify(this.props.map);
-    var buttonDisabled =
+    const buttonDisabled =
       Object.keys(this.props.unmappedHeaders).length > 0 ||
       !this.props.mapValidity ||
       this.state.buttonDelay ||
       mapUnchanged;
-    var buttonUploadStyling = buttonDisabled
+    const buttonUploadStyling = buttonDisabled
       ? stylesObj.editCardUploadButtonDisabled
       : stylesObj.editCardUploadButtonEnabled;
     return (

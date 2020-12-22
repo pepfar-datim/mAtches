@@ -5,31 +5,22 @@ import match from "../public/images/match_color.png"; // Tell Webpack this JS fi
 
 import config from "../config.json";
 
-import { stylesObj } from "./styling/stylesObj.js";
-
-function goHome() {
-  window.location = config.base + "maps/";
-}
+import { stylesObj } from "./styling/stylesObj";
 
 function HeaderBar() {
   return (
     <div data-cy="headerBar">
       <AppBar position="relative" style={stylesObj.headerBar}>
         <Toolbar>
-          <img
-            style={stylesObj.headerLink}
-            src={match}
-            alt="match"
-            onClick={() => {
-              window.location = config.base + "maps/";
-            }}
-          />
+          <a href={`${config.base}maps/`}>
+            <img style={stylesObj.headerLink} src={match} alt="match" />
+          </a>
           <Typography
             style={{ ...stylesObj.themePadding, ...stylesObj.headerLink }}
             variant="h5"
             color="inherit"
             onClick={() => {
-              window.location = config.base + "maps/";
+              window.location = `${config.base}maps/`;
             }}
           >
             {config.appName}
@@ -43,7 +34,7 @@ function HeaderBar() {
               color="inherit"
               aria-label="menu"
               onClick={() => {
-                window.location = config.base + "maps/";
+                window.location = `${config.base}maps/`;
               }}
             >
               <Home />
