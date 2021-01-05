@@ -1,12 +1,12 @@
 import React, { Component } from "react";
 import { CircularProgress, Typography } from "@material-ui/core";
-import HeaderBar from "./HeaderBar.js";
-import MapList from "./MapList.js";
-import MapAdd from "./MapAdd.js";
+import HeaderBar from "./HeaderBar";
+import MapList from "./MapList";
+import MapAdd from "./MapAdd";
 
-import api from "./services/api.js";
+import api from "./services/api";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "./styling/stylesObj";
 
 class MapDashboard extends Component {
   // Initialize the state
@@ -26,15 +26,14 @@ class MapDashboard extends Component {
     api
       .get("api/questionnaires")
       .then((questionnaires) => {
-        var questionnaireHash = questionnaires.reduce(function (mappedQs, q) {
-          if (!mappedQs.hasOwnProperty(q.resource.url)) {
-            mappedQs[q.resource.url] = q.resource.name;
-            return mappedQs;
-          }
-        }, {});
-        this.setState({ questionnaireHash: questionnaireHash, loading: false });
+        const questionnaireHash = questionnaires.reduce(
+          (mappedQs, q) => ({ ...mappedQs, [q.resource.url]: q.resource.name }),
+          {}
+        );
+        this.setState({ questionnaireHash, loading: false });
       })
       .catch((e) => {
+        console.log(e);
         this.setState({
           failedToLoad: "Failed to load questionnaires from FHIR Server",
           loading: false,
@@ -43,20 +42,21 @@ class MapDashboard extends Component {
   }
 
   render() {
+    const { loading, failedToLoad, questionnaireHash } = this.state;
     return (
       <>
         <HeaderBar />
-        {this.state.loading ? (
+        {loading ? (
           <CircularProgress style={stylesObj.loaderStyling} />
         ) : (
           <>
-            {this.state.failedToLoad ? (
-              <Typography>{this.state.failedToLoad}</Typography>
+            {failedToLoad ? (
+              <Typography>{failedToLoad}</Typography>
             ) : (
               <>
                 <div>
-                  <MapList questionnaireHash={this.state.questionnaireHash} />
-                  <MapAdd questionnaireHash={this.state.questionnaireHash} />
+                  <MapList questionnaireHash={questionnaireHash} />
+                  <MapAdd questionnaireHash={questionnaireHash} />
                 </div>
               </>
             )}

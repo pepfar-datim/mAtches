@@ -1,54 +1,66 @@
 import React from "react";
+import PropTypes from "prop-types";
+
 import { Card, Typography } from "@material-ui/core";
 
-import { stylesObj, themeColors } from "./styling/stylesObj.js";
+import { stylesObj } from "./styling/stylesObj";
 
 function formatErrors(errors) {
-  return Object.keys(errors).map((key) => {
-    return (
-      <div>
-        <Typography variant="h6" style={stylesObj.validationErrorProp}>
-          {key}
+  return Object.keys(errors).map((key) => (
+    <div>
+      <Typography variant="h6" style={stylesObj.validationErrorProp}>
+        {key}
+      </Typography>
+      {errors[key].invalidValueMapping && (
+        <Typography variant="body1" style={stylesObj.validationErrorText}>
+          Values are not Mapped for following values:
+          {Object.keys(errors[key].invalidValueMapping).join(", ")}
         </Typography>
-        {errors[key].hasOwnProperty("invalidValueMapping") && (
-          <Typography variant="body1" style={stylesObj.validationErrorText}>
-            Values are not Mapped for following values:{" "}
-            {Object.keys(errors[key].invalidValueMapping).join(", ")}
-          </Typography>
-        )}
-        {errors[key].hasOwnProperty("invalidValueType") && (
-          <Typography variant="body1" style={stylesObj.validationErrorText}>
-            Values are Invalid on the following rows:{" "}
-            {errors[key].invalidValueType.join(", ")}
-          </Typography>
-        )}
-      </div>
-    );
-  });
+      )}
+      {errors[key].invalidValueType && (
+        <Typography variant="body1" style={stylesObj.validationErrorText}>
+          Values are Invalid on the following rows:
+          {errors[key].invalidValueType.join(", ")}
+        </Typography>
+      )}
+    </div>
+  ));
 }
 
 function ValidationCard(props) {
-  var cardStyling = props.success
+  const {
+    data,
+    errors,
+    invalidHeaders,
+    missingHeaders,
+    success,
+    urlResponse,
+  } = props;
+  const cardStyling = success
     ? stylesObj.validationSuccessCard
     : stylesObj.validationErrorCard;
-  var successText = props.success
-    ? "Success!"
-    : Object.keys(props.errors).length > 0
-    ? "Invalid File: Value Errors"
-    : "Invalid File: Header Errors";
+
+  let successText;
+  if (success) {
+    successText = "Success!";
+  } else if (Object.keys(errors).length > 0) {
+    successText = "Invalid File: Value Errors";
+  } else {
+    successText = "Invalid File: Header Errors";
+  }
 
   return (
     <div>
-      {props.invalidHeaders.length > 0 && (
+      {invalidHeaders.length > 0 && (
         <Card height="100%" style={stylesObj.validationWarningCard}>
           <div style={stylesObj.themePadding}>
             <Typography variant="h6">
               <strong>Warning: Extra Headers in CSV File</strong>
             </Typography>
-            {props.invalidHeaders.length > 0 && (
+            {invalidHeaders.length > 0 && (
               <Typography variant="body1">
-                Headers in csv file, not in map:{" "}
-                {props.invalidHeaders.join(", ")}
+                Headers in csv file, not in map:
+                {invalidHeaders.join(", ")}
               </Typography>
             )}
           </div>
@@ -59,27 +71,27 @@ function ValidationCard(props) {
           <Typography variant="h6">
             <strong>{successText}</strong>
           </Typography>
-          {props.data.resourceType == "Bundle" &&
-            Object.keys(props.urlResponse).length == 0 && (
+          {data.resourceType === "Bundle" &&
+            Object.keys(urlResponse).length === 0 && (
               <Typography variant="body1">
-                Questionnaire Responses Bundle: {JSON.stringify(props.data)}
+                Questionnaire Responses Bundle:
+                {JSON.stringify(data)}
               </Typography>
             )}
-          {props.data.resourceType == "Bundle" &&
-            Object.keys(props.urlResponse).length > 0 && (
+          {data.resourceType === "Bundle" &&
+            Object.keys(urlResponse).length > 0 && (
               <Typography variant="body1">
-                Response from URL: {JSON.stringify(props.urlResponse)}
+                Response from URL:
+                {JSON.stringify(urlResponse)}
               </Typography>
             )}
-          {props.missingHeaders.length > 0 && (
+          {missingHeaders.length > 0 && (
             <Typography variant="body1">
-              Headers in map, missing from csv file:{" "}
-              {props.missingHeaders.join(", ")}
+              Headers in map, missing from csv file:
+              {missingHeaders.join(", ")}
             </Typography>
           )}
-          {Object.keys(props.errors).length > 0 && (
-            <div>{formatErrors(props.errors)}</div>
-          )}
+          {Object.keys(errors).length > 0 && <div>{formatErrors(errors)}</div>}
         </div>
       </Card>
     </div>
@@ -87,3 +99,12 @@ function ValidationCard(props) {
 }
 
 export default ValidationCard;
+
+ValidationCard.propTypes = {
+  data: PropTypes.object.isRequired,
+  errors: PropTypes.object.isRequired,
+  invalidHeaders: PropTypes.arrayOf(PropTypes.string).isRequired,
+  missingHeaders: PropTypes.arrayOf(PropTypes.string).isRequired,
+  success: PropTypes.bool.isRequired,
+  urlResponse: PropTypes.object.isRequired,
+};

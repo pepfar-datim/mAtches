@@ -1,10 +1,7 @@
-import React, { Component } from "react";
+import React, { Component, forwardRef } from "react";
+import PropTypes from "prop-types";
+
 import MaterialTable from "material-table";
-
-import config from "../config.json";
-import api from "./services/api.js";
-
-import { forwardRef } from "react";
 
 import AddBox from "@material-ui/icons/AddBox";
 import ArrowUpward from "@material-ui/icons/ArrowUpward";
@@ -22,9 +19,13 @@ import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import Upload from "@material-ui/icons/PublishOutlined";
 import ViewColumn from "@material-ui/icons/ViewColumn";
+import api from "./services/api";
+import config from "../config.json";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "./styling/stylesObj";
 
+/* eslint-disable react/jsx-props-no-spreading */
+// plan to rewrite to remove depency on material table
 const tableIcons = {
   Add: forwardRef((props, ref) => <AddBox {...props} ref={ref} />),
   Check: forwardRef((props, ref) => <Check {...props} ref={ref} />),
@@ -67,11 +68,14 @@ class MapList extends Component {
   // Retrieves the list of items from the Express app
   getMaps() {
     api.get("api/maps").then((maps) => {
-      this.setState({ maps: maps });
+      this.setState({ maps });
     });
   }
 
   render() {
+    const { questionnaireHash } = this.props;
+    const { maps } = this.state;
+
     return (
       <div data-cy="mapsTable" style={stylesObj.themePadding}>
         <MaterialTable
@@ -82,42 +86,40 @@ class MapList extends Component {
             {
               title: "Questionnaire",
               field: "questionnaireuid",
-              lookup: this.props.questionnaireHash,
+              lookup: questionnaireHash,
             },
             { title: "File Type", field: "fileType" },
             { title: "Updated", field: "updated", type: "date" },
           ]}
-          data={this.state.maps}
+          data={maps}
           actions={[
             {
               icon: tableIcons.Edit,
               tooltip: "Edit Map",
               onClick: (event, rowData) => {
-                window.location =
-                  config.base + "maps/" + rowData.uid + "?mode=edit";
+                window.location = `${config.base}maps/${rowData.uid}?mode=edit`;
               },
             },
             (rowData) => ({
               icon: tableIcons.Upload,
               tooltip: "Upload to map",
-              onClick: (event, rowData) => {
-                window.location =
-                  config.base + "maps/" + rowData.uid + "?mode=upload";
+              onClick: (event, rd) => {
+                window.location = `${config.base}maps/${rd.uid}?mode=upload`;
               },
-              disabled: rowData.complete == false || rowData.map === null,
+              disabled: rowData.complete === false || rowData.map === null,
             }),
             {
               icon: tableIcons.Delete,
               tooltip: "Delete Map",
               onClick: (event, rowData) => {
-                var tempIndex = rowData.tableData.id;
-                var _this = this;
-                function deleteCallback() {
-                  var tempMaps = _this.state.maps;
-                  tempMaps.splice(tempIndex, 1);
-                  _this.setState({ maps: tempMaps });
-                }
-                api.delete("api/maps/" + rowData.uid, deleteCallback);
+                const tempIndex = rowData.tableData.id;
+                const deleteCallback = () => {
+                  this.setState((prevState) => {
+                    prevState.maps.splice(tempIndex, 1);
+                    return { maps: prevState.maps };
+                  });
+                };
+                api.delete(`api/maps/${rowData.uid}`, deleteCallback);
               },
             },
           ]}
@@ -132,3 +134,7 @@ class MapList extends Component {
 }
 
 export default MapList;
+
+MapList.propTypes = {
+  questionnaireHash: PropTypes.object.isRequired,
+};

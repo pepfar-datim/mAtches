@@ -460,7 +460,7 @@ const deleteSpecificResource = (request, response) => {
     .then((readFile) => {
       const file = readFile;
       if (file.data) {
-        if (file.data.uid) {
+        if (file.data[uid]) {
           delete file.data[uid];
           try {
             writeResource(

@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 
 import {
   Radio,
@@ -7,25 +8,27 @@ import {
   TextField,
 } from "@material-ui/core";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "./styling/stylesObj";
 
 import config from "../config.json";
 
 function UploadDestinationSelector(props) {
+  const { destination, externalURL, onDestinationChange, onURLChange } = props;
+
   return (
     <div>
       <RadioGroup
         style={stylesObj.uploadDestinationRadioGroup}
         aria-label="destination"
         name="destinationSelector"
-        value={props.destination}
-        onChange={(e) => props.onDestinationChange(e.target.value)}
+        value={destination}
+        onChange={(e) => onDestinationChange(e.target.value)}
         row
       >
         <FormControlLabel
           value="internal"
           control={<Radio style={stylesObj.uploadDestinationRadio} />}
-          label={"Output generated FHIR bundle in " + config.appName}
+          label={`Output generated FHIR bundle in ${config.appName}`}
         />
         <FormControlLabel
           value="external"
@@ -33,14 +36,14 @@ function UploadDestinationSelector(props) {
           label="Send generated FHIR bundle to external URL"
         />
       </RadioGroup>
-      {props.destination == "external" && (
+      {destination === "external" && (
         <div>
           <TextField
             style={stylesObj.uploadDestinationText}
             id="url-name"
             label="URL"
-            value={props.externalURL}
-            onChange={(e) => props.onURLChange(e.target.value)}
+            value={externalURL}
+            onChange={(e) => onURLChange(e.target.value)}
           />
         </div>
       )}
@@ -49,3 +52,10 @@ function UploadDestinationSelector(props) {
 }
 
 export default UploadDestinationSelector;
+
+UploadDestinationSelector.propTypes = {
+  destination: PropTypes.string.isRequired,
+  externalURL: PropTypes.string.isRequired,
+  onDestinationChange: PropTypes.func.isRequired,
+  onURLChange: PropTypes.func.isRequired,
+};

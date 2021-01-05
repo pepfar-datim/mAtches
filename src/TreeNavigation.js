@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import { Chip } from "@material-ui/core";
 import TreeView from "@material-ui/lab/TreeView";
@@ -6,7 +7,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import TreeItem from "@material-ui/lab/TreeItem";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "./styling/stylesObj";
 
 const useStyles = makeStyles({
   root: {
@@ -17,19 +18,20 @@ const useStyles = makeStyles({
 });
 
 export default function TreeNavigation(props) {
+  const { currentHeaders, data } = props;
   const classes = useStyles();
 
-  const renderTree = (nodes, currentHeaders) =>
-    nodes.hasOwnProperty("items") ? (
+  const renderTree = (nodes, cHeaders) =>
+    nodes.items ? (
       <TreeItem key={nodes.key} nodeId={nodes.id} label={nodes.key}>
-        {nodes.items.map((node) => renderTree(node, currentHeaders))}
+        {nodes.items.map((node) => renderTree(node, cHeaders))}
       </TreeItem>
     ) : (
       <div>
         <Chip
           label={nodes.key}
           style={
-            currentHeaders[nodes.id].path
+            cHeaders[nodes.id].path
               ? stylesObj.mappedChip
               : stylesObj.unmappedChip
           }
@@ -41,11 +43,15 @@ export default function TreeNavigation(props) {
     <TreeView
       className={classes.root}
       defaultCollapseIcon={<ExpandMoreIcon />}
-      defaultExpanded={["root"]}
       defaultExpandIcon={<ChevronRightIcon />}
-      defaultExpanded={props.data.map((m) => m.id)}
+      defaultExpanded={data.map((m) => m.id)}
     >
-      {props.data.map((node) => renderTree(node, props.currentHeaders))}
+      {data.map((node) => renderTree(node, currentHeaders))}
     </TreeView>
   );
 }
+
+TreeNavigation.propTypes = {
+  currentHeaders: PropTypes.object.isRequired,
+  data: PropTypes.object.isRequired,
+};
