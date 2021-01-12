@@ -104,18 +104,21 @@ var data = {
           } else {
             this.addError(row, key, "invalidValueType");
           }
+          break;
         case "dateTime":
           if (moment(value, moment.ISO_8601, true).isValid()) {
-            return value;
+            return new Date(value).toISOString();
           } else {
             this.addError(row, key, "invalidValueType");
           }
+          break;
         case "date":
           if (moment(value, moment.ISO_8601, true).isValid()) {
-            return value;
+            return new Date(value).toISOString();
           } else {
             this.addError(row, key, "invalidValueType");
           }
+          break;
         default:
           return value;
       }
