@@ -29,7 +29,7 @@ mkdir mAtches && cd $_ #create mAtches directory and go there
 mkdir data && cd $_ #create data subdirectory and go there
 mkdir maps #create maps subdirectory
 chmod a+rw maps #give users ability to read/write from files within maps subdirectory
-touch maps/maps.json #create empty maps.json file
+echo "{}" > maps/maps.json #create maps.json file with no 
 ```
 
 C. Set up and start frontend
