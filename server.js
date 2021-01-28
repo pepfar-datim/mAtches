@@ -3,8 +3,12 @@ const bodyParser = require('body-parser')
 const path = require('path');
 const app = express()
 const api = require('./queries')
-const port = 5001
 
+const config = require('./config.json');
+
+const port = config.port;
+
+const basePath = config.base;
 const DIST_DIR = path.join(__dirname, './dist');
 const HTML_FILE = path.join(DIST_DIR, 'index.html');
 const ERROR_FILE = path.join(DIST_DIR, 'error.html');
@@ -14,8 +18,6 @@ app.use(bodyParser.urlencoded({ limit: '50mb', extended: true, parameterLimit: 5
 
 app.use(express.static(DIST_DIR));
 
-const config = require('./config.json');
-const basePath = config.base;
 
 app.get(basePath + 'api/about', api.getAbout);
 
