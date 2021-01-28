@@ -9,7 +9,7 @@ const config = require('./config.json');
 const port = config.port;
 
 const basePath = config.base;
-const DIST_DIR = path.join(__dirname, './dist');
+const DIST_DIR = path.join(__dirname, './dist' + basePath.slice(0,-1));
 const HTML_FILE = path.join(DIST_DIR, 'index.html');
 const ERROR_FILE = path.join(DIST_DIR, 'error.html');
 app.use(bodyParser.json({ limit: '50mb' }));

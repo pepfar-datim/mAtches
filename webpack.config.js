@@ -1,5 +1,8 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
 const path = require('path');
+
+const config = require('./config.json');
+
 const htmlPlugin = new HtmlWebPackPlugin({
   template: "./src/index.html", 
   filename: "./index.html"
@@ -7,9 +10,9 @@ const htmlPlugin = new HtmlWebPackPlugin({
 module.exports = {
   entry: "./src/index.js",
   output: {
-    path: path.join(__dirname, 'dist'),
+    path: path.join(__dirname, 'dist' + config.base.slice(0,-1)),
     filename: "[name].js",
-    publicPath: '/'
+    publicPath: config.base,
   },
   resolve: {
     alias: {
