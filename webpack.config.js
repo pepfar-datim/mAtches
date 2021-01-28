@@ -3,9 +3,13 @@ const path = require('path');
 
 const config = require('./config.json');
 
-const htmlPlugin = new HtmlWebPackPlugin({
+const indexPlugin = new HtmlWebPackPlugin({
   template: "./src/index.html", 
   filename: "./index.html"
+});
+const errorPlugin = new HtmlWebPackPlugin({
+  template: "./src/error.html",
+  filename: "./error.html"
 });
 module.exports = {
   entry: "./src/index.js",
@@ -20,7 +24,8 @@ module.exports = {
     }
   },
   plugins: [
-    htmlPlugin    
+    indexPlugin,
+    errorPlugin,
     ],
   module: {
     rules: [
