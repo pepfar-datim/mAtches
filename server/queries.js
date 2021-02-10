@@ -1,12 +1,12 @@
 const fs = require("fs");
 
 const fetch = require("node-fetch");
-const helpers = require("./helpers.js");
+const helpers = require("./services/helpers");
 
-const config = require("./config.json");
-const aboutPackage = require("./package.json");
-const convert = require("./convert.js");
-const validateServices = require("./validateValueMap.js");
+const config = require("../config.json");
+const aboutPackage = require("../package.json");
+const convert = require("./services/convert");
+const validateServices = require("./services/validateValueMap");
 
 const { validateValueMap } = validateServices;
 const { convertToFHIR } = convert;
@@ -133,7 +133,7 @@ const checkName = (request, response) => {
   checkForSpecificProp(request.params.name, "maps", "name")
     .then((nameFound) => {
       if (nameFound) {
-        response.status(200).send(nameFound);
+        response.status(200).send({uid: nameFound});
       } else {
         response.status(200).send({});
       }

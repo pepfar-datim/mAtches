@@ -16,11 +16,11 @@ import {
   DialogTitle,
 } from "@material-ui/core";
 
-import api from "./services/api.js";
-import flattenValuesMap from "./services/flattenValuesMap.js";
-import { uploadFile, checkHeadersGeneral } from "./services/validateFile.js";
+import api from "../services/api.js";
+import flattenValuesMap from "../services/flattenValuesMap.js";
+import { uploadFile, checkHeadersGeneral } from "../services/validateFile.js";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj.js";
 
 function getSteps() {
   return [
@@ -56,17 +56,17 @@ class ValueMapUploadDialogue extends React.Component {
   }
 
   handleDownload() {
-    var tempValueSet = JSON.parse(JSON.stringify(this.props.valueSet));
-    var flatCSV = flattenValuesMap(tempValueSet);
+    const tempValueSet = JSON.parse(JSON.stringify(this.props.valueSet));
+    const flatCSV = flattenValuesMap(tempValueSet);
     try {
       csv.stringify(flatCSV, (err, output) => {
-        var data = new Blob([output], { type: "text/csv" });
-        var csvURL = window.URL.createObjectURL(data);
-        let tempLink = document.createElement("a");
+        const data = new Blob([output], { type: "text/csv" });
+        const csvURL = window.URL.createObjectURL(data);
+        const tempLink = document.createElement("a");
         tempLink.href = csvURL;
         tempLink.setAttribute(
           "download",
-          this.props.header + "_valueMapTemplate"
+          `${this.props.header}_valueMapTemplate`
         );
         tempLink.click();
       });
@@ -80,7 +80,7 @@ class ValueMapUploadDialogue extends React.Component {
   }
 
   handleNext(e) {
-    var currentStep = this.state.activeStep;
+    const currentStep = this.state.activeStep;
     switch (this.state.activeStep) {
       case 0:
         this.handleDownload();
@@ -108,21 +108,18 @@ class ValueMapUploadDialogue extends React.Component {
   }
 
   uploadCallback(csvText) {
-    var headersCheck = checkHeadersGeneral(csvText.split("\n")[0].split(","), [
-      "Target",
-      "Source",
-    ]);
+    const headersCheck = checkHeadersGeneral(
+      csvText.split("\n")[0].split(","),
+      ["Target", "Source"]
+    );
     if (headersCheck.valid) {
-      var postObject = {
-        csvText: csvText,
+      const postObject = {
+        csvText,
         valueSet: JSON.parse(JSON.stringify(this.props.valueSet)),
       };
       api
         .post(
-          "api/maps/" +
-            this.props.uid +
-            "/upload/valueMap/" +
-            this.props.header,
+          `api/maps/${this.props.uid}/upload/valueMap/${this.props.header}`,
           postObject
         )
         .then((response) => {
@@ -147,8 +144,8 @@ class ValueMapUploadDialogue extends React.Component {
 
     return (
       <Dialog
-        maxWidth={"md"}
-        fullWidth={true}
+        maxWidth="md"
+        fullWidth
         open={this.props.open}
         onClose={this.props.onClose}
       >

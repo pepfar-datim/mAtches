@@ -1,11 +1,11 @@
 import React from "react";
 import { AppBar, Toolbar, Typography, IconButton } from "@material-ui/core";
 import { Settings, Home, Help } from "@material-ui/icons";
-import match from "../public/images/match_color.png"; // Tell Webpack this JS file uses this image
+import match from "../../public/images/match_color.png"; // Tell Webpack this JS file uses this image
 
-import config from "../config.json";
+import config from "../../config.json";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
 function HeaderBar() {
   return (

@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 
 import { Card, Typography } from "@material-ui/core";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
 function formatErrors(errors) {
   return Object.keys(errors).map((key) => (
@@ -101,10 +101,10 @@ function ValidationCard(props) {
 export default ValidationCard;
 
 ValidationCard.propTypes = {
-  data: PropTypes.object.isRequired,
-  errors: PropTypes.object.isRequired,
+  data: PropTypes.objectOf(PropTypes.object).isRequired,
+  errors: PropTypes.objectOf(PropTypes.object).isRequired,
   invalidHeaders: PropTypes.arrayOf(PropTypes.string).isRequired,
   missingHeaders: PropTypes.arrayOf(PropTypes.string).isRequired,
   success: PropTypes.bool.isRequired,
-  urlResponse: PropTypes.object.isRequired,
+  urlResponse: PropTypes.objectOf(PropTypes.object).isRequired,
 };

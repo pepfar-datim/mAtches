@@ -1,4 +1,5 @@
 import React from "react";
+import PropTypes from "prop-types";
 import {
   Card,
   Typography,
@@ -18,34 +19,42 @@ import RequiredNonRequiredSelector from "./RequiredNonRequiredSelector";
 import ConstantDialog from "./ConstantDialog";
 import SendButtonTooltip from "./SendButtonTooltip";
 
-import api from "./services/api";
+import api from "../services/api";
 
-import config from "../config.json";
+import config from "../../config.json";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
-function formatMenuItems(currentMap) {
-  return Object.keys(currentMap.headers).map((k) => (
+const getValueMapButtonStyle = (questionnaireItem, mapItem) => {
+  if (!(questionnaireItem.header || "").length) {
+    return stylesObj.editCardSelectorButtonDisabled;
+  }
+  const tempChoiceMap = mapItem.choiceMap || {};
+  if (Object.entries(tempChoiceMap).length) {
+    return stylesObj.editCardSelectorButtonComplete;
+  }
+  return stylesObj.editCardSelectorButtonIncomplete;
+};
+
+const formatMenuItems = (currentMap) =>
+  Object.keys(currentMap.headers).map((k) => (
     <MenuItem value={k}>{k}</MenuItem>
   ));
-}
 
-function formatSelect(header, key, map, associationFunction) {
-  return (
-    <FormControl style={stylesObj.editCardSelector}>
-      <Select
-        value={header || ""}
-        onChange={associationFunction}
-        name={key}
-        data_cy={`${key}_selectItem`}
-      >
-        {formatMenuItems(map)}
-      </Select>
-    </FormControl>
-  );
-}
+const formatSelect = (header, key, map, associationFunction) => (
+  <FormControl style={stylesObj.editCardSelector}>
+    <Select
+      value={header || ""}
+      onChange={associationFunction}
+      name={key}
+      data_cy={`${key}_selectItem`}
+    >
+      {formatMenuItems(map)}
+    </Select>
+  </FormControl>
+);
 
-function formatQuestions(
+const formatQuestions = (
   mapCheck,
   map,
   associationFunction,
@@ -53,8 +62,8 @@ function formatQuestions(
   constantChange,
   setConstantDialogOpen,
   itemVisibility
-) {
-  return Object.keys(mapCheck.flatQuestionnaire).map((k) => {
+) =>
+  Object.keys(mapCheck.flatQuestionnaire).map((k) => {
     // let mappedToConstant = !!((Object.keys(mapCheck.flatQuestionnaire[k].constant) || '').length);
     const mappedToConstant = !!Object.keys(
       mapCheck.flatQuestionnaire[k].constant || {}
@@ -154,18 +163,6 @@ function formatQuestions(
       </>
     );
   });
-}
-
-function getValueMapButtonStyle(questionnaireItem, mapItem) {
-  if (!(questionnaireItem.header || "").length) {
-    return stylesObj.editCardSelectorButtonDisabled;
-  }
-  const tempChoiceMap = mapItem.choiceMap || {};
-  if (Object.entries(tempChoiceMap).length) {
-    return stylesObj.editCardSelectorButtonComplete;
-  }
-  return stylesObj.editCardSelectorButtonIncomplete;
-}
 
 class EditCard extends React.Component {
   constructor(props) {
@@ -175,13 +172,13 @@ class EditCard extends React.Component {
       constantDialogOpen: false,
       constantHeader: "",
       qID: "",
-      valueArray: [],
       valueType: "",
-      path: [],
+      headerPath: [],
       itemVisibility: "all",
     };
     this.setConstantDialogOpen = this.setConstantDialogOpen.bind(this);
     this.handleVisibilityChange = this.handleVisibilityChange.bind(this);
+    this.sendMap = this.sendMap.bind(this);
   }
 
   handleVisibilityChange(text) {
@@ -189,29 +186,31 @@ class EditCard extends React.Component {
   }
 
   setConstantDialogOpen(ch, qID, vm, vt, path) {
+    const { constantDialogOpen } = this.state;
     const tempConstantHeader = typeof ch === "string" ? ch : "";
     const tempQID = typeof qID === "string" ? qID : "";
     const tempValueMap = Array.isArray(vm) ? vm : [];
     const tempValueType = typeof vt === "string" ? vt : "";
     const tempPath = Array.isArray(path) ? path : [];
     this.setState({
-      constantDialogOpen: !this.state.constantDialogOpen,
+      constantDialogOpen: !constantDialogOpen,
       constantHeader: tempConstantHeader,
       qID: tempQID,
       valueMap: tempValueMap,
       valueType: tempValueType,
-      path: tempPath,
+      headerPath: tempPath,
     });
   }
 
   sendMap() {
     // disable for testing
-    api.sendMap(this.props.map).then((resp) => {
+    const { map } = this.props;
+    api.sendMap(map).then((resp) => {
       console.log(resp);
     });
     this.setState({
       buttonDelay: true,
-      submittedMap: JSON.parse(JSON.stringify(this.props.map)),
+      submittedMap: JSON.parse(JSON.stringify(map)),
     });
     setTimeout(() => {
       this.setState({ buttonDelay: false });
@@ -219,12 +218,32 @@ class EditCard extends React.Component {
   }
 
   render() {
-    const mapUnchanged =
-      JSON.stringify(this.state.submittedMap) == JSON.stringify(this.props.map);
+    const {
+      constantChange,
+      mapCheck,
+      map,
+      mapValidity,
+      onAssociation,
+      onValueMap,
+      unmappedHeaders,
+    } = this.props;
+    const {
+      buttonDelay,
+      constantDialogOpen,
+      constantHeader,
+      qID,
+      valueMap,
+      valueType,
+      headerPath,
+      itemVisibility,
+      submittedMap,
+    } = this.state;
+
+    const mapUnchanged = JSON.stringify(submittedMap) === JSON.stringify(map);
     const buttonDisabled =
-      Object.keys(this.props.unmappedHeaders).length > 0 ||
-      !this.props.mapValidity ||
-      this.state.buttonDelay ||
+      Object.keys(unmappedHeaders).length > 0 ||
+      !mapValidity ||
+      buttonDelay ||
       mapUnchanged;
     const buttonUploadStyling = buttonDisabled
       ? stylesObj.editCardUploadButtonDisabled
@@ -236,25 +255,26 @@ class EditCard extends React.Component {
             <strong>Map Source Headers to Target Questions</strong>
           </Typography>
           <Typography variant="body1" style={stylesObj.marginQuarterBottom}>
-            <strong>*</strong> denotes required item
+            <strong>*</strong>
+            denotes required item
           </Typography>
 
           <RequiredNonRequiredSelector
-            itemVisibility={this.state.itemVisibility}
+            itemVisibility={itemVisibility}
             handleVisibilityChange={this.handleVisibilityChange}
           />
 
           <div style={stylesObj.themePaddingQuarter}>
-            {this.props.mapCheck && this.props.map && (
+            {mapCheck && map && (
               <div>
                 {formatQuestions(
-                  this.props.mapCheck,
-                  this.props.map.map,
-                  this.props.onAssociation,
-                  this.props.onValueMap,
-                  this.props.constantChange,
+                  mapCheck,
+                  map.map,
+                  onAssociation,
+                  onValueMap,
+                  constantChange,
                   this.setConstantDialogOpen,
-                  this.state.itemVisibility
+                  itemVisibility
                 )}
               </div>
             )}
@@ -268,9 +288,9 @@ class EditCard extends React.Component {
             ) : (
               <SendButtonTooltip
                 mapUnchanged={mapUnchanged}
-                tempDelay={this.state.buttonDelay}
-                unmappedHeaders={this.props.unmappedHeaders}
-                flatQuestionnaire={this.props.mapCheck.flatQuestionnaire}
+                tempDelay={buttonDelay}
+                unmappedHeaders={unmappedHeaders}
+                flatQuestionnaire={mapCheck.flatQuestionnaire}
               />
             )
           }
@@ -279,29 +299,40 @@ class EditCard extends React.Component {
             <Button
               variant="contained"
               style={buttonUploadStyling}
-              onClick={this.sendMap.bind(this)}
+              onClick={this.sendMap}
               disabled={buttonDisabled}
             >
-              Submit to {config.externalMappingLocation}
+              Submit to&nbsp;
+              {config.externalMappingLocation}
               <SendIcon style={stylesObj.marginQuarter} />
             </Button>
           </div>
         </Tooltip>
-        {this.state.constantDialogOpen && (
+        {constantDialogOpen && (
           <ConstantDialog
-            open={this.state.constantDialogOpen}
+            open={constantDialogOpen}
             closeConstantMapDialog={this.setConstantDialogOpen}
-            constantHeader={this.state.constantHeader}
-            qID={this.state.qID}
-            setConstant={this.props.constantChange}
-            valueArray={this.state.valueMap}
-            valueType={this.state.valueType}
-            path={this.state.path}
+            constantHeader={constantHeader}
+            qID={qID}
+            setConstant={constantChange}
+            valueArray={valueMap}
+            valueType={valueType}
+            path={headerPath}
           />
         )}
       </Card>
     );
   }
 }
+
+EditCard.propTypes = {
+  constantChange: PropTypes.func.isRequired,
+  mapCheck: PropTypes.objectOf(PropTypes.object).isRequired,
+  map: PropTypes.objectOf(PropTypes.object).isRequired,
+  mapValidity: PropTypes.bool.isRequired,
+  onAssociation: PropTypes.func.isRequired,
+  onValueMap: PropTypes.func.isRequired,
+  unmappedHeaders: PropTypes.objectOf(PropTypes.object).isRequired,
+};
 
 export default EditCard;

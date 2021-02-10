@@ -1,42 +1,47 @@
 const HtmlWebPackPlugin = require("html-webpack-plugin");
-const path = require("path");
-const htmlPlugin = new HtmlWebPackPlugin({
-  template: "./src/index.html",
-  filename: "./index.html",
+const path = require('path');
+
+const config = require('./config.json');
+
+const indexPlugin = new HtmlWebPackPlugin({
+  template: "./public/index.html", 
+  filename: "./index.html"
+});
+const errorPlugin = new HtmlWebPackPlugin({
+  template: "./public/error.html",
+  filename: "./error.html"
 });
 module.exports = {
   entry: "./src/index.js",
   output: {
-    path: path.join(__dirname, "dist"),
+    path: path.join(__dirname, 'dist' + config.base.slice(0,-1)),
     filename: "[name].js",
-    publicPath: "/",
+    publicPath: config.base,
   },
   resolve: {
     alias: {
-      src: path.resolve(__dirname + "/src"),
-    },
+      src: path.resolve(__dirname + '/src')
+    }
   },
-  plugins: [htmlPlugin],
+  plugins: [
+    indexPlugin,
+    errorPlugin,
+    ],
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: [
-          {
-            loader: "babel-loader",
-          },
-          {
-            loader: "eslint-loader",
-          },
-        ],
+        use: {
+          loader: "babel-loader"
+        }
       },
       {
         test: /\.(png|jpe?g|gif)$/i,
         use: {
-          loader: "file-loader",
-        },
-      },
-    ],
-  },
+          loader: "file-loader"
+        }
+      }
+    ]
+  }
 };

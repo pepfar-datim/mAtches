@@ -19,10 +19,10 @@ import SaveAlt from "@material-ui/icons/SaveAlt";
 import Search from "@material-ui/icons/Search";
 import Upload from "@material-ui/icons/PublishOutlined";
 import ViewColumn from "@material-ui/icons/ViewColumn";
-import api from "./services/api";
-import config from "../config.json";
+import api from "../services/api";
+import config from "../../config.json";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
 /* eslint-disable react/jsx-props-no-spreading */
 // plan to rewrite to remove depency on material table
@@ -136,5 +136,5 @@ class MapList extends Component {
 export default MapList;
 
 MapList.propTypes = {
-  questionnaireHash: PropTypes.object.isRequired,
+  questionnaireHash: PropTypes.objectOf(PropTypes.object).isRequired,
 };

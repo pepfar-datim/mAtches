@@ -4,9 +4,9 @@ import HeaderBar from "./HeaderBar";
 import MapList from "./MapList";
 import MapAdd from "./MapAdd";
 
-import api from "./services/api";
+import api from "../services/api";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
 class MapDashboard extends Component {
   // Initialize the state

@@ -1,15 +1,15 @@
 function validateMap(map, questionnaire) {
-  console.log(JSON.stringify(questionnaire))
-  var flatQuestionnaire = {};
-  var path = [];
+  console.log(JSON.stringify(questionnaire));
+  let flatQuestionnaire = {};
+  const path = [];
   flatQuestionnaire = generateFlatQuestionnaire(
     questionnaire.resource.item,
     flatQuestionnaire,
     path.slice()
   );
 
-  var validityCheck = { flatQuestionnaire: flatQuestionnaire };
-  validityCheck = populateWithMap(map["map"], validityCheck);
+  let validityCheck = { flatQuestionnaire };
+  validityCheck = populateWithMap(map.map, validityCheck);
   validityCheck = checkAllQuestions(validityCheck);
   return validityCheck;
 }
@@ -18,18 +18,18 @@ function generateFlatQuestionnaire(obj, fq, path) {
   if (Array.isArray(obj)) {
     for (let i = 0; i < obj.length; i++) {
       if (obj[i].hasOwnProperty("item")) {
-        var tempPath = path.slice(); //make temp copy to avoid pass by reference
+        var tempPath = path.slice(); // make temp copy to avoid pass by reference
         tempPath.push({
-          linkid: obj[i]["linkId"],
-          text: obj[i]["text"],
+          linkid: obj[i].linkId,
+          text: obj[i].text,
           required: obj[i].required,
         });
-        fq = generateFlatQuestionnaire(obj[i]["item"], fq, tempPath.slice());
+        fq = generateFlatQuestionnaire(obj[i].item, fq, tempPath.slice());
       } else {
-        if (!fq.hasOwnProperty(obj[i]["linkId"])) {
-          fq[obj[i]["linkId"]] = {};
+        if (!fq.hasOwnProperty(obj[i].linkId)) {
+          fq[obj[i].linkId] = {};
         }
-        var tempPath = path.slice(); //make temp copy to avoid pass by reference
+        var tempPath = path.slice(); // make temp copy to avoid pass by reference
         tempPath.push({
           linkid: obj[i].linkId,
           text: obj[i].text,
@@ -39,7 +39,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
         fq[obj[i].linkId].required = obj[i].required;
         if (obj[i].hasOwnProperty("answerValueSet")) {
           fq[obj[i].linkId].answerValueSet = obj[i].answerValueSet.concept;
-          for (var a of fq[obj[i].linkId].answerValueSet) {
+          for (const a of fq[obj[i].linkId].answerValueSet) {
             a.valueType = "choice";
           }
         }
@@ -47,7 +47,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
           fq[obj[i].linkId].answerOption = obj[i].answerOption;
           fq[obj[i].linkId].answerValueSet = [];
           fq[obj[i].linkId].answerValueSet = obj[i].answerOption.map((ans) => {
-            let keyName = Object.keys(ans).filter(
+            const keyName = Object.keys(ans).filter(
               (k) => k != "initialSelected"
             )[0];
             let tempItem = {};
@@ -58,9 +58,7 @@ function generateFlatQuestionnaire(obj, fq, path) {
                 valueType: keyName.replace("value").toLowerCase(),
               };
             } else {
-              tempItem = Object.assign({}, ans[keyName], {
-                valueType: "choice",
-              });
+              tempItem = { ...ans[keyName], valueType: "choice" };
               if (!tempItem.display) {
                 tempItem.display = tempItem.code;
               }
@@ -81,8 +79,8 @@ function populateWithMap(map, vc) {
     if (!map.headers[key].hasOwnProperty("path")) {
       vc.invalidMap = true;
     } else {
-      var tempId =
-        map.headers[key]["path"][map.headers[key]["path"].length - 1]["linkid"];
+      const tempId =
+        map.headers[key].path[map.headers[key].path.length - 1].linkid;
       if (!vc.flatQuestionnaire.hasOwnProperty(tempId)) {
         vc.invalidMap = true;
       } else {
@@ -101,10 +99,10 @@ function populateWithMap(map, vc) {
 }
 
 function checkAllQuestions(vc) {
-  for (var key in vc["flatQuestionnaire"]) {
-    let mappedToHeader = !!(vc["flatQuestionnaire"][key].header || "").length;
-    let mappedToConstant = !!Object.keys(
-      vc["flatQuestionnaire"][key].constant || {}
+  for (const key in vc.flatQuestionnaire) {
+    const mappedToHeader = !!(vc.flatQuestionnaire[key].header || "").length;
+    const mappedToConstant = !!Object.keys(
+      vc.flatQuestionnaire[key].constant || {}
     ).length;
     if (mappedToHeader == mappedToConstant) {
       vc.invalidMap = true;

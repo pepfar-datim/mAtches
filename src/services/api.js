@@ -10,7 +10,7 @@ export default class api {
   static sendData(url, data, method) {
     return fetch(config.base + url, {
       credentials: "include",
-      method: method,
+      method,
       headers: {
         "Content-Type": "application/json; charset=UTF-8",
       },
@@ -18,16 +18,15 @@ export default class api {
     }).then((resp) => {
       if (resp.ok) {
         return resp.json();
-      } else {
-        throw new Error("HTTP Request error");
       }
+      throw new Error("HTTP Request error");
     });
   }
 
   static sendCSV(url, data, method) {
     return fetch(config.base + url, {
       credentials: "include",
-      method: method,
+      method,
       headers: {
         "Content-Type": "text/plain; charset=UTF-8",
       },
@@ -35,9 +34,8 @@ export default class api {
     }).then((resp) => {
       if (resp.ok) {
         return resp.json();
-      } else {
-        throw new Error("HTTP Request error");
       }
+      throw new Error("HTTP Request error");
     });
   }
 
@@ -52,9 +50,8 @@ export default class api {
     }).then((resp) => {
       if (resp.ok) {
         return resp.json();
-      } else {
-        throw new Error("HTTP Request error");
       }
+      throw new Error("HTTP Request error");
     });
   }
 

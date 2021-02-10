@@ -1,7 +1,7 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import {
   Grid,
-  Paper,
   Card,
   Typography,
   IconButton,
@@ -9,37 +9,35 @@ import {
 } from "@material-ui/core";
 import Edit from "@material-ui/icons/Edit";
 
-import UploadCard from "./UploadCard.js";
-import config from "../config.json";
+import UploadCard from "./UploadCard";
+import config from "../../config.json";
 
-import loadMapQuestionnaire from "./services/loadMapQuestionnaire.js";
+import loadMapQuestionnaire from "../services/loadMapQuestionnaire";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj";
 
 function formatMapping(item) {
-  if (item.hasOwnProperty("header")) {
+  if (item.header) {
     return item.header;
   }
-  if (item.hasOwnProperty("constant")) {
+  if (item.constant) {
     return item.constant.code;
   }
   return "";
 }
 
 function formatQuestions(mapCheck) {
-  return Object.keys(mapCheck.flatQuestionnaire).map(function (k, i) {
-    return (
-      <div key={"question-" + i}>
-        <Typography wrap="noWrap">
-          <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
-        </Typography>
-        <Typography wrap="noWrap">
-          {formatMapping(mapCheck.flatQuestionnaire[k])}
-        </Typography>
-        <br />
-      </div>
-    );
-  });
+  return Object.keys(mapCheck.flatQuestionnaire).map((k) => (
+    <div key={`question-${k}`}>
+      <Typography wrap="noWrap">
+        <strong>{mapCheck.flatQuestionnaire[k].text}</strong>
+      </Typography>
+      <Typography wrap="noWrap">
+        {formatMapping(mapCheck.flatQuestionnaire[k])}
+      </Typography>
+      <br />
+    </div>
+  ));
 }
 
 class MapUpload extends Component {
@@ -54,19 +52,21 @@ class MapUpload extends Component {
   }
 
   componentDidMount() {
-    loadMapQuestionnaire(this.props.id, this);
+    const { id } = this.props;
+    loadMapQuestionnaire(id, this);
   }
 
   render() {
+    const { failedToLoad, loading, map, mapCheck, questionnaire } = this.state;
     return (
       <>
-        {this.state.loading ? (
+        {loading ? (
           <CircularProgress style={stylesObj.loaderStyling} />
         ) : (
           <>
-            {this.state.failedToLoad ? (
+            {failedToLoad ? (
               <>
-                <Typography>{this.state.failedToLoad}</Typography>
+                <Typography>{failedToLoad}</Typography>
               </>
             ) : (
               <>
@@ -82,22 +82,18 @@ class MapUpload extends Component {
                         <div style={stylesObj.themePadding}>
                           <Typography variant="h6">
                             <strong>Map name: </strong>
-                            {this.state.map.name}
+                            {map.name}
                           </Typography>
                           <Typography variant="body1">
                             <strong>Questionnaire: </strong>
-                            {this.state.questionnaire.resource.name}
+                            {questionnaire.resource.name}
                           </Typography>
                           <IconButton
                             edge="start"
                             color="inherit"
                             aria-label="menu"
                             onClick={() => {
-                              window.location =
-                                config.base +
-                                "maps/" +
-                                this.state.map.uid +
-                                "?mode=edit";
+                              window.location = `${config.base}maps/${map.uid}?mode=edit`;
                             }}
                           >
                             <Edit />
@@ -105,14 +101,12 @@ class MapUpload extends Component {
                           <br />
                           <br />
                           <br />
-                          {this.state.mapCheck && (
-                            <div>{formatQuestions(this.state.mapCheck)}</div>
-                          )}
+                          {mapCheck && <div>{formatQuestions(mapCheck)}</div>}
                         </div>
                       </Card>
                     </Grid>
                     <Grid item xs>
-                      <UploadCard map={this.state.map} />
+                      <UploadCard map={map} />
                     </Grid>
                   </Grid>
                 </div>
@@ -124,5 +118,9 @@ class MapUpload extends Component {
     );
   }
 }
+
+MapUpload.propTypes = {
+  id: PropTypes.string.isRequired,
+};
 
 export default MapUpload;

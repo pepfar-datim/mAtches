@@ -1,25 +1,20 @@
 import React from "react";
+import PropTypes from "prop-types";
 
-import {
-  Radio,
-  RadioGroup,
-  FormControlLabel,
-  TextField,
-} from "@material-ui/core";
+import { Radio, RadioGroup, FormControlLabel } from "@material-ui/core";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj";
 
-import config from "../config.json";
-
-function RequiredNonRequiredSelector(props) {
+const RequiredNonRequiredSelector = (props) => {
+  const { handleVisibilityChange, itemVisibility } = props;
   return (
     <div>
       <RadioGroup
         style={stylesObj.uploadDestinationRadioGroup}
         aria-label="visibility"
         name="visibilitySelector"
-        value={props.itemVisibility}
-        onChange={(e) => props.handleVisibilityChange(e.target.value)}
+        value={itemVisibility}
+        onChange={(e) => handleVisibilityChange(e.target.value)}
         row
       >
         <FormControlLabel
@@ -35,6 +30,11 @@ function RequiredNonRequiredSelector(props) {
       </RadioGroup>
     </div>
   );
-}
+};
+
+RequiredNonRequiredSelector.propTypes = {
+  handleVisibilityChange: PropTypes.func.isRequired,
+  itemVisibility: PropTypes.string.isRequired,
+};
 
 export default RequiredNonRequiredSelector;

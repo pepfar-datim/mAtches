@@ -19,10 +19,10 @@ import ChipInput from "material-ui-chip-input";
 
 import ValueMapUploadDialogue from "./ValueMapUploadDialogue.js";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj.js";
 
 function generateChoiceMap(headerDefinitions, tempValueSet) {
-  var tempChoiceMap = {};
+  let tempChoiceMap = {};
   if (headerDefinitions.hasOwnProperty("choiceMap")) {
     tempChoiceMap = headerDefinitions.choiceMap;
   } else {
@@ -37,16 +37,16 @@ function generateChoiceMap(headerDefinitions, tempValueSet) {
 }
 
 function loadValueSet(tempChoiceMap, tempValueSet) {
-  var reverseChoiceMap = {};
+  const reverseChoiceMap = {};
 
-  for (var k in tempChoiceMap) {
+  for (const k in tempChoiceMap) {
     if (!reverseChoiceMap.hasOwnProperty(tempChoiceMap[k])) {
       reverseChoiceMap[tempChoiceMap[k].code] = [];
     }
     reverseChoiceMap[tempChoiceMap[k].code].push(k);
   }
 
-  tempValueSet = tempValueSet.map(function (mapItem) {
+  tempValueSet = tempValueSet.map((mapItem) => {
     mapItem.maps = reverseChoiceMap.hasOwnProperty(mapItem.code)
       ? reverseChoiceMap[mapItem.code]
       : [];
@@ -72,9 +72,9 @@ class ValueMapCard extends React.Component {
   }
 
   componentDidMount() {
-    var tempValueSet = this.props.mapCheck.flatQuestionnaire[this.props.mapID]
+    let tempValueSet = this.props.mapCheck.flatQuestionnaire[this.props.mapID]
       .answerValueSet;
-    var tempChoiceMap = generateChoiceMap(
+    const tempChoiceMap = generateChoiceMap(
       this.props.map.map.headers[this.props.header],
       tempValueSet
     );
@@ -83,18 +83,16 @@ class ValueMapCard extends React.Component {
   }
 
   formatValueMap(valueSet) {
-    return valueSet.map((o, i) => {
-      return (
-        <div>
-          <Typography variant="h6" style={stylesObj.marginQuarter}>
-            <strong>{o.display}</strong>
-            <br />
-            {this.formatChips(o.maps, i, o.code, o.valueType)}
-          </Typography>
+    return valueSet.map((o, i) => (
+      <div>
+        <Typography variant="h6" style={stylesObj.marginQuarter}>
+          <strong>{o.display}</strong>
           <br />
-        </div>
-      );
-    });
+          {this.formatChips(o.maps, i, o.code, o.valueType)}
+        </Typography>
+        <br />
+      </div>
+    ));
   }
 
   formatChips(mapValues, index, code, valueType) {
@@ -116,8 +114,8 @@ class ValueMapCard extends React.Component {
   handleAddChip(chip, index, code, valueType) {
     chip = chip.trim();
     if (!this.state.choiceMap.hasOwnProperty(chip)) {
-      var tempChoiceMap = this.state.choiceMap;
-      var tempValueSet = this.state.valueSet;
+      const tempChoiceMap = this.state.choiceMap;
+      const tempValueSet = this.state.valueSet;
       tempChoiceMap[chip] = { code, valueType };
       tempValueSet[index].maps.push(chip);
       this.setState({ choiceMap: tempChoiceMap, valueSet: tempValueSet });
@@ -125,10 +123,10 @@ class ValueMapCard extends React.Component {
   }
 
   handleDeleteChip(chip, index, code, valueType) {
-    var tempChoiceMap = this.state.choiceMap;
-    var tempValueSet = this.state.valueSet;
+    const tempChoiceMap = this.state.choiceMap;
+    const tempValueSet = this.state.valueSet;
     delete tempChoiceMap[chip];
-    var filteredValueSet = tempValueSet[index].maps.filter((v) => v != chip);
+    const filteredValueSet = tempValueSet[index].maps.filter((v) => v != chip);
     tempValueSet[index].maps = filteredValueSet;
     this.setState({ choiceMap: tempChoiceMap, valueSet: tempValueSet });
   }
@@ -149,7 +147,8 @@ class ValueMapCard extends React.Component {
       <Card style={stylesObj.valueMapCard}>
         <div style={stylesObj.themePadding}>
           <Typography variant="h6" style={stylesObj.marginQuarter}>
-            <strong>Map Values</strong> for {this.props.header}
+            <strong>Map Values</strong> for
+            {this.props.header}
             <br />
           </Typography>
           <Button

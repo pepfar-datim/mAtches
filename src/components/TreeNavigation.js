@@ -7,7 +7,7 @@ import ExpandMoreIcon from "@material-ui/icons/ExpandMore";
 import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import TreeItem from "@material-ui/lab/TreeItem";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
 const useStyles = makeStyles({
   root: {
@@ -23,7 +23,7 @@ export default function TreeNavigation(props) {
 
   const renderTree = (nodes, cHeaders) =>
     nodes.items ? (
-      <TreeItem key={nodes.key} nodeId={nodes.id} label={nodes.key}>
+      <TreeItem key={nodes.key} nodeId={nodes.id} label={`${nodes.key}_logic`}>
         {nodes.items.map((node) => renderTree(node, cHeaders))}
       </TreeItem>
     ) : (
@@ -52,6 +52,6 @@ export default function TreeNavigation(props) {
 }
 
 TreeNavigation.propTypes = {
-  currentHeaders: PropTypes.object.isRequired,
-  data: PropTypes.object.isRequired,
+  currentHeaders: PropTypes.objectOf(PropTypes.object).isRequired,
+  data: PropTypes.objectOf(PropTypes.object).isRequired,
 };

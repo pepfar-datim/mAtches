@@ -14,7 +14,7 @@ import {
   MenuItem,
 } from "@material-ui/core/";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
 export default function ConstantDialog(props) {
   const {

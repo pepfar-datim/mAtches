@@ -8,9 +8,9 @@ import {
   TextField,
 } from "@material-ui/core";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
-import config from "../config.json";
+import config from "../../config.json";
 
 function UploadDestinationSelector(props) {
   const { destination, externalURL, onDestinationChange, onURLChange } = props;

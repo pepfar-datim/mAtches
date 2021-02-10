@@ -30,8 +30,8 @@ function readFileContent(file) {
 }
 
 export function checkHeadersGeneral(actualHeaders, desiredHeaders) {
-  var duplicates = false;
-  var missingHeaders = [];
+  let duplicates = false;
+  const missingHeaders = [];
 
   actualHeaders = actualHeaders.reduce((a, h) => {
     if (a.hasOwnProperty(h)) {
@@ -41,7 +41,7 @@ export function checkHeadersGeneral(actualHeaders, desiredHeaders) {
     return a;
   }, {});
 
-  for (var h of desiredHeaders) {
+  for (const h of desiredHeaders) {
     if (actualHeaders.hasOwnProperty(h)) {
       delete actualHeaders[h];
     } else {
@@ -49,16 +49,16 @@ export function checkHeadersGeneral(actualHeaders, desiredHeaders) {
     }
   }
 
-  var validity = duplicates ? false : missingHeaders.length > 0 ? false : true;
+  const validity = duplicates ? false : !(missingHeaders.length > 0);
   return { valid: validity, extraHeaders: Object.keys(actualHeaders) };
 }
 
 export function checkHeaders(csvFile, mapHeaders) {
   console.log(mapHeaders);
-  var columnRow = csvFile.split("\n")[0];
-  var columns = columnRow.split(",");
-  let i = 0;
-  let invalidHeaders = [];
+  const columnRow = csvFile.split("\n")[0];
+  const columns = columnRow.split(",");
+  const i = 0;
+  const invalidHeaders = [];
   for (let i = 0; i < columns.length; i++) {
     if (!mapHeaders.hasOwnProperty(columns[i].trim())) {
       invalidHeaders.push(columns[i].trim());
@@ -66,14 +66,14 @@ export function checkHeaders(csvFile, mapHeaders) {
       delete mapHeaders[columns[i].trim()];
     }
   }
-  var validity = true;
+  let validity = true;
   if (Object.keys(mapHeaders).length > 0) {
     validity = false;
   }
 
   return {
-    validity: validity,
-    invalidHeaders: invalidHeaders,
+    validity,
+    invalidHeaders,
     missingHeaders: Object.keys(mapHeaders),
     text: csvFile,
   };

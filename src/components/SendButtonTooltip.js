@@ -1,45 +1,46 @@
 import React from "react";
+import PropTypes from "prop-types";
 import { Typography } from "@material-ui/core";
 
-function generateEmptyQuestions(flatQuestionnaire) {
-  let tempEmptyQuestions = [];
-  Object.keys(flatQuestionnaire).map((k) => {
+const generateEmptyQuestions = (flatQuestionnaire) => {
+  const tempEmptyQuestions = [];
+  Object.keys(flatQuestionnaire).forEach((k) => {
     if (flatQuestionnaire[k].required) {
-      let mappedToHeader = !!(flatQuestionnaire[k].header || "").length;
-      let mappedToConstant = !!(
+      const mappedToHeader = !!(flatQuestionnaire[k].header || "").length;
+      const mappedToConstant = !!(
         (flatQuestionnaire[k].constant || {}).code || ""
       ).length;
       if (!mappedToHeader && !mappedToConstant) {
         tempEmptyQuestions.push(flatQuestionnaire[k].text);
       }
     }
-  }, tempEmptyQuestions);
+  });
   return tempEmptyQuestions;
-}
+};
 
-function SendButtonTooltip(props) {
-  let unmappedHeaders = props.unmappedHeaders;
-  let tempEmptyQuestions = generateEmptyQuestions(props.flatQuestionnaire);
+const SendButtonTooltip = (props) => {
+  const { flatQuestionnaire, mapUnchanged, tempDelay, unmappedHeaders } = props;
+  const tempEmptyQuestions = generateEmptyQuestions(flatQuestionnaire);
 
   return (
     <div>
       <Typography>Cannot Upload</Typography>
       <br />
-      {props.mapUnchanged == true && (
+      {mapUnchanged && (
         <div>
           <span>Map is the same as last submission</span>
           <br />
           <br />
         </div>
       )}
-      {props.mapUnchanged == false && props.tempDelay == true && (
+      {!mapUnchanged && tempDelay && (
         <div>
           <span>Please wait a few seconds for button to be reenabled</span>
           <br />
           <br />
         </div>
       )}
-      {Object.keys(unmappedHeaders).length != 0 && (
+      {Object.keys(unmappedHeaders).length !== 0 && (
         <div>
           <strong>Unmapped Headers</strong>
           <br />
@@ -48,7 +49,7 @@ function SendButtonTooltip(props) {
           <br />
         </div>
       )}
-      {tempEmptyQuestions.length != 0 && (
+      {tempEmptyQuestions.length !== 0 && (
         <div>
           <strong>Unmapped Questions</strong>
           <br />
@@ -59,6 +60,13 @@ function SendButtonTooltip(props) {
       )}
     </div>
   );
-}
+};
+
+SendButtonTooltip.propTypes = {
+  flatQuestionnaire: PropTypes.objectOf(PropTypes.object).isRequired,
+  mapUnchanged: PropTypes.bool.isRequired,
+  tempDelay: PropTypes.bool.isRequired,
+  unmappedHeaders: PropTypes.objectOf(PropTypes.object).isRequired,
+};
 
 export default SendButtonTooltip;

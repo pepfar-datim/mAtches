@@ -1,11 +1,11 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import {
+  CircularProgress,
   Paper,
   Typography,
   TextField,
   FormControl,
-  FormHelperText,
-  Input,
   InputLabel,
   Select,
   MenuItem,
@@ -14,10 +14,13 @@ import {
 
 import AddCircleOutlinedIcon from "@material-ui/icons/AddCircleOutlined";
 
-import config from "../config.json";
-import api from "./services/api.js";
+import config from "../../config.json";
+import api from "../services/api";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj";
+
+const generateFileTypeMenuItems = (fileTypes) =>
+  fileTypes.map((type) => <MenuItem value={type}>{type}</MenuItem>);
 
 class MapAdd extends Component {
   constructor(props) {
@@ -28,7 +31,10 @@ class MapAdd extends Component {
       name: "",
       fileType: "",
     };
-    this.handleSelectChange.bind(this);
+    this.checkName = this.checkName.bind(this);
+    this.handleAdd = this.handleAdd.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
+    this.handleSelectChange = this.handleSelectChange.bind(this);
   }
 
   handleSelectChange(value, key) {
@@ -36,35 +42,28 @@ class MapAdd extends Component {
   }
 
   handleNameChange(event) {
+    const { timeout } = this.state;
     const tempName = event.target.value;
-    if (this.state.timeout) {
-      clearTimeout(this.state.timeout);
+    if (timeout) {
+      clearTimeout(timeout);
     }
     this.setState({
       checking: true,
       name: tempName,
       timeout: setTimeout(() => {
-        this.checkName(tempName, this);
+        this.checkName(tempName);
       }, 1000),
     });
   }
 
-  checkName(name, _this) {
-    api.get(`api/maps/names/${encodeURI(name)}`).then((nameFound) => {
-      _this.setState({
-        invalidName: nameFound.hasOwnProperty("uid"),
-        checking: false,
-      });
-    });
-  }
-
   handleAdd() {
-    if (!this.state.invalidName) {
+    const { fileType, invalidName, name, questionnaire } = this.state;
+    if (!invalidName) {
       const payload = {
         map: { headers: {}, constants: {} },
-        fileType: this.state.fileType,
-        name: this.state.name,
-        questionnaireuid: this.state.questionnaire,
+        fileType,
+        name,
+        questionnaireuid: questionnaire,
       };
       api.post("api/maps", payload).then((response) => {
         window.location = `${config.base}maps/${response.uid}?mode=edit`;
@@ -72,9 +71,26 @@ class MapAdd extends Component {
     }
   }
 
+  checkName(name) {
+    api.get(`api/maps/names/${encodeURI(name)}`).then((nameFound) => {
+      this.setState({
+        invalidName: Boolean(nameFound.uid),
+        checking: false,
+      });
+    });
+  }
+
   render() {
     const { questionnaireHash } = this.props;
-    return this.state.loading ? (
+    const {
+      checking,
+      fileType,
+      invalidName,
+      loading,
+      name,
+      questionnaire,
+    } = this.state;
+    return loading ? (
       <CircularProgress style={stylesObj.loaderStyling} />
     ) : (
       <div>
@@ -94,14 +110,14 @@ class MapAdd extends Component {
                   Questionnaire
                 </InputLabel>
                 <Select
-                  value={this.state.questionnaire}
+                  value={questionnaire}
                   displayEmpty
                   name="questionnaire"
                   onChange={(e) =>
                     this.handleSelectChange(e.target.value, "questionnaire")
                   }
                 >
-                  {Object.keys(questionnaireHash).map((uid, index) => (
+                  {Object.keys(questionnaireHash).map((uid) => (
                     <MenuItem value={uid}>{questionnaireHash[uid]}</MenuItem>
                   ))}
                 </Select>
@@ -112,17 +128,15 @@ class MapAdd extends Component {
                   File Type
                 </InputLabel>
                 <Select
-                  value={this.state.fileType}
+                  value={fileType}
                   displayEmpty
                   name="fileType"
-                  onChange={(e) =>
-                    this.handleSelectChange(e.target.value, "fileType")
-                  }
+                  onChange={(e) => {
+                    console.log("selected", e.target.value);
+                    this.handleSelectChange(e.target.value, "fileType");
+                  }}
                 >
-                  >
-                  {["csv", "json"].map((type) => (
-                    <MenuItem value={type}>{type}</MenuItem>
-                  ))}
+                  {generateFileTypeMenuItems(["csv", "json"])}
                 </Select>
               </FormControl>
               <br />
@@ -130,25 +144,25 @@ class MapAdd extends Component {
                 style={stylesObj.themeWidth}
                 id="name-entry"
                 label="Name"
-                value={this.state.name}
+                value={name}
                 margin="normal"
-                onChange={this.handleNameChange.bind(this)}
-                error={this.state.invalidName}
-                helperText={this.state.invalidName && "Name already used"}
+                onChange={this.handleNameChange}
+                error={invalidName}
+                helperText={invalidName && "Name already used"}
               />
               <br />
               <IconButton
                 edge="start"
                 aria-label="menu"
                 disabled={
-                  this.state.invalidName ||
-                  this.state.checking ||
-                  !this.state.name ||
-                  !this.state.questionnaire ||
-                  !this.state.fileType
+                  invalidName ||
+                  checking ||
+                  !name ||
+                  !questionnaire ||
+                  !fileType
                 }
                 id="addMapButton"
-                onClick={this.handleAdd.bind(this)}
+                onClick={this.handleAdd}
               >
                 <AddCircleOutlinedIcon />
               </IconButton>
@@ -159,5 +173,9 @@ class MapAdd extends Component {
     );
   }
 }
+
+MapAdd.propTypes = {
+  questionnaireHash: PropTypes.string.isRequired,
+};
 
 export default MapAdd;

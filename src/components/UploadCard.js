@@ -1,18 +1,20 @@
 import React from "react";
+import PropTypes from "prop-types";
+
 import { Card, Typography, IconButton, TextField } from "@material-ui/core";
 
 import PublishIcon from "@material-ui/icons/Publish";
 
-import ValidationCard from "./ValidationCard.js";
-import UploadDestinationSelector from "./UploadDestinationSelector.js";
+import ValidationCard from "./ValidationCard";
+import UploadDestinationSelector from "./UploadDestinationSelector";
 
-import api from "./services/api.js";
+import api from "../services/api";
 
-import { uploadFile, checkHeaders } from "./services/validateFile.js";
+import { uploadFile, checkHeaders } from "../services/validateFile";
 
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj";
 
-import config from "../config.json";
+import config from "../../config.json";
 
 class UploadCard extends React.Component {
   constructor(props) {
@@ -25,6 +27,15 @@ class UploadCard extends React.Component {
     this.handleDestinationChange = this.handleDestinationChange.bind(this);
     this.handleURLChange = this.handleURLChange.bind(this);
   }
+
+  handleDestinationChange(text) {
+    this.setState({ destination: text });
+  }
+
+  handleURLChange(text) {
+    this.setState({ externalURL: text });
+  }
+
   setInitialState() {
     this.setState({
       finishedUploading: false,
@@ -35,20 +46,17 @@ class UploadCard extends React.Component {
       urlResponse: {},
     });
   }
-  handleDestinationChange(text) {
-    this.setState({ destination: text });
-  }
-  handleURLChange(text) {
-    this.setState({ externalURL: text });
-  }
+
   uploadAction(e) {
     this.refs.fileInput.click(e);
   }
 
   uploadCallback(dataFile) {
+    const { map } = this.props;
+    const { destination, externalURL } = this.state;
     let dataSummary = {};
 
-    switch (this.props.map.fileType) {
+    switch (map.fileType) {
       case "json":
         dataSummary = {
           validity: true,
@@ -60,7 +68,7 @@ class UploadCard extends React.Component {
       default:
         dataSummary = checkHeaders(
           dataFile,
-          JSON.parse(JSON.stringify(this.props.map.map.headers))
+          JSON.parse(JSON.stringify(map.map.headers))
         );
         break;
     }
@@ -69,23 +77,18 @@ class UploadCard extends React.Component {
       missingHeaders: dataSummary.missingHeaders,
     });
     if (dataSummary.validity) {
-      var url =
-        this.state.destination == "external"
-          ? encodeURIComponent(this.state.externalURL)
-          : null;
+      const url =
+        destination === "external" ? encodeURIComponent(externalURL) : null;
       api
-        .postCSV(
-          "api/maps/" + this.props.map.uid + "/upload?url=" + url,
-          dataSummary.text
-        )
+        .postCSV(`api/maps/${map.uid}/upload?url=${url}`, dataSummary.text)
         .then((response) => {
-          if (response.hasOwnProperty("errors")) {
+          if (response.errors) {
             this.setState({ errors: response.errors });
           }
-          if (response.hasOwnProperty("data")) {
+          if (response.data) {
             this.setState({ data: response.data });
           }
-          if (response.hasOwnProperty("urlResponse")) {
+          if (response.urlResponse) {
             this.setState({ urlResponse: response.urlResponse });
           }
           this.setState({ finishedUploading: true });
@@ -111,6 +114,18 @@ class UploadCard extends React.Component {
   }
 
   render() {
+    const { map } = this.props;
+    const {
+      data,
+      destination,
+      errors,
+      externalURL,
+      fileName,
+      finishedUploading,
+      invalidHeaders,
+      missingHeaders,
+      urlResponse,
+    } = this.state;
     return (
       <Card style={stylesObj.mainCard}>
         <div style={stylesObj.themePadding}>
@@ -119,22 +134,17 @@ class UploadCard extends React.Component {
           </Typography>
           {config.allowExternalURL && (
             <UploadDestinationSelector
-              destination={this.state.destination}
-              externalURL={this.state.externalURL}
+              destination={destination}
+              externalURL={externalURL}
               onDestinationChange={this.handleDestinationChange}
               onURLChange={this.handleURLChange}
             />
           )}
           <div style={stylesObj.themePaddingQuarter}>
             <Typography variant="body1">
-              Select a {(this.props.map.fileType || "CSV").toUpperCase()} file
-              to upload
+              {`Select a ${map.fileType.toUpperCase() || "CSV"} file to upload`}
             </Typography>
-            <TextField
-              disabled={true}
-              label={this.state.filename}
-              value={this.state.fileName}
-            />
+            <TextField disabled label={fileName} value={fileName} />
             <IconButton
               edge="start"
               color="inherit"
@@ -149,20 +159,20 @@ class UploadCard extends React.Component {
               <input
                 type="file"
                 ref="fileInput"
-                accept={"." + (this.props.map.fileType || "csv")}
+                accept={`.${map.fileType || "csv"}`}
                 onChange={(ev) => {
                   this.upload(ev);
                 }}
               />
             </form>
-            {this.state.finishedUploading && (
+            {finishedUploading && (
               <ValidationCard
-                errors={this.state.errors}
-                invalidHeaders={this.state.invalidHeaders}
-                missingHeaders={this.state.missingHeaders}
-                success={this.state.data.resourceType == "Bundle"}
-                data={this.state.data}
-                urlResponse={this.state.urlResponse}
+                errors={errors}
+                invalidHeaders={invalidHeaders}
+                missingHeaders={missingHeaders}
+                success={data.resourceType === "Bundle"}
+                data={data}
+                urlResponse={urlResponse}
               />
             )}
           </div>
@@ -171,5 +181,9 @@ class UploadCard extends React.Component {
     );
   }
 }
+
+UploadCard.propTypes = {
+  map: PropTypes.objectOf(PropTypes.object).isRequired,
+};
 
 export default UploadCard;

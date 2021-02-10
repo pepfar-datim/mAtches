@@ -4,7 +4,7 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import MapDashboard from "./MapDashboard";
 import MapUpdate from "./MapUpdate";
 
-import config from "../config.json";
+import config from "../../config.json";
 
 const basePath = config.base;
 

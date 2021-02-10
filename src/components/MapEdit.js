@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import PropTypes from "prop-types";
 import {
   Grid,
   Card,
@@ -17,13 +18,13 @@ import ValueMapCard from "./ValueMapCard";
 import UploadSource from "./UploadSource";
 import TreeNavigation from "./TreeNavigation";
 
-import api from "./services/api";
-import { uploadFile } from "./services/validateFile";
+import api from "../services/api";
+import { uploadFile } from "../services/validateFile";
 
-import loadMapQuestionnaire from "./services/loadMapQuestionnaire";
-import loadMapFromMap from "./services/loadMapFromMap";
+import loadMapQuestionnaire from "../services/loadMapQuestionnaire";
+import loadMapFromMap from "../services/loadMapFromMap";
 
-import { stylesObj } from "./styling/stylesObj";
+import { stylesObj } from "../styling/stylesObj";
 
 function pushMapBack(tempMap, mapValidity) {
   api.put("api/maps", { ...tempMap, complete: mapValidity });
@@ -41,7 +42,7 @@ function removeAssociationQuestionnaire(tempCheck, mapping) {
 
 function getCurrentAssociation(tempCheck, prop) {
   let currentAssociation = "";
-  if (tempCheck.flatQuestionnaire.prop) {
+  if (tempCheck.flatQuestionnaire[prop]) {
     if (tempCheck.flatQuestionnaire[prop].header) {
       currentAssociation = tempCheck.flatQuestionnaire[prop].header;
     }
@@ -87,10 +88,12 @@ function checkValidity(flatQuestionnaire, mappings) {
   return mapValidity;
 }
 
-function processAdd(tempMap, tempUnmappedHeaders, tempHeader, headerPath) {
-  if (!tempMap.map.headers.tempHeader) {
+function processAdd(map, unmappedHeaders, tempHeader, headerPath) {
+  const tempMap = map;
+  const tempUnmappedHeaders = unmappedHeaders;
+  if (!tempMap.map.headers[tempHeader]) {
     tempMap.map.headers[tempHeader] = { headerPath };
-    if (!tempUnmappedHeaders.tempHeader) {
+    if (!tempUnmappedHeaders[tempHeader]) {
       tempUnmappedHeaders[tempHeader] = { headerPath };
     }
   }
@@ -99,14 +102,19 @@ function processAdd(tempMap, tempUnmappedHeaders, tempHeader, headerPath) {
 
 function extractHeaderFromPath(path) {
   return path.reduce((accum, cv, ind) => {
+    let tempAccum = accum;
     if (ind > 0 && !Number.isInteger(cv)) {
-      accum += ".";
+      tempAccum += ".";
     }
-    return Number.isInteger(cv) ? `${accum}[${cv}]` : accum + cv;
+    return Number.isInteger(cv) ? `${tempAccum}[${cv}]` : tempAccum + cv;
   }, "");
 }
 
-function parseJSON(obj, path, tempMap, tempUnmappedHeaders, headersStructure) {
+function parseJSON(obj, path, map, unmappedHeaders, headersStructureOriginal) {
+  let tempMap = map;
+  let tempUnmappedHeaders = unmappedHeaders;
+  const headersStructure = headersStructureOriginal;
+
   Object.keys(obj).forEach((key) => {
     const updatedPath = [...path, key];
     const tempType = Array.isArray(obj[key]) ? "array" : typeof obj[key];
@@ -117,7 +125,7 @@ function parseJSON(obj, path, tempMap, tempUnmappedHeaders, headersStructure) {
     });
     if (Array.isArray(obj[key])) {
       headersStructure[headersStructure.length - 1].items = [];
-      for (let i = 0; i < obj[key].length; i++) {
+      for (let i = 0; i < obj[key].length; i += 1) {
         headersStructure[headersStructure.length - 1].items[i] = {
           type: typeof obj[key][i],
           key: i,
@@ -167,55 +175,7 @@ function parseJSON(obj, path, tempMap, tempUnmappedHeaders, headersStructure) {
   return [tempMap, tempUnmappedHeaders, headersStructure];
 }
 
-function readFileContent(file) {
-  const reader = new FileReader();
-  return new Promise((resolve, reject) => {
-    reader.onload = (event) => resolve(event.target.result);
-    reader.onerror = (error) => reject(error);
-    reader.readAsText(file);
-  });
-}
-
 class MapEdit extends Component {
-  formatHeaders(currentMap, _this) {
-    if (this.state.map.fileType == "json" && this.state.map.headersStructure) {
-      return (
-        <>
-          <Button
-            variant="contained"
-            style={stylesObj.resetSourceButton}
-            onClick={() => {
-              this.clearJSON();
-            }}
-          >
-            Reset Source
-            <DeleteForever />
-          </Button>
-          {Object.keys(this.state.map.headersStructure).length && (
-            <TreeNavigation
-              currentHeaders={this.state.map.map.headers}
-              data={this.state.map.headersStructure}
-            />
-          )}
-        </>
-      );
-    }
-    return Object.keys(currentMap.headers).map((k, i) => (
-      <div key={`chip_${i}`}>
-        <Chip
-          label={k.length > 30 ? `${k.substring(0, 30)}...` : k}
-          onDelete={this.handleDelete.bind(this, k)}
-          style={
-            currentMap.headers[k].hasOwnProperty("path")
-              ? stylesObj.mappedChip
-              : stylesObj.unmappedChip
-          }
-          data-cy={`chip_${k}`}
-        />
-      </div>
-    ));
-  }
-
   constructor(props) {
     super(props);
     this.state = {
@@ -233,6 +193,7 @@ class MapEdit extends Component {
       headerUsed: false,
       fileError: false,
     };
+    this.checkMapName = this.checkMapName.bind(this);
     this.clearJSON = this.clearJSON.bind(this);
     this.handleAdd = this.handleAdd.bind(this);
     this.handleAssociationChangeHeader = this.handleAssociationChangeHeader.bind(
@@ -253,83 +214,88 @@ class MapEdit extends Component {
   }
 
   componentDidMount() {
-    loadMapQuestionnaire(this.props.id, this);
+    const { id } = this.props;
+    loadMapQuestionnaire(id, this);
     // need to check the answer option set and load as constant if relevant
   }
 
+  handleUpload(e) {
+    const { map } = this.state;
+    this.setState({ fileError: false });
+    e.preventDefault();
+    uploadFile(e, this).then((fileText) => {
+      switch (map.fileType) {
+        case "json":
+          this.processJSON(fileText);
+          break;
+        default:
+          this.processCSV(fileText);
+          break;
+      }
+    });
+  }
+
   handleAdd() {
-    const tempHeader = this.state.newHeaderName;
+    const { newHeaderName, map, unmappedHeaders } = this.state;
     if (
-      this.state.map.map.headers.hasOwnProperty(tempHeader) ||
-      this.state.unmappedHeaders.hasOwnProperty(tempHeader)
+      Object.prototype.hasOwnProperty.call(map.map.headers, newHeaderName) ||
+      Object.prototype.hasOwnProperty.call(unmappedHeaders, newHeaderName)
     ) {
       this.setState({ headerUsed: true });
     }
-    if (!this.state.map.map.headers.hasOwnProperty(tempHeader)) {
+    if (!Object.prototype.hasOwnProperty.call(map.map.headers, newHeaderName)) {
       const { tempMap, tempUnmappedHeaders } = processAdd(
-        this.state.map,
-        this.state.unmappedHeaders,
-        tempHeader,
-        [tempHeader]
+        map,
+        unmappedHeaders,
+        newHeaderName,
+        [newHeaderName]
       );
       const mapValidity = false; // map validity is false when you add a header because it's not associated yet
       this.setState({
         map: tempMap,
         newHeaderName: "",
         unmappedHeaders: tempUnmappedHeaders,
-        mapValidity,
+        mapValidity: false,
       });
       pushMapBack(tempMap, mapValidity);
     }
   }
 
   handleDelete(header) {
-    const tempMap = this.state.map;
-    let tempCheck = this.state.mapCheck;
-    const tempUnmappedHeaders = this.state.unmappedHeaders;
+    const { map, mapCheck, unmappedHeaders } = this.state;
+    const tempMap = JSON.parse(JSON.stringify(map));
+    let tempCheck = JSON.parse(JSON.stringify(mapCheck));
+    const tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
+
     tempCheck = removeAssociationQuestionnaire(
       tempCheck,
       tempMap.map.headers[header]
     );
+
     delete tempMap.map.headers[header];
     delete tempUnmappedHeaders[header];
+
     let mapValidity = false; // mapValidity false if there are unmapped headers
-    if (Object.keys(tempUnmappedHeaders).length == 0) {
+    if (Object.keys(tempUnmappedHeaders).length === 0) {
       mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
     }
+
     this.setState({
       map: tempMap,
       mapCheck: tempCheck,
       unmappedHeaders: tempUnmappedHeaders,
       mapValidity,
     });
-    pushMapBack(tempMap, mapValidity);
-  }
 
-  clearJSON() {
-    const tempMap = this.state.map;
-    tempMap.map.headers = {};
-    delete tempMap.headersStructure;
-    const tempUnmappedHeaders = [];
-    const mapValidity = false;
-    const tempMapCheck = this.state.mapCheck;
-    for (const k in tempMapCheck.flatQuestionnaire) {
-      delete tempMapCheck.flatQuestionnaire[k].header;
-    }
-    this.setState({
-      map: tempMap,
-      unmappedHeaders: tempUnmappedHeaders,
-      mapValidity,
-      mapCheck: tempMapCheck,
-    });
     pushMapBack(tempMap, mapValidity);
   }
 
   handleEditMapName() {
-    if (this.state.editingName) {
-      if (this.state.tempName != this.state.map.name) {
-        const tempMap = { ...this.state.map };
-        tempMap.name = this.state.tempName;
+    const { editingName, map, tempName } = this.state;
+    if (editingName) {
+      if (tempName !== map.name) {
+        const tempMap = JSON.parse(JSON.stringify(map));
+        tempMap.name = tempName;
         pushMapBack(tempMap, tempMap.complete);
         this.setState({ editingName: false, tempName: "", map: tempMap });
       } else {
@@ -338,17 +304,18 @@ class MapEdit extends Component {
     } else {
       this.setState({
         editingName: true,
-        tempName: this.state.map.name,
+        tempName: map.name,
         validName: true,
       });
     }
   }
 
   handleNameChange(event) {
+    const { timeout } = this.state;
     const tempName = event.target.value;
     this.setState({ headerUsed: false });
-    if (this.state.timeout) {
-      clearTimeout(this.state.timeout);
+    if (timeout) {
+      clearTimeout(timeout);
     }
     this.setState({
       checking: true,
@@ -360,30 +327,18 @@ class MapEdit extends Component {
   }
 
   handleMapNameChange(event) {
+    const { timeout } = this.state;
     const tempName = event.target.value;
-    if (this.state.timeout) {
-      clearTimeout(this.state.timeout);
+    if (timeout) {
+      clearTimeout(timeout);
     }
     this.setState({
       checking: true,
       tempName,
       timeout: setTimeout(() => {
-        this.checkMapName(tempName, this);
+        this.checkMapName(tempName);
       }, 1000),
     });
-  }
-
-  checkMapName(name, _this) {
-    if (name) {
-      api.get(`api/maps/names/${encodeURI(name)}`).then((nameFound) => {
-        _this.setState({
-          validName: !nameFound.hasOwnProperty("uid"),
-          checking: false,
-        });
-      });
-    } else {
-      _this.setState({ validName: false, checking: false });
-    }
   }
 
   handleTabChange(event, newValue) {
@@ -391,14 +346,15 @@ class MapEdit extends Component {
   }
 
   handleMapUpload(baseMapId) {
+    const { map, mapCheck, unmappedHeaders } = this.state;
     api.get(`api/maps/${baseMapId}`).then((baseMap) => {
       const returnObj = loadMapFromMap(
-        JSON.parse(JSON.stringify(this.state.mapCheck.flatQuestionnaire)),
+        JSON.parse(JSON.stringify(mapCheck.flatQuestionnaire)),
         JSON.parse(JSON.stringify(baseMap)),
-        JSON.parse(JSON.stringify(this.state.map)),
-        JSON.parse(JSON.stringify(this.state.unmappedHeaders))
+        JSON.parse(JSON.stringify(map)),
+        JSON.parse(JSON.stringify(unmappedHeaders))
       );
-      const tempMapCheck = JSON.parse(JSON.stringify(this.state.mapCheck));
+      const tempMapCheck = JSON.parse(JSON.stringify(mapCheck));
       tempMapCheck.flatQuestionnaire = returnObj.flatQuestionnaire;
       this.setState({
         mapCheck: tempMapCheck,
@@ -407,7 +363,7 @@ class MapEdit extends Component {
       });
 
       let mapValidity = false; // mapValidity false if there are unmapped headers
-      if (Object.keys(returnObj.unmappedHeaders).length == 0) {
+      if (Object.keys(returnObj.unmappedHeaders).length === 0) {
         mapValidity = checkValidity(
           tempMapCheck.flatQuestionnaire,
           returnObj.newMap.map
@@ -418,16 +374,20 @@ class MapEdit extends Component {
   }
 
   handleAssociationChangeHeader(event) {
-    const tempMap = this.state.map;
-    let tempCheck = this.state.mapCheck;
-    const tempUnmappedHeaders = this.state.unmappedHeaders;
+    const { map, mapCheck, unmappedHeaders } = this.state;
+    const tempMap = JSON.parse(JSON.stringify(map));
+    let tempCheck = JSON.parse(JSON.stringify(mapCheck));
+    const tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
 
     // clear out current association in map
     const currentAssociation = getCurrentAssociation(
       tempCheck,
       event.target.name
     );
-    if (currentAssociation.length && currentAssociation != event.target.value) {
+    if (
+      currentAssociation.length &&
+      currentAssociation !== event.target.value
+    ) {
       tempMap.map.headers[currentAssociation] = {};
       tempUnmappedHeaders[currentAssociation] = {};
     }
@@ -446,7 +406,7 @@ class MapEdit extends Component {
       tempCheck.flatQuestionnaire[event.target.name].valueType;
     delete tempUnmappedHeaders[event.target.value];
     let mapValidity = false; // assume false until proven otherwise
-    if (Object.keys(tempUnmappedHeaders).length == 0) {
+    if (Object.keys(tempUnmappedHeaders).length === 0) {
       mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
     }
     this.setState({
@@ -459,25 +419,27 @@ class MapEdit extends Component {
   }
 
   handleConstantChange(qLocation, changeType, constantValue) {
-    const tempMap = this.state.map;
-    const tempCheck = this.state.mapCheck;
-    const tempUnmappedHeaders = this.state.unmappedHeaders;
-    if (changeType == "add") {
+    const { map, mapCheck, unmappedHeaders } = this.state;
+    const tempMap = JSON.parse(JSON.stringify(map));
+    const tempCheck = JSON.parse(JSON.stringify(mapCheck));
+    const tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
+
+    if (changeType === "add") {
       const tempHeader = tempCheck.flatQuestionnaire[qLocation].header || "";
       tempCheck.flatQuestionnaire[qLocation].constant = constantValue;
       tempCheck.flatQuestionnaire[qLocation].header = "";
-      if (tempMap.map.headers.hasOwnProperty(tempHeader)) {
+      if (tempMap.map.headers[tempHeader]) {
         tempMap.map.headers[tempHeader] = {};
         tempUnmappedHeaders[tempHeader] = {};
       }
       tempMap.map.constants[qLocation] = constantValue;
     }
-    if (changeType == "delete") {
+    if (changeType === "delete") {
       delete tempCheck.flatQuestionnaire[qLocation].constant;
       delete tempMap.map.constants[qLocation];
     }
     let tempMapValidity = false;
-    if (Object.keys(this.state.unmappedHeaders).length == 0) {
+    if (Object.keys(unmappedHeaders).length === 0) {
       tempMapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
     }
     this.setState({
@@ -494,14 +456,13 @@ class MapEdit extends Component {
   }
 
   handleValueMapClose(event, choiceMap, header) {
-    const tempMap = this.state.map;
+    const { map, mapCheck, unmappedHeaders } = this.state;
+    const tempMap = JSON.parse(JSON.stringify(map));
+
     tempMap.map.headers[header].choiceMap = choiceMap;
     let mapValidity = false; // assume false until proven otherwise
-    if (Object.keys(this.state.unmappedHeaders).length == 0) {
-      mapValidity = checkValidity(
-        this.state.mapCheck.flatQuestionnaire,
-        tempMap.map
-      );
+    if (Object.keys(unmappedHeaders).length === 0) {
+      mapValidity = checkValidity(mapCheck.flatQuestionnaire, tempMap.map);
     }
     this.setState({
       editValueMap: false,
@@ -511,16 +472,28 @@ class MapEdit extends Component {
     pushMapBack(tempMap, mapValidity);
   }
 
+  checkMapName(name) {
+    if (name) {
+      api.get(`api/maps/names/${encodeURI(name)}`).then((nameFound) => {
+        this.setState({
+          validName: !nameFound.uid,
+          checking: false,
+        });
+      });
+    } else {
+      this.setState({ validName: false, checking: false });
+    }
+  }
+
   processCSV(csvText) {
+    const { map, unmappedHeaders } = this.state;
     try {
       const columns = csvText.split(/\r\n|\n/)[0].split(",");
-      let tempMap = JSON.parse(JSON.stringify(this.state.map));
+      let tempMap = JSON.parse(JSON.stringify(map));
       const originalMap = JSON.parse(JSON.stringify(tempMap));
-      let tempUnmappedHeaders = JSON.parse(
-        JSON.stringify(this.state.unmappedHeaders)
-      );
+      let tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
       const mapValidity = true;
-      for (let i = 0; i < columns.length; i++) {
+      for (let i = 0; i < columns.length; i += 1) {
         ({ tempMap, tempUnmappedHeaders } = processAdd(
           tempMap,
           tempUnmappedHeaders,
@@ -528,7 +501,7 @@ class MapEdit extends Component {
           [columns[i].trim()]
         ));
       }
-      if (tempMap != originalMap) {
+      if (tempMap !== originalMap) {
         this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
         pushMapBack(tempMap, mapValidity);
       }
@@ -539,20 +512,19 @@ class MapEdit extends Component {
   }
 
   processJSON(jsonObj) {
+    const { map, unmappedHeaders } = this.state;
     try {
       let obj = JSON.parse(jsonObj);
       if (Array.isArray(obj)) {
-        obj = obj[0];
+        [obj] = obj;
       }
       if (typeof obj !== "object") {
         throw new Error("File is not a valid JSON object");
       }
 
-      let tempMap = JSON.parse(JSON.stringify(this.state.map));
+      let tempMap = JSON.parse(JSON.stringify(map));
       const originalMap = JSON.parse(JSON.stringify(tempMap));
-      let tempUnmappedHeaders = JSON.parse(
-        JSON.stringify(this.state.unmappedHeaders)
-      );
+      let tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
       const mapValidity = true;
       let headersStructure = [];
 
@@ -563,7 +535,7 @@ class MapEdit extends Component {
         tempUnmappedHeaders,
         headersStructure
       );
-      if (tempMap != originalMap) {
+      if (tempMap !== originalMap) {
         tempMap.headersStructure = headersStructure;
         this.setState({ map: tempMap, unmappedHeaders: tempUnmappedHeaders });
         pushMapBack(tempMap, mapValidity);
@@ -574,162 +546,225 @@ class MapEdit extends Component {
     }
   }
 
-  handleUpload(e) {
-    this.setState({ fileError: false });
-    e.preventDefault();
-    uploadFile(e, this).then((fileText) => {
-      switch (this.state.map.fileType) {
-        case "json":
-          this.processJSON(fileText);
-          break;
-        default:
-          this.processCSV(fileText);
-          break;
-      }
+  clearJSON() {
+    const { map, mapCheck } = this.state;
+
+    const tempMap = JSON.parse(JSON.stringify(map));
+    const tempMapCheck = JSON.parse(JSON.stringify(mapCheck));
+    tempMap.map.headers = {};
+    delete tempMap.headersStructure;
+
+    const tempUnmappedHeaders = [];
+    const mapValidity = false;
+    Object.keys(tempMapCheck.flatQuestionnaire).forEach((k) => {
+      delete tempMapCheck.flatQuestionnaire[k].header;
     });
+
+    this.setState({
+      map: tempMap,
+      unmappedHeaders: tempUnmappedHeaders,
+      mapValidity,
+      mapCheck: tempMapCheck,
+    });
+    pushMapBack(tempMap, mapValidity);
+  }
+
+  formatHeaders(currentMap) {
+    const { map } = this.state;
+    if (map.fileType === "json" && map.headersStructure) {
+      return (
+        <>
+          <Button
+            variant="contained"
+            style={stylesObj.resetSourceButton}
+            onClick={() => {
+              this.clearJSON();
+            }}
+          >
+            Reset Source
+            <DeleteForever />
+          </Button>
+          {Object.keys(map.headersStructure).length && (
+            <TreeNavigation
+              currentHeaders={map.map.headers}
+              data={map.headersStructure}
+            />
+          )}
+        </>
+      );
+    }
+    return Object.keys(currentMap.headers).map((k) => (
+      <div key={`chip_${k}`}>
+        <Chip
+          label={k.length > 30 ? `${k.substring(0, 30)}...` : k}
+          onDelete={() => {
+            this.handleDelete(k);
+          }}
+          style={
+            Object.prototype.hasOwnProperty.call(currentMap.headers[k], "path")
+              ? stylesObj.mappedChip
+              : stylesObj.unmappedChip
+          }
+          data-cy={`cy_chip_${k}`}
+        />
+      </div>
+    ));
   }
 
   render() {
+    const {
+      checking,
+      editingName,
+      editValueMap,
+      failedToLoad,
+      fileError,
+      header,
+      headerUsed,
+      loading,
+      map,
+      mapCheck,
+      mapID,
+      mapValidity,
+      newHeaderName,
+      questionnaire,
+      tabChoice,
+      tempName,
+      unmappedHeaders,
+      validName,
+    } = this.state;
+    const { id } = this.props;
     return (
       <>
-        {this.state.loading ? (
+        {loading ? (
           <CircularProgress style={stylesObj.loaderStyling} />
         ) : (
           <>
-            {this.state.failedToLoad ? (
+            {failedToLoad ? (
               <>
-                <Typography>{this.state.failedToLoad}</Typography>
+                <Typography>{failedToLoad}</Typography>
               </>
             ) : (
               <>
                 <div style={stylesObj.themePadding}>
-                  {this.state.editValueMap && (
+                  {editValueMap && (
                     <ValueMapCard
-                      map={this.state.map}
-                      header={this.state.header}
+                      map={map}
+                      header={header}
                       onValueMapClose={this.handleValueMapClose}
-                      mapCheck={this.state.mapCheck}
-                      mapID={this.state.mapID}
+                      mapCheck={mapCheck}
+                      mapID={mapID}
                     />
                   )}
-                  {!this.state.editValueMap &&
-                    this.state.mapValidity != undefined && (
-                      <Grid
-                        container
-                        className={stylesObj.flexGrow}
-                        wrap="nowrap"
-                        spacing={2}
-                      >
-                        <Grid item xs={3} style={stylesObj.gridWidth}>
-                          <Card style={stylesObj.sideCard} wrap="wrap">
-                            <div style={stylesObj.themePadding}>
-                              <Typography variant="h6">
-                                <span style={stylesObj.textBold}>
-                                  Map name:{" "}
-                                </span>
+                  {!editValueMap && mapValidity !== undefined && (
+                    <Grid
+                      container
+                      className={stylesObj.flexGrow}
+                      wrap="nowrap"
+                      spacing={2}
+                    >
+                      <Grid item xs={3} style={stylesObj.gridWidth}>
+                        <Card style={stylesObj.sideCard} wrap="wrap">
+                          <div style={stylesObj.themePadding}>
+                            <Typography variant="h6">
+                              <span style={stylesObj.textBold}>Map name: </span>
 
-                                {!this.state.editingName && (
-                                  <>
-                                    <span>{this.state.map.name}</span>
-                                    <IconButton
-                                      edge="start"
-                                      aria-label="menu"
-                                      onClick={this.handleEditMapName}
-                                      style={stylesObj.nameEditIcon}
-                                    >
-                                      <Edit />
-                                    </IconButton>
-                                  </>
-                                )}
-                                {this.state.editingName && (
-                                  <>
-                                    <TextField
-                                      style={stylesObj.addHeaderText}
-                                      id="name_editedValue"
-                                      value={this.state.tempName}
-                                      margin="normal"
-                                      onChange={this.handleMapNameChange}
-                                    />
-                                    <IconButton
-                                      edge="start"
-                                      aria-label="menu"
-                                      onClick={this.handleEditMapName}
-                                      style={stylesObj.nameEditIcon}
-                                      disabled={
-                                        !this.state.validName ||
-                                        this.state.checking
-                                      }
-                                    >
-                                      <Save />
-                                    </IconButton>
-                                    {!this.state.validName && (
-                                      <Typography
-                                        variant="body1"
-                                        style={stylesObj.invalidName}
-                                      >
-                                        Invalid Name
-                                      </Typography>
-                                    )}
-                                  </>
-                                )}
-                              </Typography>
-                              <Typography variant="body1">
-                                <span style={stylesObj.textBold}>
-                                  Questionnaire:{" "}
-                                </span>
-                                {this.state.questionnaire.resource.name}
-                              </Typography>
-                              <Typography
-                                variant="body1"
-                                style={stylesObj.mapTextEnd}
-                              >
-                                <span style={stylesObj.textBold}>
-                                  file type:{" "}
-                                </span>
-                                {this.state.map.fileType}
-                              </Typography>
-                              <Typography variant="h6">
-                                <span style={stylesObj.textBold}>
-                                  {this.state.map.fileType == "csv"
-                                    ? "Source Headers"
-                                    : "Source Structure"}
-                                </span>
-                              </Typography>
-                              <UploadSource
-                                fileError={this.state.fileError}
-                                fileType={this.state.map.fileType || "csv"}
-                                handleAdd={this.handleAdd}
-                                handleMapUpload={this.handleMapUpload}
-                                handleNameChange={this.handleNameChange}
-                                handleTabChange={this.handleTabChange}
-                                handleUpload={this.handleUpload}
-                                headerUsed={this.state.headerUsed}
-                                id={this.props.id}
-                                newHeaderName={this.state.newHeaderName}
-                                tabChoice={this.state.tabChoice}
-                              />
-                              <br />
-                              {this.state.map.map && (
-                                <div>
-                                  {this.formatHeaders(this.state.map.map, this)}
-                                </div>
+                              {!editingName && (
+                                <>
+                                  <span>{map.name}</span>
+                                  <IconButton
+                                    edge="start"
+                                    aria-label="menu"
+                                    onClick={this.handleEditMapName}
+                                    style={stylesObj.nameEditIcon}
+                                  >
+                                    <Edit />
+                                  </IconButton>
+                                </>
                               )}
-                            </div>
-                          </Card>
-                        </Grid>
-                        <Grid item xs>
-                          <EditCard
-                            mapCheck={this.state.mapCheck}
-                            map={this.state.map}
-                            onAssociation={this.handleAssociationChangeHeader}
-                            constantChange={this.handleConstantChange}
-                            onValueMap={this.handleValueMap}
-                            unmappedHeaders={this.state.unmappedHeaders}
-                            mapValidity={this.state.mapValidity}
-                          />
-                        </Grid>
+                              {editingName && (
+                                <>
+                                  <TextField
+                                    style={stylesObj.addHeaderText}
+                                    id="name_editedValue"
+                                    value={tempName}
+                                    margin="normal"
+                                    onChange={this.handleMapNameChange}
+                                  />
+                                  <IconButton
+                                    edge="start"
+                                    aria-label="menu"
+                                    onClick={this.handleEditMapName}
+                                    style={stylesObj.nameEditIcon}
+                                    disabled={!validName || checking}
+                                  >
+                                    <Save />
+                                  </IconButton>
+                                  {!validName && (
+                                    <Typography
+                                      variant="body1"
+                                      style={stylesObj.invalidName}
+                                    >
+                                      Invalid Name
+                                    </Typography>
+                                  )}
+                                </>
+                              )}
+                            </Typography>
+                            <Typography variant="body1">
+                              <span style={stylesObj.textBold}>
+                                Questionnaire:&nbsp;
+                              </span>
+                              {questionnaire.resource.name}
+                            </Typography>
+                            <Typography
+                              variant="body1"
+                              style={stylesObj.mapTextEnd}
+                            >
+                              <span style={stylesObj.textBold}>
+                                file type:&nbsp;
+                              </span>
+                              {map.fileType}
+                            </Typography>
+                            <Typography variant="h6">
+                              <span style={stylesObj.textBold}>
+                                {map.fileType === "csv"
+                                  ? "Source Headers"
+                                  : "Source Structure"}
+                              </span>
+                            </Typography>
+                            <UploadSource
+                              fileError={fileError}
+                              fileType={map.fileType || "csv"}
+                              handleAdd={this.handleAdd}
+                              handleMapUpload={this.handleMapUpload}
+                              handleNameChange={this.handleNameChange}
+                              handleTabChange={this.handleTabChange}
+                              handleUpload={this.handleUpload}
+                              headerUsed={headerUsed}
+                              id={id}
+                              newHeaderName={newHeaderName}
+                              tabChoice={tabChoice}
+                            />
+                            <br />
+                            {map.map && (
+                              <div>{this.formatHeaders(map.map, this)}</div>
+                            )}
+                          </div>
+                        </Card>
                       </Grid>
-                    )}
+                      <Grid item xs>
+                        <EditCard
+                          mapCheck={mapCheck}
+                          map={map}
+                          onAssociation={this.handleAssociationChangeHeader}
+                          constantChange={this.handleConstantChange}
+                          onValueMap={this.handleValueMap}
+                          unmappedHeaders={unmappedHeaders}
+                          mapValidity={mapValidity}
+                        />
+                      </Grid>
+                    </Grid>
+                  )}
                 </div>
               </>
             )}
@@ -739,5 +774,9 @@ class MapEdit extends Component {
     );
   }
 }
+
+MapEdit.propTypes = {
+  id: PropTypes.string.isRequired,
+};
 
 export default MapEdit;

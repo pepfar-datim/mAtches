@@ -5,7 +5,7 @@ const app = express();
 const api = require("./queries");
 const port = 5001;
 
-const DIST_DIR = path.join(__dirname, "./dist");
+const DIST_DIR = path.join(__dirname, "../dist");
 const HTML_FILE = path.join(DIST_DIR, "index.html");
 const ERROR_FILE = path.join(DIST_DIR, "error.html");
 app.use(bodyParser.json({ limit: "50mb" }));
@@ -20,7 +20,7 @@ app.use(
 
 app.use(express.static(DIST_DIR));
 
-const config = require("./config.json");
+const config = require("../config.json");
 const basePath = config.base;
 
 app.get(basePath + "api/about", api.getAbout);

@@ -14,7 +14,7 @@ import {
   Edit,
   Save,
 } from "@material-ui/icons";
-import { stylesObj } from "./styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj.js";
 
 import UploadMapList from "./UploadMapList.js";
 
@@ -31,9 +31,8 @@ export default function UploadSource(props) {
   const isInteractionHidden = (csvIndex, jsonIndex) => {
     if (props.fileType == "csv") {
       return props.tabChoice != csvIndex;
-    } else {
-      return props.tabChoice != jsonIndex;
     }
+    return props.tabChoice != jsonIndex;
   };
 
   return (
@@ -97,9 +96,9 @@ export default function UploadSource(props) {
         </div>
         <div hidden={isInteractionHidden(1, 0)}>
           <Typography variant="body1">
-            {"Upload Headers from " + props.fileType.toUpperCase()}
+            {`Upload Headers from ${props.fileType.toUpperCase()}`}
           </Typography>
-          <TextField disabled={true} label="" value="" />
+          <TextField disabled label="" value="" />
           <IconButton
             edge="start"
             color="inherit"
@@ -114,13 +113,13 @@ export default function UploadSource(props) {
               ref={(form) => {
                 targetForm = form;
               }}
-              accept={"." + props.fileType}
+              accept={`.${props.fileType}`}
               onChange={(ev) => props.handleUpload(ev)}
             />
           </form>
           {props.fileError && (
             <Typography variant="body1" style={stylesObj.errorText}>
-              {"Invalid " + props.fileType + " file"}
+              {`Invalid ${props.fileType} file`}
             </Typography>
           )}
           <br />
