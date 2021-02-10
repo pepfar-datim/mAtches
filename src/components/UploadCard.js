@@ -47,10 +47,6 @@ class UploadCard extends React.Component {
     });
   }
 
-  uploadAction(e) {
-    this.refs.fileInput.click(e);
-  }
-
   uploadCallback(dataFile) {
     const { map } = this.props;
     const { destination, externalURL } = this.state;
@@ -114,6 +110,7 @@ class UploadCard extends React.Component {
   }
 
   render() {
+    let targetForm = "";
     const { map } = this.props;
     const {
       data,
@@ -149,17 +146,17 @@ class UploadCard extends React.Component {
               edge="start"
               color="inherit"
               aria-label="menu"
-              onClick={(e) => {
-                this.uploadAction(e);
-              }}
+              onClick={() => targetForm.click()}
             >
               <PublishIcon />
             </IconButton>
             <form style={stylesObj.hidden}>
               <input
                 type="file"
-                ref="fileInput"
                 accept={`.${map.fileType || "csv"}`}
+                ref={(form) => {
+                  targetForm = form;
+                }}
                 onChange={(ev) => {
                   this.upload(ev);
                 }}
