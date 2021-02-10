@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React from "react";
+import PropTypes from "prop-types";
+
 import {
   Typography,
   IconButton,
@@ -7,16 +9,10 @@ import {
   Tab,
 } from "@material-ui/core";
 
-import {
-  AddCircleOutlined,
-  Publish,
-  ImageSearch,
-  Edit,
-  Save,
-} from "@material-ui/icons";
-import { stylesObj } from "../styling/stylesObj.js";
+import { AddCircleOutlined, Publish, ImageSearch } from "@material-ui/icons";
+import { stylesObj } from "../styling/stylesObj";
 
-import UploadMapList from "./UploadMapList.js";
+import UploadMapList from "./UploadMapList";
 
 function a11yProps(index) {
   return {
@@ -26,46 +22,62 @@ function a11yProps(index) {
 }
 
 export default function UploadSource(props) {
+  const {
+    fileError,
+    fileType,
+    handleAdd,
+    handleMapUpload,
+    handleNameChange,
+    handleTabChange,
+    handleUpload,
+    headerUsed,
+    id,
+    newHeaderName,
+    tabChoice,
+  } = props;
   let targetForm = "";
 
   const isInteractionHidden = (csvIndex, jsonIndex) => {
-    if (props.fileType == "csv") {
-      return props.tabChoice != csvIndex;
+    if (fileType === "csv") {
+      return tabChoice !== csvIndex;
     }
-    return props.tabChoice != jsonIndex;
+    return tabChoice !== jsonIndex;
   };
 
   return (
     <div>
       <div style={stylesObj.whiteBackground}>
         <Tabs
-          value={props.tabChoice}
-          onChange={props.handleTabChange}
+          value={tabChoice}
+          onChange={handleTabChange}
           style={stylesObj.mappingBoxBanner}
           TabIndicatorProps={{
             style: stylesObj.tabIndicator,
           }}
         >
-          {props.fileType == "csv" && (
+          {fileType === "csv" && (
             <Tab
               style={stylesObj.minWidth}
               icon={<AddCircleOutlined />}
               aria-label="add"
-              {...a11yProps(0)}
+              id={a11yProps(0).id}
+              aria-controls={a11yProps(0)["aria-controls"]}
             />
           )}
           <Tab
             style={stylesObj.minWidth}
             icon={<Publish />}
             aria-label="upload"
-            {...a11yProps(1)}
+            id={a11yProps(1).id}
+            aria-controls={a11yProps(1)["aria-controls"]}
           />
-          {props.fileType == "csv" && (
+          {fileType === "csv" && (
             <Tab
               style={stylesObj.minWidth}
               icon={<ImageSearch />}
               aria-label="fromMap"
-              {...a11yProps(2)}
+              id={a11yProps(2).id}
+              aria-controls={a11yProps(2)["aria-controls"]}
             />
           )}
         </Tabs>
@@ -74,21 +86,21 @@ export default function UploadSource(props) {
             style={stylesObj.addHeaderText}
             id="add_header"
             label="Add a Header"
-            value={props.newHeaderName}
+            value={newHeaderName}
             margin="normal"
-            onChange={(e) => props.handleNameChange(e)}
+            onChange={(e) => handleNameChange(e)}
             data-cy="addHeaderInput"
           />
           <br />
           <IconButton
             edge="start"
             aria-label="menu"
-            onClick={() => props.handleAdd()}
+            onClick={() => handleAdd()}
             data-cy="addHeaderButton"
           >
             <AddCircleOutlined />
           </IconButton>
-          {props.headerUsed && (
+          {headerUsed && (
             <Typography variant="body1" style={stylesObj.errorText}>
               Header has already been used
             </Typography>
@@ -96,14 +108,14 @@ export default function UploadSource(props) {
         </div>
         <div hidden={isInteractionHidden(1, 0)}>
           <Typography variant="body1">
-            {`Upload Headers from ${props.fileType.toUpperCase()}`}
+            {`Upload Headers from ${fileType.toUpperCase()}`}
           </Typography>
           <TextField disabled label="" value="" />
           <IconButton
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={(e) => targetForm.click()}
+            onClick={() => targetForm.click()}
           >
             <Publish />
           </IconButton>
@@ -113,22 +125,36 @@ export default function UploadSource(props) {
               ref={(form) => {
                 targetForm = form;
               }}
-              accept={`.${props.fileType}`}
-              onChange={(ev) => props.handleUpload(ev)}
+              accept={`.${fileType}`}
+              onChange={(ev) => handleUpload(ev)}
             />
           </form>
-          {props.fileError && (
+          {fileError && (
             <Typography variant="body1" style={stylesObj.errorText}>
-              {`Invalid ${props.fileType} file`}
+              {`Invalid ${fileType} file`}
             </Typography>
           )}
           <br />
         </div>
         <div hidden={isInteractionHidden(2, undefined)}>
-          <UploadMapList onMapProcess={props.handleMapUpload} id={props.id} />
+          <UploadMapList onMapProcess={handleMapUpload} id={id} />
         </div>
       </div>
       <br />
     </div>
   );
 }
+
+UploadSource.propTypes = {
+  fileError: PropTypes.bool.isRequired,
+  fileType: PropTypes.string.isRequired,
+  handleAdd: PropTypes.func.isRequired,
+  handleMapUpload: PropTypes.func.isRequired,
+  handleNameChange: PropTypes.func.isRequired,
+  handleTabChange: PropTypes.func.isRequired,
+  handleUpload: PropTypes.func.isRequired,
+  headerUsed: PropTypes.bool.isRequired,
+  id: PropTypes.string.isRequired,
+  newHeaderName: PropTypes.string.isRequired,
+  tabChoice: PropTypes.number.isRequired,
+};

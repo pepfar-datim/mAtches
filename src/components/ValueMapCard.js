@@ -1,32 +1,22 @@
 import React from "react";
-import {
-  Card,
-  Typography,
-  IconButton,
-  TextField,
-  InputLabel,
-  MenuItem,
-  FormHelperText,
-  FormControl,
-  Select,
-  Button,
-  Chip,
-} from "@material-ui/core";
+import PropTypes from "prop-types";
 
-import { Save, AddCircleOutlined, Publish } from "@material-ui/icons";
+import { Card, Typography, Button } from "@material-ui/core";
+
+import { Save, Publish } from "@material-ui/icons";
 
 import ChipInput from "material-ui-chip-input";
 
-import ValueMapUploadDialogue from "./ValueMapUploadDialogue.js";
+import ValueMapUploadDialog from "./ValueMapUploadDialog";
 
-import { stylesObj } from "../styling/stylesObj.js";
+import { stylesObj } from "../styling/stylesObj";
 
 function generateChoiceMap(headerDefinitions, tempValueSet) {
   let tempChoiceMap = {};
-  if (headerDefinitions.hasOwnProperty("choiceMap")) {
+  if (headerDefinitions.choiceMap) {
     tempChoiceMap = headerDefinitions.choiceMap;
   } else {
-    for (let i = 0; i < tempValueSet.length; i++) {
+    for (let i = 0; i < tempValueSet.length; i += 1) {
       tempChoiceMap[tempValueSet[i].code] = {
         code: tempValueSet[i].code,
         valueType: tempValueSet[i].valueType,
@@ -36,18 +26,28 @@ function generateChoiceMap(headerDefinitions, tempValueSet) {
   return tempChoiceMap;
 }
 
-function loadValueSet(tempChoiceMap, tempValueSet) {
+function loadValueSet(choiceMap, valueSet) {
+  const tempChoiceMap = JSON.parse(JSON.stringify(choiceMap));
+  let tempValueSet = JSON.parse(JSON.stringify(valueSet));
   const reverseChoiceMap = {};
 
-  for (const k in tempChoiceMap) {
-    if (!reverseChoiceMap.hasOwnProperty(tempChoiceMap[k])) {
+  Object.keys(tempChoiceMap).forEach((k) => {
+    if (
+      !Object.prototype.hasOwnProperty.call(
+        reverseChoiceMap,
+        tempChoiceMap[k].code
+      )
+    ) {
       reverseChoiceMap[tempChoiceMap[k].code] = [];
     }
     reverseChoiceMap[tempChoiceMap[k].code].push(k);
-  }
+  });
 
   tempValueSet = tempValueSet.map((mapItem) => {
-    mapItem.maps = reverseChoiceMap.hasOwnProperty(mapItem.code)
+    mapItem.maps = Object.prototype.hasOwnProperty.call(
+      reverseChoiceMap,
+      mapItem.code
+    )
       ? reverseChoiceMap[mapItem.code]
       : [];
     return mapItem;
@@ -61,25 +61,59 @@ class ValueMapCard extends React.Component {
     this.state = {
       choiceMap: {},
       valueSet: [],
-      valueMapUploadDialogue: false,
+      valueMapUploadDialogOpen: false,
     };
     this.formatValueMap = this.formatValueMap.bind(this);
     this.formatChips = this.formatChips.bind(this);
     this.handleAddChip = this.handleAddChip.bind(this);
     this.handleDeleteChip = this.handleDeleteChip.bind(this);
-    this.handleDialogueChange = this.handleDialogueChange.bind(this);
+    this.handleDialogChange = this.handleDialogChange.bind(this);
     this.handleValueMapUpdate = this.handleValueMapUpdate.bind(this);
   }
 
   componentDidMount() {
-    let tempValueSet = this.props.mapCheck.flatQuestionnaire[this.props.mapID]
-      .answerValueSet;
+    const { header, map, mapCheck, mapID } = this.props;
+    let tempValueSet = mapCheck.flatQuestionnaire[mapID].answerValueSet;
     const tempChoiceMap = generateChoiceMap(
-      this.props.map.map.headers[this.props.header],
+      map.map.headers[header],
       tempValueSet
     );
     tempValueSet = loadValueSet(tempChoiceMap, tempValueSet);
     this.setState({ choiceMap: tempChoiceMap, valueSet: tempValueSet });
+  }
+
+  handleAddChip(chipText, index, code, valueType) {
+    const { choiceMap, valueSet } = this.state;
+    const chip = chipText.trim();
+    if (!choiceMap[chip]) {
+      const tempChoiceMap = JSON.parse(JSON.stringify(choiceMap));
+      const tempValueSet = JSON.parse(JSON.stringify(valueSet));
+      tempChoiceMap[chip] = { code, valueType };
+      tempValueSet[index].maps.push(chip);
+      this.setState({ choiceMap: tempChoiceMap, valueSet: tempValueSet });
+    }
+  }
+
+  handleDeleteChip(chip, index) {
+    const { choiceMap, valueSet } = this.state;
+    const tempChoiceMap = JSON.parse(JSON.stringify(choiceMap));
+    const tempValueSet = JSON.parse(JSON.stringify(valueSet));
+    delete tempChoiceMap[chip];
+    const filteredValueSet = tempValueSet[index].maps.filter((v) => v !== chip);
+    tempValueSet[index].maps = filteredValueSet;
+    this.setState({ choiceMap: tempChoiceMap, valueSet: tempValueSet });
+  }
+
+  handleDialogChange() {
+    const { valueMapUploadDialogOpen } = this.state;
+    this.setState({
+      valueMapUploadDialogOpen: !valueMapUploadDialogOpen,
+    });
+  }
+
+  handleValueMapUpdate(tempValueSet, tempChoiceMap) {
+    this.setState({ valueSet: tempValueSet, choiceMap: tempChoiceMap });
+    this.handleDialogChange();
   }
 
   formatValueMap(valueSet) {
@@ -111,80 +145,42 @@ class ValueMapCard extends React.Component {
     );
   }
 
-  handleAddChip(chip, index, code, valueType) {
-    chip = chip.trim();
-    if (!this.state.choiceMap.hasOwnProperty(chip)) {
-      const tempChoiceMap = this.state.choiceMap;
-      const tempValueSet = this.state.valueSet;
-      tempChoiceMap[chip] = { code, valueType };
-      tempValueSet[index].maps.push(chip);
-      this.setState({ choiceMap: tempChoiceMap, valueSet: tempValueSet });
-    }
-  }
-
-  handleDeleteChip(chip, index, code, valueType) {
-    const tempChoiceMap = this.state.choiceMap;
-    const tempValueSet = this.state.valueSet;
-    delete tempChoiceMap[chip];
-    const filteredValueSet = tempValueSet[index].maps.filter((v) => v != chip);
-    tempValueSet[index].maps = filteredValueSet;
-    this.setState({ choiceMap: tempChoiceMap, valueSet: tempValueSet });
-  }
-
-  handleDialogueChange() {
-    this.setState({
-      valueMapUploadDialogue: !this.state.valueMapUploadDialogue,
-    });
-  }
-
-  handleValueMapUpdate(tempValueSet, tempChoiceMap) {
-    this.setState({ valueSet: tempValueSet, choiceMap: tempChoiceMap });
-    this.handleDialogueChange();
-  }
-
   render() {
+    const { header, map, onValueMapClose } = this.props;
+    const { choiceMap, valueMapUploadDialogOpen, valueSet } = this.state;
     return (
       <Card style={stylesObj.valueMapCard}>
         <div style={stylesObj.themePadding}>
           <Typography variant="h6" style={stylesObj.marginQuarter}>
-            <strong>Map Values</strong> for
-            {this.props.header}
+            <strong>Map Values</strong>
+            <span>{` for ${header}`}</span>
             <br />
           </Typography>
           <Button
             style={stylesObj.valueMapButton}
-            onClick={this.handleDialogueChange}
+            onClick={this.handleDialogChange}
           >
             Upload Values Map
             <Publish />
           </Button>
-          {this.state.valueMapUploadDialogue && (
-            <ValueMapUploadDialogue
-              open={this.state.valueMapUploadDialogue}
-              onClose={this.handleDialogueChange}
-              valueSet={
-                this.props.mapCheck.flatQuestionnaire[this.props.mapID]
-                  .answerValueSet
-              }
-              header={this.props.header}
-              uid={this.props.map.uid}
+          {valueMapUploadDialogOpen && (
+            <ValueMapUploadDialog
               handleValueMapUpdate={this.handleValueMapUpdate}
+              header={header}
+              onClose={this.handleDialogChange}
+              open={valueMapUploadDialogOpen}
+              valueSet={valueSet}
+              uid={map.uid}
             />
           )}
           <br />
           <div style={stylesObj.marginQuarter}>
-            {this.formatValueMap(this.state.valueSet)}
+            {this.formatValueMap(valueSet)}
           </div>
           <Button
             variant="contained"
             style={stylesObj.valueMapContinueButton}
-            onClick={(e) =>
-              this.props.onValueMapClose(
-                e,
-                this.state.choiceMap,
-                this.props.header
-              )
-            }
+            onClick={(e) => onValueMapClose(e, choiceMap, header)}
           >
             Save and Close
             <Save style={stylesObj.marginQuarter} />
@@ -196,3 +192,11 @@ class ValueMapCard extends React.Component {
 }
 
 export default ValueMapCard;
+
+ValueMapCard.propTypes = {
+  map: PropTypes.objectOf(PropTypes.object).isRequired,
+  header: PropTypes.string.isRequired,
+  onValueMapClose: PropTypes.func.isRequired,
+  mapCheck: PropTypes.objectOf(PropTypes.object).isRequired,
+  mapID: PropTypes.string.isRequired,
+};
