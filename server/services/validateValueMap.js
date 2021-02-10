@@ -45,7 +45,7 @@ const validateValueMap = (body) => {
           if (!a.hasOwnProperty(source)) {
             //invalid if they've added target system values (e.g, added Masculin in target column)
             if (valueSetMap.hasOwnProperty(target)) {
-              a[source] = target;
+              a[source] = {code: target, valueType: 'choice'};
               returnObject.valueSet[valueSetMap[target]].maps.push(source);
             } else {
               returnObject.invalidMappings.push(target);
