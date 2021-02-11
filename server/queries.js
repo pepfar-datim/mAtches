@@ -1,535 +1,597 @@
-const helpers = require('./helpers.js')
-const fs = require('fs');
+const fs = require("fs");
 
-const csv = require('csv');
-var fetch = require('node-fetch');
+const fetch = require("node-fetch");
+const helpers = require("./services/helpers");
 
-const config = require('./config.json');
-const package = require('./package.json');
-var convert = require('./convert.js');
-var validateServices = require('./validateValueMap.js');
-var validateValueMap = validateServices.validateValueMap;
-var convertToFHIR = convert.convertToFHIR;
-splitNumber = config.base.split('/').length;
+const config = require("../config.json");
+const aboutPackage = require("../package.json");
+const convert = require("./services/convert");
+const validateServices = require("./services/validateValueMap");
+
+const { validateValueMap } = validateServices;
+const { convertToFHIR } = convert;
+const splitNumber = config.base.split("/").length;
 
 const allowableQuery = {
-  "maps": {
-    "uid": true,
-    "name": true
+  maps: {
+    uid: true,
+    name: true,
   },
-  "questionnaires": {
-    "uid": true,
-    "name": true    
-  }
-}
+  questionnaires: {
+    uid: true,
+    name: true,
+  },
+};
 
-const checkTable = (table) => {
-  return allowableQuery.hasOwnProperty(table)
-}
-
-const checkColumn = (table, column) => {
-  var valid = false;
-  if (allowableQuery.hasOwnProperty(table)) {
-    if (allowableQuery[table].hasOwnProperty(column)) {
-      valid = true;
-    }
-  }
-  return valid
-}
+const checkTable = (table) =>
+  Object.prototype.hasOwnProperty.call(allowableQuery, table);
 
 const readResource = (fileName) => {
-  var promise = new Promise(function(resolve, reject) {
+  const promise = new Promise((resolve, reject) => {
     fs.readFile(fileName, (err, data) => {
       if (err) {
-        console.log(err)
-        reject({"error": err}) 
+        console.log(err);
+        reject(new Error("file not readable"));
       } else {
-        var parsedData = JSON.parse(data);
-        resolve({"data": parsedData})
+        resolve({ data: JSON.parse(data) });
       }
-    })  
-  })
-  return promise
-}
+    });
+  });
+  return promise;
+};
 
 const writeResource = (fileName, data) => {
-  var promise = new Promise(function(resolve, reject) {
+  const promise = new Promise((resolve, reject) => {
     fs.writeFile(fileName, data, (err) => {
-      if (err) resolve({"error": err})
-      resolve({"success": true})
-    })  
-  })
-  return promise
-}
+      if (err) reject(new Error(err));
+      resolve({ success: true });
+    });
+  });
+  return promise;
+};
 
 const deleteResource = (fileName) => {
-  var promise = new Promise(function(resolve, reject) {
+  const promise = new Promise((resolve, reject) => {
     fs.unlink(fileName, (err) => {
-      if (err) resolve({"error": err})
-      resolve({"success": true})
-    })  
-  })
-  return promise  
-}
+      if (err) reject(new Error(err));
+      resolve({ success: true });
+    });
+  });
+  return promise;
+};
 
 const getAbout = (request, response) => {
-  let aboutInfo = {appName: package.name, version: package.version, buildDate: package.buildDate, repository: package.repository}
+  const aboutInfo = {
+    appName: aboutPackage.name,
+    version: aboutPackage.version,
+    buildDate: aboutPackage.buildDate,
+    repository: aboutPackage.repository,
+  };
   response.status(200).json(aboutInfo);
-}
+};
+
+const getFileTypes = (request, response) => {
+  const fileTypes = ["CSV", "JSON"];
+  response.status(200).json(fileTypes);
+};
 
 const getAll = (request, response) => {
-  var type = request.path.split('/')[splitNumber];
+  const type = request.path.split("/")[splitNumber];
   if (!checkTable(type)) {
-     response.status(403).end('Invalid\n')
+    response.status(403).end("Invalid\n");
   }
-  readResource(config.persistencyLocation + type + '/' + type + '.json').then((data) => {
-    if (data.hasOwnProperty('data')) {
-      var cleanedData = getAllClean(data.data);
-      response.status(200).json(cleanedData); 
-    }
-    if (data.hasOwnProperty('error')) {
-      response.status(400).end(JSON.stringify(data.error)); 
-    }
-    response.status(400).end('problem accessing resource');
-  });
-}
+  try {
+    readResource(`${config.persistencyLocation + type}/${type}.json`).then(
+      (data) => {
+        const cleanedData = Object.values(data.data);
+        response.status(200).json(cleanedData);
+      }
+    );
+  } catch (e) {
+    response.status(400).end(e);
+  }
+};
 
 const getFHIRQuestionnaires = (request, response) => {
-    fetch(config.fhirServer + '/Questionnaire?_format=json')
-    .then(r => {
+  fetch(`${config.fhirServer}/Questionnaire?_format=json`)
+    .then((r) => {
       if (r.status < 200 || r.status >= 300) {
-        response.status(400).send('Unable to retrieve Questionnaires from FHIR Server')
-      } 
-      return r.json()      
+        response
+          .status(400)
+          .send("Unable to retrieve Questionnaires from FHIR Server");
+      }
+      return r.json();
     })
-    .then(data => {
+    .then((data) => {
       response.status(200).end(JSON.stringify(data.entry));
     })
-    .catch(e => {
+    .catch((e) => {
       response.status(400).send(e);
-    })
-}
+    });
+};
 
-const getAllClean = (data) => {
-  var dataArray = []
-  for (var i in data) {
-    dataArray.push(data[i])
-  }
-  return dataArray
-}
+const checkForSpecificProp = (value, resource, prop) => {
+  const promise = new Promise((resolve, reject) => {
+    readResource(`${config.persistencyLocation + resource}/${resource}.json`)
+      .then((data) => {
+        const d = Object.values(data.data).filter((i) => i[prop] === value);
+        const res = d.length ? d[0].uid : false;
+        resolve(res);
+      })
+      .catch(() => {
+        reject(new Error("Unable to read resource"));
+      });
+  });
+  return promise;
+};
 
 const checkName = (request, response) => {
-  var type = request.path.split('/')[splitNumber];
+  const type = request.path.split("/")[splitNumber];
   if (!checkTable(type)) {
-     response.status(403).end('Invalid\n') 
+    response.status(403).end("Invalid\n");
   }
-  checkForSpecificProp(request.params.name,'maps','name').then(nameFound => {
-    if (nameFound.hasOwnProperty('error')) {
-      response.status(400).end(nameConflict.error)
-    }
-    if (nameFound) {
-      response.status(200).send(nameFound)
-    } else {
-      response.status(200).send({})  
-    }   
-  })
-}
+  checkForSpecificProp(request.params.name, "maps", "name")
+    .then((nameFound) => {
+      if (nameFound) {
+        response.status(200).send({uid: nameFound});
+      } else {
+        response.status(200).send({});
+      }
+    })
+    .catch((e) => {
+      response.status(400).send({ error: e });
+    });
+};
 
 const getSpecificResource = (request, response) => {
-  var type = request.path.split('/')[splitNumber];
+  const type = request.path.split("/")[splitNumber];
   if (!checkTable(type)) {
-     response.status(403).end('Invalid\n') 
+    response.status(403).end("Invalid\n");
   }
-  readResource(config.persistencyLocation + type + '/' + request.params.id + '.json').then((data) => {
-    if (data.hasOwnProperty('data')) response.status(200).json(data.data);
-    if (data.hasOwnProperty('error')) response.status(200).send('');
-    response.status(400).end('problem accessing resource');
-  })
-  .catch(() => {response.status(404).end('not found')});  
-}
+  readResource(`${config.persistencyLocation + type}/${request.params.id}.json`)
+    .then((data) => {
+      if (data.data) response.status(200).json(data.data);
+      response.status(400).end("problem accessing resource");
+    })
+    .catch(() => {
+      response.status(404).end("not found");
+    });
+};
 
-const getSpecificQuestionnaire = (request, response) => {
-  fetch(config.fhirServer + '/Questionnaire/?url=' + encodeURI(request.params.id) + '&_format=json')
-  .then(r => {
-    if (r.status < 200 || r.status >= 300) {
-      response.status(400).send('Unable to retrieve Questionnaires from FHIR Server')
+const getValueMaps = (items, valueSetArray, tempPath) => {
+  for (let i = 0; i < items.length; i += 1) {
+    let tempPathCopy = [];
+    if (items[i].item) {
+      tempPathCopy = [...tempPath];
+      tempPathCopy.push(i);
+      valueSetArray = getValueMaps(items[i].item, valueSetArray, tempPathCopy);
+    } else if (items[i].answerValueSet) {
+      tempPathCopy = [...tempPath];
+      tempPathCopy.push(i);
+
+      const fetchURL = `${config.fhirServer}/ValueSet?url=${encodeURI(
+        items[i].answerValueSet
+      )}&_format=json`;
+      valueSetArray.push({ fetchURL, path: tempPathCopy });
     }
-    return r.json() 
-  })
-  .then(data => {
-    var questionnaire = data.entry[0];
-    var valueSetURLS = [];
-    valueSetURLS = getValueMaps(questionnaire.resource.item, [], []);
-    Promise.all(
-      valueSetURLS.map(url => 
-        fetch(url.fetchURL)
-        .then(res => res.json())
-        .then(res => {
-          let valueSetSummary = [[],url.path];
-          if (res && res.entry && res.entry[0].resource && res.entry[0].resource.id) {
-            return {url: config.fhirServer + '/ValueSet/' + res.entry[0].resource.id + '/$expand?_format=json', path: url.path}
-          }
-        })
-      )
-    )
-    .catch(e=>{
-      console.log(e)
-      response.status(400).json({'message': 'Unable to retrieve Value Sets from FHIR Server'})
-    })
-    .then(valueSetIDURLs => {
-      Promise.all(
-        valueSetIDURLs.map(vs =>
-          fetch(vs.url)
-          .then(res2 => res2.json())
-          .then(res2 => {
-            let valueSetSummary = [[],vs.path];
-            if (res2 && res2.expansion && res2.expansion.contains) {
-              valueSetSummary[0] = res2.expansion.contains;
-            }
-            else if (res2 && res2.compose && res2.compose.include && res2.compose.include[0].concept) {
-              valueSetSummary[0] = res2.compose.include[0].concept;
-              if (res2.compose.include[0].system) {
-                for (x of valueSetSummary[0]) {x.system = res2.compose.include[0].system}
-              }
-            }
-            return valueSetSummary
-          }))
-      )
-      .catch(e=>{
-        console.log(e)
-        response.status(400).json({'message': 'Unable to retrieve Value Sets from FHIR Server'})
-      })
-      .then(valueSets => {
-        for (vs of valueSets) {
-          questionnaire.resource.item = loadValueMaps(questionnaire.resource.item, vs)
-        }
-        response.status(200).end(JSON.stringify(questionnaire));
-      })
-    })
-  })
-}
+  }
+  return valueSetArray;
+};
 
 const loadValueMaps = (items, vs) => {
   if (vs[1].length > 1) {
-    var newPath = vs[1].slice(1);
-    items[vs[1][0]].item = loadValueMaps(items[vs[1][0]].item, [vs[0], newPath])
+    const newPath = vs[1].slice(1);
+    items[vs[1][0]].item = loadValueMaps(items[vs[1][0]].item, [
+      vs[0],
+      newPath,
+    ]);
   } else {
-    items[vs[1][0]].answerValueSet = {}
-    items[vs[1][0]].answerValueSet.concept = vs[0];
+    items[vs[1][0]].answerValueSet = {};
+    [items[vs[1][0]].answerValueSet.concept] = vs;
   }
-  return items
-}
+  return items;
+};
 
-const getValueMaps = (items, valueSetArray, tempPath) => {
-    for (let i =0; i<items.length; i++) {
-      if (items[i].hasOwnProperty('item')) {
-        var tempPathCopy = [...tempPath];
-        tempPathCopy.push(i);
-        valueSetArray = getValueMaps(items[i].item, valueSetArray, tempPathCopy);
-      } else {
-        if (items[i].hasOwnProperty('answerValueSet')) {
-          var tempPathCopy = [...tempPath];
-          tempPathCopy.push(i);
-
-          var fetchURL = config.fhirServer + '/ValueSet?url=' + encodeURI(items[i].answerValueSet) + '&_format=json';
-          valueSetArray.push({"fetchURL": fetchURL, path: tempPathCopy})
-        }
+const getSpecificQuestionnaire = (request, response) => {
+  fetch(
+    `${config.fhirServer}/Questionnaire/?url=${encodeURI(
+      request.params.id
+    )}&_format=json`
+  )
+    .then((r) => {
+      if (r.status < 200 || r.status >= 300) {
+        response
+          .status(400)
+          .send("Unable to retrieve Questionnaires from FHIR Server");
       }
-    }
-    return valueSetArray
-}
-
-const checkForSpecificProp = (value, resource, prop) => {
-  var promise = new Promise(function(resolve, reject) {
-    readResource(config.persistencyLocation + resource + '/' + resource + '.json').then((data) => {
-      if (data.hasOwnProperty('error')) resolve(data)
-      for (var i in data.data) {
-        if (data.data[i].hasOwnProperty(prop)) {
-          if (data.data[i][prop] == value) {
-            resolve({"uid": data.data[i].uid})
-          }
-        }
-      }
-      resolve(false)
+      return r.json();
     })
-  })
-  return promise  
-}
+    .then((data) => {
+      const questionnaire = data.entry[0];
+      let valueSetURLS = [];
+      valueSetURLS = getValueMaps(questionnaire.resource.item, [], []);
+      Promise.all(
+        valueSetURLS.map((url) =>
+          fetch(url.fetchURL)
+            .then((res) => res.json())
+            .then((res) => {
+              if (
+                res &&
+                res.entry &&
+                res.entry[0].resource &&
+                res.entry[0].resource.id
+              ) {
+                return {
+                  url: `${config.fhirServer}/ValueSet/${res.entry[0].resource.id}/$expand?_format=json`,
+                  path: url.path,
+                };
+              }
+            })
+        )
+      )
+        .catch((e) => {
+          console.log(e);
+          response.status(400).json({
+            message: "Unable to retrieve Value Sets from FHIR Server",
+          });
+        })
+        .then((valueSetIDURLs) => {
+          Promise.all(
+            valueSetIDURLs.map((vs) =>
+              fetch(vs.url)
+                .then((res2) => res2.json())
+                .then((res2) => {
+                  const valueSetSummary = [[], vs.path];
+                  if (res2 && res2.expansion && res2.expansion.contains) {
+                    valueSetSummary[0] = res2.expansion.contains;
+                  } else if (
+                    res2 &&
+                    res2.compose &&
+                    res2.compose.include &&
+                    res2.compose.include[0].concept
+                  ) {
+                    valueSetSummary[0] = res2.compose.include[0].concept;
+                    if (res2.compose.include[0].system) {
+                      valueSetSummary[0].map((x) =>
+                        Object.assign(x, {
+                          system: res2.compose.include[0].system,
+                        })
+                      );
+                    }
+                  }
+                  return valueSetSummary;
+                })
+            )
+          )
+            .catch((e) => {
+              console.log(e);
+              response.status(400).json({
+                message: "Unable to retrieve Value Sets from FHIR Server",
+              });
+            })
+            .then((valueSets) => {
+              valueSets.forEach((vs) => {
+                questionnaire.resource.item = loadValueMaps(
+                  questionnaire.resource.item,
+                  vs
+                );
+              });
+              response.status(200).end(JSON.stringify(questionnaire));
+            });
+        });
+    });
+};
 
 const checkForUID = (uid, resource) => {
-  var promise = new Promise(function(resolve, reject) {
-    readResource(config.persistencyLocation + resource + '/' + resource + '.json').then((data) => {
-      if (data.hasOwnProperty('error')) resolve(data)
-      resolve(data.data.hasOwnProperty(uid))
-    })
-  })
-  return promise
-}
+  const promise = new Promise((resolve, reject) => {
+    readResource(`${config.persistencyLocation + resource}/${resource}.json`)
+      .then((data) => {
+        resolve(Object.prototype.hasOwnProperty.call(data.data, "uid"));
+      })
+      .catch(() => {
+        reject(new Error("Item not readable"));
+      });
+  });
+  return promise;
+};
 
-const checkForProp = (value, table, column, uidExclude) => {
-  var promise = new Promise(function(resolve, reject) {
-    if (!checkTable(table)) {resolve(true)}
-    if (!checkColumn(table, column)) {resolve(true)}
-
-    var query = {
-      text: "SELECT * FROM " + table + " WHERE " + column + "=$1;",
-      values: [value]
-    }
-
-    if (uidExclude) {
-      query.text = "SELECT * FROM " + table + " WHERE " + column + "=$1 AND uid!=$2;";
-      query.values = [value, uidExclude];
-    }
-    
-    pool.query(query, (error, results) => {
-      if (error) {
-        throw error
-      }
-      resolve(results.rowCount > 0)      
-    })
-  })
-  return promise
-}
-
-const addToSummary = (payload, uid, endpoint) => {
-  var promise = new Promise(function(resolve, reject) {
-    var now = new Date().toISOString();
-    if (!payload.hasOwnProperty('created')) {
+const addToSummary = (initialPayload, uid, endpoint) => {
+  const payload = initialPayload;
+  const promise = new Promise((resolve, reject) => {
+    const now = new Date().toISOString();
+    if (!payload.created) {
       payload.created = now;
     }
-    if (!payload.hasOwnProperty('updated')) {
+    if (!payload.updated) {
       payload.updated = now;
     }
-    if (!payload.hasOwnProperty('complete')) {
+    if (!payload.complete) {
       payload.complete = false;
     }
-    var desiredProperties = {
-      "maps": ['name', 'created', 'updated', 'uid', 'questionnaireuid', 'complete'],
-      "questionnaires": ['name', 'created', 'updated', 'uid']
+    const desiredProperties = {
+      maps: [
+        "name",
+        "created",
+        "updated",
+        "uid",
+        "questionnaireuid",
+        "complete",
+        "fileType",
+        "headersStructure",
+      ],
+      questionnaires: ["name", "created", "updated", "uid"],
     };
-    var undesiredProperties = {
-      "maps": "map",
-      "questionnaires": "questionnaire"
-    };    
-    var scrubbedObject = {}
+    const undesiredProperties = {
+      maps: "map",
+      questionnaires: "questionnaire",
+    };
+    const scrubbedObject = {};
 
-    for (let i=0; i<desiredProperties[endpoint].length; i++) {
-      scrubbedObject[desiredProperties[endpoint][i]] = payload[desiredProperties[endpoint][i]];
+    for (let i = 0; i < desiredProperties[endpoint].length; i += 1) {
+      scrubbedObject[desiredProperties[endpoint][i]] =
+        payload[desiredProperties[endpoint][i]];
     }
-    readResource(config.persistencyLocation+ endpoint + '/' + endpoint + '.json').then(file => {
-      if (file.hasOwnProperty('data')) {
-        file.data[uid] = scrubbedObject;
-        writeResource(config.persistencyLocation+ endpoint + '/' + endpoint + '.json', JSON.stringify(file.data)).then(status => {
-          if (status.hasOwnProperty('success')) {
-            //add back in map or questionnaire
-            scrubbedObject[undesiredProperties[endpoint]] = payload[undesiredProperties[endpoint]];
-            resolve(scrubbedObject)
-          } else {
-            resolve(file)
-          }
-        })
-      } else {
-        resolve(file)
-      }
-    }) 
-  })
-  return promise
-}
+    readResource(`${config.persistencyLocation + endpoint}/${endpoint}.json`)
+      .then((readFile) => {
+        const file = readFile;
+        if (file.data) {
+          file.data[uid] = scrubbedObject;
+          writeResource(
+            `${config.persistencyLocation + endpoint}/${endpoint}.json`,
+            JSON.stringify(file.data)
+          ).then((status) => {
+            if (status.success) {
+              // add back in map or questionnaire
+              scrubbedObject[undesiredProperties[endpoint]] =
+                payload[undesiredProperties[endpoint]];
+              resolve(scrubbedObject);
+            } else {
+              resolve(file);
+            }
+          });
+        } else {
+          resolve(file);
+        }
+      })
+      .catch(() => {
+        reject(new Error("could not add"));
+      });
+  });
+  return promise;
+};
 
 const validateMapPayload = (payload, uid, update) => {
-  var promise = new Promise(function(resolve, reject) {
-    if (!payload.hasOwnProperty('name')) {
-      resolve('Name is required')
+  const promise = new Promise((resolve, reject) => {
+    if (!payload.name) {
+      resolve("Name is required");
     }
-    if (!payload.hasOwnProperty('questionnaireuid')) {
-      resolve('Questionnaire UID is required')
+    if (!payload.questionnaireuid) {
+      resolve("Questionnaire UID is required");
     }
     if (update) {
-      resolve(true)
+      resolve(true);
     }
 
-    checkForSpecificProp(payload.name.replace(/'/gi,"''"), 'maps', 'name').then(nameConflict => {
-      if (nameConflict.hasOwnProperty('error')) {
-        response.status(400).end(nameConflict.error);
-      }
-      if (nameConflict) {
-        resolve('Name (' + payload.name + ') already exists(, or request is invalid)')
-      }          
-      resolve(true)
-    })
-        
-  })
-  return promise
-}
+    checkForSpecificProp(payload.name.replace(/'/gi, "''"), "maps", "name")
+      .then((nameConflict) => {
+        if (nameConflict) {
+          resolve(
+            `Name (${payload.name}) already exists(, or request is invalid)`
+          );
+        }
+        resolve(true);
+      })
+      .catch(() => {
+        reject(new Error("problem with validation"));
+      });
+  });
+  return promise;
+};
 
 const validateValueMapPayload = (request, response) => {
-    validateValueMap(request.body).then(res => {
-      response.status(200).json(res);  
-    })
-    
-}
+  validateValueMap(request.body).then((res) => {
+    response.status(200).json(res);
+  });
+};
 
 const updateMapFiles = (request, response, uid, update) => {
-  validateMapPayload(request.body, uid, update).then(validity => {
+  validateMapPayload(request.body, uid, update).then((validity) => {
     if (validity === true) {
-      addToSummary(request.body, uid, 'maps').then(result => {
-        writeResource(config.persistencyLocation + 'maps/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
-          var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
-          if (writeStatus.hasOwnProperty('success')) {
-            response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded map for: ' + uid + '"}');
-          }
-          response.status(400).end(JSON.stringify(error));
-        })            
-      })
-
+      addToSummary(request.body, uid, "maps").then((result) => {
+        try {
+          writeResource(
+            `${config.persistencyLocation}maps/${uid}.json`,
+            JSON.stringify(result)
+          ).then((writeStatus) => {
+            if (writeStatus.success) {
+              response.status(200).json({ uid, message: "success" });
+            }
+          });
+        } catch (e) {
+          response.status(400).end(e);
+        }
+      });
     } else {
-      response.status(400).end('Problem with payload: ' + validity + '\n');
-    } 
-  })  
-}
+      response.status(400).end(`Problem with payload: ${validity}\n`);
+    }
+  });
+};
 
 const createMap = (request, response) => {
-  var map = request.body;
-  var uid = helpers.generateUID(); //should define as random at first and then redefine
+  let uid = helpers.generateUID(); // should define as random at first and then redefine
 
-  if (request.body.hasOwnProperty('uid')) {
+  if (request.body.uid) {
     uid = request.body.uid;
   } else {
-    request.body.uid = uid;  
+    request.body.uid = uid;
   }
-  
-  checkForUID(uid, 'maps').then(uidFound => {
+
+  checkForUID(uid, "maps").then((uidFound) => {
     if (uidFound) {
-      response.status(400).end('The uid provided/generated (' + uid + ') already exists. Please update and try again.\n')
+      response
+        .status(400)
+        .end(
+          `The uid provided/generated (${uid}) already exists. Please update and try again.\n`
+        );
     } else {
       updateMapFiles(request, response, uid, false);
     }
-  })
-}
-
+  });
+};
 
 const updateMap = (request, response) => {
-  var map = request.body;
-  if (!request.body.hasOwnProperty('uid')) {
-    response.status(400).end('Missing uid\n');
+  if (!request.body.uid) {
+    response.status(400).end("Missing uid\n");
   }
-  var uid = request.body.uid;
+  const { uid } = request.body;
   updateMapFiles(request, response, uid, true);
-}      
+};
 
-//generalized for questionnaires...however this is just for development convenience.
-//a real method to delete questionnaire needs to remove maps tied to questionnaire (or fail until maps are removed)
+// generalized for questionnaires...however this is just for development convenience.
+// a real method to delete questionnaire needs to remove maps tied to questionnaire (or fail until maps are removed)
 const deleteSpecificResource = (request, response) => {
-  var type = request.path.split('/')[splitNumber];
+  const type = request.path.split("/")[splitNumber];
   if (!checkTable(type)) {
-     response.status(403).end('Invalid\n') 
-  }  
-  var indType = type.substring(0,type.length - 1);
-  var uid = request.params.id;
-  readResource(config.persistencyLocation + type + '/' + type + '.json').then(file => {
-    if (file.hasOwnProperty('data')) {
-      if (file.data.hasOwnProperty(uid)) {
-        delete file.data[uid]
-        writeResource(config.persistencyLocation + type + '/' + type + '.json', JSON.stringify(file.data)).then(a => {
-          deleteResource(config.persistencyLocation + type + '/' + uid + '.json').then(b => {
-            if (b.hasOwnProperty('error')) {
-              response.status(400).end(JSON.stringify(b.error));
-            }
-            response.status(200).send('Removed ' + indType + ' with uid of ' + uid);
-          })
-        })
+    response.status(403).end("Invalid\n");
+  }
+  const indType = type.substring(0, type.length - 1);
+  const uid = request.params.id;
+  readResource(`${config.persistencyLocation + type}/${type}.json`)
+    .then((readFile) => {
+      const file = readFile;
+      if (file.data) {
+        if (file.data[uid]) {
+          delete file.data[uid];
+          try {
+            writeResource(
+              `${config.persistencyLocation + type}/${type}.json`,
+              JSON.stringify(file.data)
+            ).then(() => {
+              deleteResource(
+                `${config.persistencyLocation + type}/${uid}.json`
+              ).then(() => {
+                response
+                  .status(200)
+                  .send(`Removed ${indType} with uid of ${uid}`);
+              });
+            });
+          } catch (e) {
+            response.status(400).end(e);
+          }
+        }
       }
-    }
-  })
-  .catch(e => {
-    response.status(400).end(JSON.stringify(e));
-  })  
+    })
+    .catch((e) => {
+      response.status(400).end(JSON.stringify(e));
+    });
+};
 
-}
-
-//there are no validation checks here because users will not being interacting with this route
-//call is added for convenience of developing/deploying
+// there are no validation checks here because users will not being interacting with this route
+// call is added for convenience of developing/deploying
 const createQuestionnaire = (request, response) => {
-  var payload = request.body
-  var uid = helpers.generateUID(); //should define as random at first and then redefine
-  if (payload.hasOwnProperty('uid')) {
+  const payload = request.body;
+  let uid = helpers.generateUID(); // should define as random at first and then redefine
+  if (payload.uid) {
     uid = payload.uid;
   } else {
     payload.uid = uid;
   }
-  var now = new Date().toISOString();
-  if (!payload.hasOwnProperty('created')) {
+  const now = new Date().toISOString();
+  if (!payload.created) {
     payload.created = now;
   }
-  if (!payload.hasOwnProperty('updated')) {
+  if (!payload.updated) {
     payload.updated = now;
   }
-  addToSummary(request.body, uid, 'questionnaires').then(result => {
-    writeResource(config.persistencyLocation + 'questionnaires/' + uid + '.json', JSON.stringify(result)).then(writeStatus => {
-      var error = writeStatus.hasOwnProperty('error') ? writeStatus.error : '';
-      if (writeStatus.hasOwnProperty('success')) {
-        response.status(200).json('{"uid": "' + uid + '", "message":' + '"Uploaded questionnaire for: ' + uid + '"}');
-      }
-      response.status(400).end(JSON.stringify(error));
-    })            
-  })
-}
+  addToSummary(request.body, uid, "questionnaires").then((result) => {
+    try {
+      writeResource(
+        `${config.persistencyLocation}questionnaires/${uid}.json`,
+        JSON.stringify(result)
+      ).then((writeStatus) => {
+        if (writeStatus.success) {
+          response
+            .status(200)
+            .json(
+              `{"uid": "${uid}", "message":` +
+                `"Uploaded questionnaire for: ${uid}"}`
+            );
+        }
+      });
+    } catch (e) {
+      response.status(400).end(JSON.stringify(e));
+    }
+  });
+};
 
 const uploadData = (request, response) => {
-  var url = decodeURIComponent(request.query.url);
-
-  readResource(config.persistencyLocation + 'maps/' + request.params.id + '.json').then((data) => {
-    if (data.hasOwnProperty('data')) {
-      var map = {map: data.data.map};
-        readResource(config.persistencyLocation + 'maps/' + request.params.id + '.json').then((dataQ) => {
-          if (dataQ.hasOwnProperty('data')) {
-            var questionnaireURL = dataQ.data.questionnaireuid;
-                  convertToFHIR(request.body, map, request.params.id, questionnaireURL).then(result =>{
-                    if (result.hasOwnProperty('errors')) {
-                      response.status(200).json(result);  
-                    } else {
-                      if (url == null || url.trim().toLowerCase() == 'null') {
-                        response.status(200).json(result);
-                      } else {
-                        try {
-                          fetch(url, 
-                            {
-                              method: "POST",
-                              body: JSON.stringify(result.data),
-                              headers: { "Content-Type": "application/json" }
-                            }
-                          )
-                          //.then(firstRes => firstRes.text())
-                          .then(extRes => {
-                            result.urlResponse = {status: extRes.status, url: extRes.url, body: extRes.body}
-                            response.status(200).json(result);
-                          })
-                        }
-                        catch (e) {
-                          result.urlResponse = e;
-                          response.status(400).json(result);
-                        }
-                      }
-                      //send request to url
+  const url = decodeURIComponent(request.query.url);
+  try {
+    readResource(`${config.persistencyLocation}maps/${request.params.id}.json`)
+      .then((data) => {
+        if (data.data) {
+          const map = { map: data.data.map, fileType: data.data.fileType };
+          readResource(
+            `${config.persistencyLocation}maps/${request.params.id}.json`
+          )
+            .then((dataQ) => {
+              if (dataQ.data) {
+                const questionnaireURL = dataQ.data.questionnaireuid;
+                convertToFHIR(
+                  request.body,
+                  map,
+                  request.params.id,
+                  questionnaireURL
+                ).then((result) => {
+                  if (result.erros) {
+                    response.status(200).json(result);
+                  } else if (
+                    url === null ||
+                    url.trim().toLowerCase() === "null"
+                  ) {
+                    response.status(200).json(result);
+                  } else {
+                    try {
+                      fetch(url, {
+                        method: "POST",
+                        body: JSON.stringify(result.data),
+                        headers: { "Content-Type": "application/json" },
+                      })
+                        // .then(firstRes => firstRes.text())
+                        .then((extRes) => {
+                          result.urlResponse = {
+                            status: extRes.status,
+                            url: extRes.url,
+                            body: extRes.body,
+                          };
+                          response.status(200).json(result);
+                        });
+                    } catch (e) {
+                      result.urlResponse = e;
+                      response.status(400).json(result);
                     }
-                  })
-          }
-          if (dataQ.hasOwnProperty('error')) {
-            response.status(400).end(dataQ.error);
-          }
-        });
-    }
-    if (data.hasOwnProperty('error')) {
-      response.status(400).end(data.error);
-    } 
-  });
-
-}
+                  }
+                });
+              }
+            })
+            .catch((e) => {
+              response.status(400).end(e);
+            });
+        }
+      })
+      .catch((e) => {
+        response.status(400).end(e);
+      });
+  } catch (e) {
+    response.status(400).end(e);
+  }
+};
 
 module.exports = {
   getAbout,
   getAll,
   getFHIRQuestionnaires,
+  getFileTypes,
   checkName,
   getSpecificResource,
   getSpecificQuestionnaire,
@@ -538,5 +600,5 @@ module.exports = {
   deleteSpecificResource,
   createQuestionnaire,
   uploadData,
-  validateValueMapPayload
-}
+  validateValueMapPayload,
+};

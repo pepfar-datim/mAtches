@@ -4,11 +4,11 @@ const path = require('path');
 const config = require('./config.json');
 
 const indexPlugin = new HtmlWebPackPlugin({
-  template: "./src/index.html", 
+  template: "./public/index.html", 
   filename: "./index.html"
 });
 const errorPlugin = new HtmlWebPackPlugin({
-  template: "./src/error.html",
+  template: "./public/error.html",
   filename: "./error.html"
 });
 module.exports = {
