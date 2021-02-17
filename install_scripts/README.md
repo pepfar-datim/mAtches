@@ -2,7 +2,8 @@
 
 Before running the script, update nginx configuration (if applicable) by adding the below to the server configurations:
 
-```location /mAtches {
+```
+location /mAtches {
   proxy_pass http://127.0.01:5001;
 }
 ```
