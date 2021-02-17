@@ -1,0 +1,75 @@
+---
+- hosts: localhost
+
+  vars:
+    destination_directory: /usr/share/mAtches
+    config_file: "{{ destination_directory }}/config.json"
+
+  tasks:
+  - name: Git pull
+    git:
+     repo: 'https://github.com/pepfar-datim/mAtches'
+     dest: "{{ destination_directory }}"
+
+  - name: Load current facts
+    slurp:
+      path: "{{ config_file }}"
+    register: facts_raw
+
+  - name: Update base
+    set_fact:
+      facts: "{{ facts | combine({ 'base': '/mAtches/', 'port': 5001 }) }}"
+    vars:
+      facts: "{{ facts_raw.content|b64decode }}"
+
+  - debug:
+      var: facts
+
+  - name: Get persistencyLocation from config.json
+    set_fact:
+      persistencyLocation: "{{ facts | json_query('\"persistencyLocation\"') }}"
+  
+  - debug:
+      var: persistencyLocation
+
+  - name: create maps directory
+    file:
+      path: "{{persistencyLocation}}/maps"
+      state: directory
+
+  - name: Create maps.json file
+    copy:
+      dest: "{{persistencyLocation}}/maps/maps.json"
+      content: |
+        {}
+
+  - name: Run npm install
+    command: npm install
+    args:
+      chdir: "{{ destination_directory }}"
+
+  - name: Run npm run-script build
+    command: npm run-script build
+    args:
+      chdir: "{{ destination_directory }}"
+
+  - name: Create service
+    copy:
+      dest: "/etc/systemd/system/mAtches.service"
+      content: |
+        [Unit]
+        Description=mAtches PLM mapper app
+        [Service]
+        WorkingDirectory=/usr/share/mAtches
+        ExecStart=/usr/bin/npm start
+        Restart=always
+        StandardOutput=syslog
+        StandardError=syslog
+        SyslogIdentifier=mAtches
+        Environment=NODE_ENV=production
+        [Install]
+
+
+
+  - name: Start service
+    command: systemctl start mAtches.service
