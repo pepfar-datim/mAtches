@@ -16,7 +16,8 @@ import { Edit, Save, DeleteForever } from "@material-ui/icons";
 import EditCard from "./EditCard";
 import ValueMapCard from "./ValueMapCard";
 import UploadSource from "./UploadSource";
-import TreeNavigation from "./TreeNavigation";
+import TreeNav from './TreeNav'
+import LogicMapDialog from './LogicMapDialog'
 
 import api from "../services/api";
 import { uploadFile } from "../services/validateFile";
@@ -25,6 +26,7 @@ import loadMapQuestionnaire from "../services/loadMapQuestionnaire";
 import loadMapFromMap from "../services/loadMapFromMap";
 
 import { stylesObj } from "../styling/stylesObj";
+import classes from '../styling/MapEdit.module.css'
 
 function pushMapBack(tempMap, mapValidity) {
   api.put("api/maps", { ...tempMap, complete: mapValidity });
@@ -192,6 +194,7 @@ class MapEdit extends Component {
       editingName: false,
       headerUsed: false,
       fileError: false,
+      logicMapOpen: true,
     };
     this.checkMapName = this.checkMapName.bind(this);
     this.clearJSON = this.clearJSON.bind(this);
@@ -573,7 +576,7 @@ class MapEdit extends Component {
     const { map } = this.state;
     if (map.fileType === "json" && map.headersStructure) {
       return (
-        <>
+        <div className="jsonStructurePresentation">
           <Button
             variant="contained"
             style={stylesObj.resetSourceButton}
@@ -585,12 +588,12 @@ class MapEdit extends Component {
             <DeleteForever />
           </Button>
           {Object.keys(map.headersStructure).length && (
-            <TreeNavigation
+            <TreeNav
               currentHeaders={map.map.headers}
               data={map.headersStructure}
             />
           )}
-        </>
+        </div>
       );
     }
     return Object.keys(currentMap.headers).map((k) => (
@@ -631,6 +634,7 @@ class MapEdit extends Component {
       tempName,
       unmappedHeaders,
       validName,
+      logicMapOpen,
     } = this.state;
     const { id } = this.props;
     return (
@@ -646,6 +650,10 @@ class MapEdit extends Component {
             ) : (
               <>
                 <div style={stylesObj.themePadding}>
+                  {!logicMapOpen && (
+                    <LogicMapDialog
+                    />
+                  )}
                   {editValueMap && (
                     <ValueMapCard
                       map={map}

@@ -4,13 +4,14 @@ import { Route, Switch, Redirect } from "react-router-dom";
 import MapDashboard from "./MapDashboard";
 import MapUpdate from "./MapUpdate";
 
+import classes from '../styling/Main.module.css'
 import config from "../../config.json";
 
 const basePath = config.base;
 
 export default function Main() {
   return (
-    <div>
+    <div className={classes.Main}>
       <Switch>
         <Route
           exact

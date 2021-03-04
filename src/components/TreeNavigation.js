@@ -23,7 +23,7 @@ export default function TreeNavigation(props) {
 
   const renderTree = (nodes, cHeaders) =>
     nodes.items ? (
-      <TreeItem key={nodes.key} nodeId={nodes.id} label={`${nodes.key}_logic`}>
+      <TreeItem key={nodes.key} nodeId={nodes.id} label={`${nodes.key}`}>
         {nodes.items.map((node) => renderTree(node, cHeaders))}
       </TreeItem>
     ) : (
