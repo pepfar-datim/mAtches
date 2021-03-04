@@ -22,7 +22,7 @@ var data = {
     return promise;
   },
   loadJSON: function (rawData) {
-    formattedData = JSON.parse(rawData);
+    let formattedData = JSON.parse(rawData);
     if (!Array.isArray(formattedData)) {
       formattedData = [formattedData];
     }
@@ -110,7 +110,7 @@ var data = {
       };
       var pathsChecked = {};
 
-      for (header in this.map.headers) {
+      for (var header in this.map.headers) {
         let individualValue = accessValue(
           this.jsonData[i],
           this.map.headers[header].headerPath
