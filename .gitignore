@@ -5,3 +5,5 @@
 /persistency/questionnaires/*
 !/persistency/maps/README.md
 /csvConversion
+/cypress/*
+cypress.json
