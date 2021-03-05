@@ -10,7 +10,13 @@ mAtches is a tool that improves and facilitates exchange of data using, FHIR sta
 
 mAtches is part of PEPFAR's Data Aggregation Service for Health (DASH) architecture which is exporing ways to facilitate data exchange and allow for easy aggregation of patient-level data. DASH is a project within PEPFAR's Data Use Community.
 
-**Please note mAtches has been developed as a proof-of-concept project. We are working to productize mAtches to make it more generally accessible and more technically.**
+**Please note mAtches has been developed as a proof-of-concept project. We are working to productize mAtches to make it more generally accessible and more technically robust.**
+
+## "Demo"
+
+The below gif shows the basic functionality of the mAtches app and shows how a csv file can be mapped to an questionnaire which defines data requirements. Demo shows some basic error handling by showing what happens if you forget to map one of the values where the questionnaire anticipates a limited number of options.
+
+![](documentation/github-matches.gif)
 
 ## Documentation
 
