@@ -1,0 +1,13 @@
+.logicSelectorContainer {
+	display: flex;
+}
+
+.logicSelectorText {
+	align-self: center;
+	margin-right: 16px;
+}
+
+.logicSelectorSelect {
+	min-width: 160px;
+
+}

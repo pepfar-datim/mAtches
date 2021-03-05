@@ -2,19 +2,22 @@ import React, { useState } from "react";
 import PropTypes from "prop-types";
 import {
   Button,
-  TextField,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  InputLabel,  
   FormControl,
-  InputLabel,
+  MenuItem,  
   Select,
-  MenuItem,
+  TextField,  
+  Typography,
 } from "@material-ui/core/";
 
 import { stylesObj } from "../styling/stylesObj";
+import classes from "../styling/LogicMapDialog.module.css";
+
 
 const extractKeys = items => {
   let keys = {};
@@ -29,6 +32,10 @@ const extractKeys = items => {
 const LogicMapDialog = ({ handleClose, node }) => {
 
   const [logicKey, setLogicKey] = useState('')
+  const [logicOperation, setLogicOperation] = useState('')
+  const [selectKey, setSelectKey] = useState('')
+
+  const availableLogicalOperations = ['equals', 'is greater than', 'is less than']
 
   return (
     <div>
@@ -40,17 +47,42 @@ const LogicMapDialog = ({ handleClose, node }) => {
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            <div style={{display:'flex'}}>
-              <span>Where</span>
+            <div className={classes.logicSelectorContainer}>
+              <div className={classes.logicSelectorText}>
+                <Typography>Where</Typography>
+              </div>
               <Select
                 id="select_key"
-                autoWidth
-                value={logicKey}
+                className={classes.logicSelectorSelect}
+                value={logicKey}                
                 onChange={(el) => setLogicKey(el.target.value)}
               >
-                {extractKeys(node.items).map(k => <MenuItem value={k}>{k}</MenuItem>)}
+                {extractKeys(node.items).map(k => <MenuItem autoWidth value={k}>{k}</MenuItem>)}
               </Select>
             </div>
+            <div className={classes.logicSelectorContainer}>
+              <Select
+                id="select_logical_operator"
+                className={classes.logicSelectorSelect}
+                value={logicOperation}                
+                onChange={(el) => setLogicOperation(el.target.value)}
+              >
+                {availableLogicalOperations.map(k => <MenuItem autoWidth value={k}>{k}</MenuItem>)}
+              </Select>
+            </div>
+            <div className={classes.logicSelectorContainer}>
+              <div className={classes.logicSelectorText}>
+                <Typography>select </Typography>
+              </div>
+              <Select
+                id="select_key"
+                className={classes.logicSelectorSelect}
+                value={selectKey}                
+                onChange={(el) => setSelectKey(el.target.value)}
+              >
+                {extractKeys(node.items).map(k => <MenuItem autoWidth value={k}>{k}</MenuItem>)}
+              </Select>
+            </div>            
           </DialogContentText>
         </DialogContent>
         <DialogActions>
