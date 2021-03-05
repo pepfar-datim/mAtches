@@ -194,7 +194,7 @@ class MapEdit extends Component {
       editingName: false,
       headerUsed: false,
       fileError: false,
-      logicMapOpen: true,
+      logicMapNode: {},
     };
     this.checkMapName = this.checkMapName.bind(this);
     this.clearJSON = this.clearJSON.bind(this);
@@ -212,6 +212,8 @@ class MapEdit extends Component {
     this.handleNameChange = this.handleNameChange.bind(this);
     this.handleMapNameChange = this.handleMapNameChange.bind(this);
     this.handleUpload = this.handleUpload.bind(this);
+    this.handleClearLogicNode = this.handleClearLogicNode.bind(this);
+    this.handleSetLogicNode = this.handleSetLogicNode.bind(this);
     this.processCSV = this.processCSV.bind(this);
     this.processJSON = this.processJSON.bind(this);
   }
@@ -454,6 +456,14 @@ class MapEdit extends Component {
     pushMapBack(tempMap, tempMapValidity);
   }
 
+  handleSetLogicNode(node) {
+    this.setState({logicMapNode: node})
+  }
+
+  handleClearLogicNode() {
+    this.setState({logicMapNode: {}})
+  }
+
   handleValueMap(tempHeader, tempID) {
     this.setState({ editValueMap: true, header: tempHeader, mapID: tempID });
   }
@@ -591,6 +601,7 @@ class MapEdit extends Component {
             <TreeNav
               currentHeaders={map.map.headers}
               data={map.headersStructure}
+              setNode = {this.handleSetLogicNode}
             />
           )}
         </div>
@@ -634,7 +645,7 @@ class MapEdit extends Component {
       tempName,
       unmappedHeaders,
       validName,
-      logicMapOpen,
+      logicMapNode,
     } = this.state;
     const { id } = this.props;
     return (
@@ -650,8 +661,10 @@ class MapEdit extends Component {
             ) : (
               <>
                 <div style={stylesObj.themePadding}>
-                  {!logicMapOpen && (
+                  {Object.keys(logicMapNode).length !== 0 && (
                     <LogicMapDialog
+                      handleClose = {this.handleClearLogicNode}
+                      node={logicMapNode}
                     />
                   )}
                   {editValueMap && (

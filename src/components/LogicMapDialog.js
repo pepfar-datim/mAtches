@@ -16,7 +16,19 @@ import {
 
 import { stylesObj } from "../styling/stylesObj";
 
-const LogicMapDialog = () => {
+const extractKeys = items => {
+  let keys = {};
+  items.forEach(item => {
+    item.items.forEach(innerItem => {
+      keys[innerItem.key] = '';
+    })
+  })
+  return Object.keys(keys)
+}
+
+const LogicMapDialog = ({ handleClose, node }) => {
+
+  const [logicKey, setLogicKey] = useState('')
 
   return (
     <div>
@@ -24,15 +36,28 @@ const LogicMapDialog = () => {
         open={true}
       >
         <DialogTitle id="form-dialog-title">
-          {`Define {nodeName}yarn`}
+          <span>Define <strong>{node.key}</strong> structure with logic</span>
         </DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Boring logic
+            <div style={{display:'flex'}}>
+              <span>Where</span>
+              <Select
+                id="select_key"
+                autoWidth
+                value={logicKey}
+                onChange={(el) => setLogicKey(el.target.value)}
+              >
+                {extractKeys(node.items).map(k => <MenuItem value={k}>{k}</MenuItem>)}
+              </Select>
+            </div>
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button color="secondary">
+          <Button 
+            color="secondary"
+            onClick={handleClose}
+          >
             Cancel
           </Button>
           <Button
@@ -47,6 +72,8 @@ const LogicMapDialog = () => {
 }
 
 LogicMapDialog.propTypes = {
+  node: PropTypes.object,
+  handleClose: PropTypes.func,
 };
 
 export default LogicMapDialog

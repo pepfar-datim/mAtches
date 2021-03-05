@@ -23,15 +23,15 @@ const LeafItem = ({ labelText }) => (
 	</div>
 )
 
-const BranchItem = ({ labelText, logicDetail }) => (
+const BranchItem = ({ labelText, node, setNode }) => (
 	<div className={classes.branchItem}>
 		<KeyboardArrowDown />
 		<Typography>{labelText}</Typography>
-		{logicDetail.length > 0 &&
+		{node.items &&
 			<IconButton 
 				size='small'
 				color='inherit'
-				onClick={()=>{console.log('open logic dialog')}}
+				onClick={()=>{setNode(node)}}
 			>
 				<Functions />
 			</IconButton>
@@ -40,23 +40,23 @@ const BranchItem = ({ labelText, logicDetail }) => (
 	</div>
 )
 
-const renderTree = (node, cHeaders) => {
+const renderTree = (node, cHeaders, setNode) => {
 	return node.items ?
 		(
-			<li><BranchItem labelText={node.key} logicDetail={displayLogic(node) ? node.items : [] } />
-				<ul>{node.items.map(n => renderTree(n, cHeaders))}</ul>
+			<li><BranchItem setNode={setNode} labelText={node.key} node={displayLogic(node) ? node : {} } />
+				<ul>{node.items.map(n => renderTree(n, cHeaders, setNode))}</ul>
 			</li>
 		) : (
 			<li><LeafItem labelText={node.key} /></li>
 		)
 } 
 
-const TreeNav = ({currentHeaders, data}) => {
+const TreeNav = ({currentHeaders, data, setNode}) => {
 
 	return (
 		<>
 		<ul className={classes.treeList}>
-			{data.map(n => renderTree(n, currentHeaders))}
+			{data.map(n => renderTree(n, currentHeaders, setNode))}
 		</ul>
 		</>
 	)
@@ -65,6 +65,7 @@ const TreeNav = ({currentHeaders, data}) => {
 TreeNav.propTypes = {
   currentHeaders: PropTypes.objectOf(PropTypes.object).isRequired,
   data: PropTypes.objectOf(PropTypes.object).isRequired,
+  setNode: PropTypes.func.isRequired,
 };
 
 export default TreeNav
