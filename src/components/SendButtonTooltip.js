@@ -22,43 +22,44 @@ const SendButtonTooltip = (props) => {
   const { flatQuestionnaire, mapUnchanged, tempDelay, unmappedHeaders } = props;
   const tempEmptyQuestions = generateEmptyQuestions(flatQuestionnaire);
 
-  return (
-    <div>
-      <Typography>Cannot Upload</Typography>
-      <br />
-      {mapUnchanged && (
-        <div>
-          <span>Map is the same as last submission</span>
-          <br />
-          <br />
-        </div>
-      )}
-      {!mapUnchanged && tempDelay && (
-        <div>
-          <span>Please wait a few seconds for button to be reenabled</span>
-          <br />
-          <br />
-        </div>
-      )}
-      {Object.keys(unmappedHeaders).length !== 0 && (
-        <div>
-          <strong>Unmapped Headers</strong>
-          <br />
-          <span>{Object.keys(unmappedHeaders).join(", ")}</span>
-          <br />
-          <br />
-        </div>
-      )}
-      {tempEmptyQuestions.length !== 0 && (
-        <div>
-          <strong>Unmapped Questions</strong>
-          <br />
-          <span>{tempEmptyQuestions.join(", ")}</span>
-          <br />
-          <br />
-        </div>
-      )}
-    </div>
+  return ((mapUnchanged && tempDelay) ? <Typography>Submission in progress</Typography> : (
+      <div>
+        <Typography>Cannot Upload</Typography>
+        <br />
+        {mapUnchanged && (
+          <div>
+            <span>Map is the same as last submission</span>
+            <br />
+            <br />
+          </div>
+        )}
+        {!mapUnchanged && tempDelay && (
+          <div>
+            <span>Please wait a few seconds for button to be reenabled</span>
+            <br />
+            <br />
+          </div>
+        )}
+        {Object.keys(unmappedHeaders).length !== 0 && (
+          <div>
+            <strong>Unmapped Headers</strong>
+            <br />
+            <span>{Object.keys(unmappedHeaders).join(", ")}</span>
+            <br />
+            <br />
+          </div>
+        )}
+        {tempEmptyQuestions.length !== 0 && (
+          <div>
+            <strong>Unmapped Questions</strong>
+            <br />
+            <span>{tempEmptyQuestions.join(", ")}</span>
+            <br />
+            <br />
+          </div>
+        )}
+      </div>
+    )
   );
 };
 
