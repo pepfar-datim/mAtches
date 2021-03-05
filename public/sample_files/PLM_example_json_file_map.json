@@ -1,0 +1,300 @@
+{
+	"name": "Trees",
+	"created": "2021-03-04T17:11:01.367Z",
+	"updated": "2021-03-04T17:11:01.367Z",
+	"uid": "MkQsT0",
+	"questionnaireuid": "http://datim.org/fhir/Questionnaire/plm-patient",
+	"complete": true,
+	"fileType": "json",
+	"headersStructure": [{
+		"type": "object",
+		"key": "patient",
+		"id": "patient",
+		"items": [{
+			"type": "object",
+			"key": "person",
+			"id": "patient.person",
+			"items": [{
+				"type": "string",
+				"key": "usage",
+				"id": "patient.person.usage"
+			}, {
+				"type": "array",
+				"key": "names",
+				"id": "patient.person.names",
+				"items": [{
+					"type": "object",
+					"key": 0,
+					"id": "patient.person.names[0]",
+					"items": [{
+						"type": "string",
+						"key": "type",
+						"id": "patient.person.names[0].type"
+					}, {
+						"type": "string",
+						"key": "value",
+						"id": "patient.person.names[0].value"
+					}]
+				}, {
+					"type": "object",
+					"key": 1,
+					"id": "patient.person.names[1]",
+					"items": [{
+						"type": "string",
+						"key": "type",
+						"id": "patient.person.names[1].type"
+					}, {
+						"type": "string",
+						"key": "value",
+						"id": "patient.person.names[1].value"
+					}]
+				}]
+			}, {
+				"type": "string",
+				"key": "date_of_birth",
+				"id": "patient.person.date_of_birth"
+			}, {
+				"type": "string",
+				"key": "gender",
+				"id": "patient.person.gender"
+			}]
+		}, {
+			"type": "object",
+			"key": "address",
+			"id": "patient.address",
+			"items": [{
+				"type": "string",
+				"key": "usage",
+				"id": "patient.address.usage"
+			}, {
+				"type": "string",
+				"key": "location",
+				"id": "patient.address.location"
+			}]
+		}]
+	}, {
+		"type": "object",
+		"key": "source",
+		"id": "source",
+		"items": [{
+			"type": "string",
+			"key": "system",
+			"id": "source.system"
+		}, {
+			"type": "string",
+			"key": "id",
+			"id": "source.id"
+		}]
+	}],
+	"map": {
+		"headers": {
+			"patient.person.usage": {
+				"headerPath": ["patient", "person", "usage"],
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.name[0]",
+					"text": "Name"
+				}, {
+					"linkid": "Patient.name[0].use",
+					"text": "Name Usage",
+					"required": true
+				}],
+				"valueType": "choice",
+				"choiceMap": {
+					"official": {
+						"code": "official",
+						"valueType": "choice"
+					}
+				}
+			},
+			"patient.person.names[0].type": {
+				"headerPath": ["patient", "person", "names", 0, "type"]
+			},
+			"patient.person.names[0].value": {
+				"headerPath": ["patient", "person", "names", 0, "value"],
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.name[0]",
+					"text": "Name"
+				}, {
+					"linkid": "Patient.name[0].family",
+					"text": "Family Name",
+					"required": true
+				}],
+				"valueType": "string"
+			},
+			"patient.person.names[1].type": {
+				"headerPath": ["patient", "person", "names", 1, "type"]
+			},
+			"patient.person.names[1].value": {
+				"headerPath": ["patient", "person", "names", 1, "value"],
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.name[0]",
+					"text": "Name"
+				}, {
+					"linkid": "Patient.name[0].given[0]",
+					"text": "Given Name(s)",
+					"required": true
+				}],
+				"valueType": "string"
+			},
+			"patient.person.date_of_birth": {
+				"headerPath": ["patient", "person", "date_of_birth"],
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.birthDate",
+					"text": "Date of Birth",
+					"required": false
+				}],
+				"valueType": "date"
+			},
+			"patient.person.gender": {
+				"headerPath": ["patient", "person", "gender"],
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.gender",
+					"text": "Gender",
+					"required": false
+				}],
+				"valueType": "choice",
+				"choiceMap": {
+					"male": {
+						"code": "male",
+						"valueType": "choice"
+					},
+					"female": {
+						"code": "female",
+						"valueType": "choice"
+					},
+					"other": {
+						"code": "other",
+						"valueType": "choice"
+					},
+					"unknown": {
+						"code": "unknown",
+						"valueType": "choice"
+					},
+					"Male": {
+						"code": "male",
+						"valueType": "choice"
+					},
+					"Female": {
+						"code": "female",
+						"valueType": "choice"
+					},
+					"Other": {
+						"code": "other",
+						"valueType": "choice"
+					},
+					"Unknown": {
+						"code": "unknown",
+						"valueType": "choice"
+					}
+				}
+			},
+			"patient.address.usage": {
+				"headerPath": ["patient", "address", "usage"],
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.address[0]",
+					"text": "Address"
+				}, {
+					"linkid": "Patient.address[0].use",
+					"text": "Address Usage",
+					"required": false
+				}],
+				"valueType": "choice",
+				"choiceMap": {
+					"home": {
+						"code": "home",
+						"valueType": "choice"
+					},
+					"work": {
+						"code": "work",
+						"valueType": "choice"
+					},
+					"temp": {
+						"code": "temp",
+						"valueType": "choice"
+					},
+					"old": {
+						"code": "old",
+						"valueType": "choice"
+					},
+					"billing": {
+						"code": "billing",
+						"valueType": "choice"
+					}
+				}
+			},
+			"patient.address.location": {
+				"headerPath": ["patient", "address", "location"],
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.address[0]",
+					"text": "Address"
+				}, {
+					"linkid": "Patient.address[0].text",
+					"text": "Address",
+					"required": false
+				}],
+				"valueType": "string"
+			},
+			"source.system": {
+				"headerPath": ["source", "system"]
+			},
+			"source.id": {
+				"headerPath": ["source", "id"]
+			}
+		},
+		"constants": {
+			"Patient.identifier[0].system": {
+				"display": "System 123",
+				"code": "System 123",
+				"valueType": "string",
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.identifier[0]",
+					"text": "Source Identifier"
+				}, {
+					"linkid": "Patient.identifier[0].system",
+					"text": "Source System",
+					"required": true
+				}]
+			},
+			"Patient.identifier[0].value": {
+				"display": "S1234",
+				"code": "S1234",
+				"valueType": "string",
+				"path": [{
+					"linkid": "Patient",
+					"text": "Patient|Primary demographic details"
+				}, {
+					"linkid": "Patient.identifier[0]",
+					"text": "Source Identifier"
+				}, {
+					"linkid": "Patient.identifier[0].value",
+					"text": "Source ID",
+					"required": true
+				}]
+			}
+		}
+	}
+}
