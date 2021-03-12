@@ -10,14 +10,15 @@ import {
   TextField,
   CircularProgress,
 } from "@material-ui/core";
+import _ from "lodash";
 
 import { Edit, Save, DeleteForever } from "@material-ui/icons";
 
 import EditCard from "./EditCard";
 import ValueMapCard from "./ValueMapCard";
 import UploadSource from "./UploadSource";
-import TreeNav from './TreeNav'
-import LogicMapDialog from './LogicMapDialog'
+import TreeNav from "./TreeNav";
+import LogicMapDialog from "./LogicMapDialog";
 
 import api from "../services/api";
 import { uploadFile } from "../services/validateFile";
@@ -26,7 +27,6 @@ import loadMapQuestionnaire from "../services/loadMapQuestionnaire";
 import loadMapFromMap from "../services/loadMapFromMap";
 
 import { stylesObj } from "../styling/stylesObj";
-import classes from '../styling/MapEdit.module.css'
 
 function pushMapBack(tempMap, mapValidity) {
   api.put("api/maps", { ...tempMap, complete: mapValidity });
@@ -112,18 +112,27 @@ function extractHeaderFromPath(path) {
   }, "");
 }
 
-function parseJSON(obj, path, map, unmappedHeaders, headersStructureOriginal) {
+function parseJSON(
+  obj,
+  path,
+  itemPath,
+  map,
+  unmappedHeaders,
+  headersStructureOriginal
+) {
   let tempMap = map;
   let tempUnmappedHeaders = unmappedHeaders;
   const headersStructure = headersStructureOriginal;
 
-  Object.keys(obj).forEach((key) => {
+  Object.keys(obj).forEach((key, index) => {
     const updatedPath = [...path, key];
     const tempType = Array.isArray(obj[key]) ? "array" : typeof obj[key];
     headersStructure.push({
       type: tempType,
       key,
       id: extractHeaderFromPath(updatedPath),
+      itemPath: [...itemPath, index],
+      path: updatedPath,
     });
     if (Array.isArray(obj[key])) {
       headersStructure[headersStructure.length - 1].items = [];
@@ -132,6 +141,8 @@ function parseJSON(obj, path, map, unmappedHeaders, headersStructureOriginal) {
           type: typeof obj[key][i],
           key: i,
           id: extractHeaderFromPath([...updatedPath, i]),
+          itemPath: [...itemPath, index, i],
+          path: updatedPath,
         };
         if (typeof obj[key][i] === "object") {
           headersStructure[headersStructure.length - 1].items[i].items = [];
@@ -139,6 +150,7 @@ function parseJSON(obj, path, map, unmappedHeaders, headersStructureOriginal) {
           [tempMap, tempUnmappedHeaders, tempHS] = parseJSON(
             obj[key][i],
             [...updatedPath, i],
+            [...itemPath, index, i],
             tempMap,
             tempUnmappedHeaders,
             tempHS
@@ -159,6 +171,7 @@ function parseJSON(obj, path, map, unmappedHeaders, headersStructureOriginal) {
       [tempMap, tempUnmappedHeaders, tempHS] = parseJSON(
         obj[key],
         updatedPath,
+        [...itemPath, index],
         tempMap,
         tempUnmappedHeaders,
         tempHS
@@ -176,6 +189,15 @@ function parseJSON(obj, path, map, unmappedHeaders, headersStructureOriginal) {
 
   return [tempMap, tempUnmappedHeaders, headersStructure];
 }
+
+const extractPathString = (itemPath) => {
+  let itemLocation = itemPath.reduce(
+    (accumulator, currentValue) => `${accumulator}[${currentValue}].items`,
+    ""
+  );
+  itemLocation = itemLocation.replace(/items$/, "logic");
+  return itemLocation;
+};
 
 class MapEdit extends Component {
   constructor(props) {
@@ -213,6 +235,8 @@ class MapEdit extends Component {
     this.handleMapNameChange = this.handleMapNameChange.bind(this);
     this.handleUpload = this.handleUpload.bind(this);
     this.handleClearLogicNode = this.handleClearLogicNode.bind(this);
+    this.handleDeleteLogicLeaf = this.handleDeleteLogicLeaf.bind(this);
+    this.handleSaveLogicNode = this.handleSaveLogicNode.bind(this);
     this.handleSetLogicNode = this.handleSetLogicNode.bind(this);
     this.processCSV = this.processCSV.bind(this);
     this.processJSON = this.processJSON.bind(this);
@@ -457,11 +481,80 @@ class MapEdit extends Component {
   }
 
   handleSetLogicNode(node) {
-    this.setState({logicMapNode: node})
+    this.setState({ logicMapNode: node });
   }
 
   handleClearLogicNode() {
-    this.setState({logicMapNode: {}})
+    this.setState({ logicMapNode: {} });
+  }
+
+  handleDeleteLogicLeaf(logic) {
+    const { map, unmappedHeaders, mapCheck } = this.state;
+    const itemLocation = extractPathString(logic.itemPath);
+    const tempMap = JSON.parse(JSON.stringify(map));
+    const tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
+    let tempCheck = JSON.parse(JSON.stringify(mapCheck));
+
+    const existingLogic = _.get(tempMap.headersStructure, itemLocation);
+    const newLogic = existingLogic.filter((l) => l.id !== logic.id);
+
+    tempCheck = removeAssociationQuestionnaire(
+      tempCheck,
+      tempMap.map.headers[logic.alias]
+    );
+
+    delete tempUnmappedHeaders[logic.alias];
+    delete tempMap.map.headers[logic.alias];
+
+    let mapValidity = false; // mapValidity false if there are unmapped headers
+    if (Object.keys(tempUnmappedHeaders).length === 0) {
+      mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
+    }
+
+    _.set(tempMap.headersStructure, itemLocation, newLogic);
+    this.setState({
+      map: tempMap,
+      unmappedHeaders: tempUnmappedHeaders,
+      mapCheck: tempCheck,
+      mapValidity,
+    });
+    pushMapBack(tempMap, mapValidity);
+  }
+
+  handleSaveLogicNode(logic) {
+    const { map, mapValidity, unmappedHeaders } = this.state;
+    const tempMap = JSON.parse(JSON.stringify(map));
+    const tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
+    const itemLocation = extractPathString(logic.itemPath);
+    const existingLogic = _.get(tempMap.headersStructure, itemLocation);
+    let newLogic = [];
+    if (existingLogic !== undefined) {
+      newLogic = existingLogic;
+    }
+    newLogic.push(logic);
+    _.set(tempMap.headersStructure, itemLocation, newLogic);
+
+    // update headers
+    const headerId = _.get(
+      tempMap.headersStructure,
+      itemLocation.replace(/.logic$/, "")
+    );
+    const headerRegEx = new RegExp(`^${headerId.id}`);
+    Object.keys(tempMap.map.headers).forEach((k) => {
+      if (k.match(headerRegEx)) delete tempMap.map.headers[k];
+    });
+    tempMap.map.headers[logic.alias] = {};
+    tempUnmappedHeaders[logic.alias] = {};
+
+    this.setState({
+      map: tempMap,
+      logicMapNode: {},
+      unmappedHeaders: tempUnmappedHeaders,
+    });
+
+    // need to add in logicLeaf and get rid of
+
+    pushMapBack(tempMap, mapValidity);
   }
 
   handleValueMap(tempHeader, tempID) {
@@ -540,9 +633,10 @@ class MapEdit extends Component {
       let tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
       const mapValidity = true;
       let headersStructure = [];
-
+      // obj, path, itemPath, map, unmappedHeaders, headersStructureOriginal
       [tempMap, tempUnmappedHeaders, headersStructure] = parseJSON(
         obj,
+        [],
         [],
         tempMap,
         tempUnmappedHeaders,
@@ -601,7 +695,8 @@ class MapEdit extends Component {
             <TreeNav
               currentHeaders={map.map.headers}
               data={map.headersStructure}
-              setNode = {this.handleSetLogicNode}
+              setNode={this.handleSetLogicNode}
+              handleDeleteLogicLeaf={this.handleDeleteLogicLeaf}
             />
           )}
         </div>
@@ -663,7 +758,8 @@ class MapEdit extends Component {
                 <div style={stylesObj.themePadding}>
                   {Object.keys(logicMapNode).length !== 0 && (
                     <LogicMapDialog
-                      handleClose = {this.handleClearLogicNode}
+                      handleClose={this.handleClearLogicNode}
+                      handleSave={this.handleSaveLogicNode}
                       node={logicMapNode}
                     />
                   )}

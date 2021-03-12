@@ -9,7 +9,7 @@ import classes from '../styling/Main.module.css'
 import config from "../../config.json";
 
 const basePath = config.base;
-
+/*
 const testNode = {key: 'names', items: [{key: "0", items:[{key: 'apples'},{key: 'pears'}]}]}
 
 export default function Main() {
@@ -20,8 +20,8 @@ export default function Main() {
     />
   )
 }
+*/
 
-/*
 export default function Main() {
   return (
     <div className={classes.Main}>
@@ -43,4 +43,3 @@ export default function Main() {
     </div>
   );
 }
-*/
