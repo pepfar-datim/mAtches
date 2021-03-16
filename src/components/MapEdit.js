@@ -491,8 +491,8 @@ class MapEdit extends Component {
   handleDeleteLogicLeaf(logic) {
     const { map, unmappedHeaders, mapCheck } = this.state;
     const itemLocation = extractPathString(logic.itemPath);
-    const tempMap = JSON.parse(JSON.stringify(map));
-    const tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
+    let tempMap = JSON.parse(JSON.stringify(map));
+    let tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
     let tempCheck = JSON.parse(JSON.stringify(mapCheck));
 
     const existingLogic = _.get(tempMap.headersStructure, itemLocation);
@@ -505,6 +505,25 @@ class MapEdit extends Component {
 
     delete tempUnmappedHeaders[logic.alias];
     delete tempMap.map.headers[logic.alias];
+
+    // need to add back non-logic items if logic is now empty
+
+    if (newLogic.length === 0) {
+      const parent = _.get(
+        tempMap.headersStructure,
+        itemLocation.replace(/.logic$/, "")
+      );
+      parent.items.forEach((outerIt) => {
+        outerIt.items.forEach((innerIt) => {
+          ({ tempMap, tempUnmappedHeaders } = processAdd(
+            tempMap,
+            tempUnmappedHeaders,
+            innerIt.id,
+            innerIt.path
+          ));
+        });
+      });
+    }
 
     let mapValidity = false; // mapValidity false if there are unmapped headers
     if (Object.keys(tempUnmappedHeaders).length === 0) {
@@ -522,13 +541,30 @@ class MapEdit extends Component {
   }
 
   handleSaveLogicNode(logic) {
-    const { map, mapValidity, unmappedHeaders } = this.state;
+    const { map, mapValidity, unmappedHeaders, mapCheck } = this.state;
     const tempMap = JSON.parse(JSON.stringify(map));
     const tempUnmappedHeaders = JSON.parse(JSON.stringify(unmappedHeaders));
+    let tempMapCheck = JSON.parse(JSON.stringify(mapCheck));
     const itemLocation = extractPathString(logic.itemPath);
     const existingLogic = _.get(tempMap.headersStructure, itemLocation);
+
     let newLogic = [];
-    if (existingLogic !== undefined) {
+
+    if (existingLogic === undefined) {
+      // clear out header associations of logic being added for first time
+      const parent = _.get(
+        tempMap.headersStructure,
+        itemLocation.replace(/.logic$/, "")
+      );
+      parent.items.forEach((outerIt) => {
+        outerIt.items.forEach((innerIt) => {
+          tempMapCheck = removeAssociationQuestionnaire(
+            tempMapCheck,
+            tempMap.map.headers[innerIt.id]
+          );
+        });
+      });
+    } else {
       newLogic = existingLogic;
     }
     newLogic.push(logic);
@@ -543,13 +579,15 @@ class MapEdit extends Component {
     Object.keys(tempMap.map.headers).forEach((k) => {
       if (k.match(headerRegEx)) delete tempMap.map.headers[k];
     });
-    tempMap.map.headers[logic.alias] = {};
+    // need header Path and logic path
+    tempMap.map.headers[logic.alias] = { logic };
     tempUnmappedHeaders[logic.alias] = {};
 
     this.setState({
       map: tempMap,
       logicMapNode: {},
       unmappedHeaders: tempUnmappedHeaders,
+      mapCheck: tempMapCheck,
     });
 
     // need to add in logicLeaf and get rid of
@@ -758,6 +796,7 @@ class MapEdit extends Component {
                 <div style={stylesObj.themePadding}>
                   {Object.keys(logicMapNode).length !== 0 && (
                     <LogicMapDialog
+                      currentHeaders={Object.keys(map.map.headers)}
                       handleClose={this.handleClearLogicNode}
                       handleSave={this.handleSaveLogicNode}
                       node={logicMapNode}

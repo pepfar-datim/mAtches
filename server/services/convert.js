@@ -22,7 +22,7 @@ var data = {
     return promise;
   },
   loadJSON: function (rawData) {
-    formattedData = JSON.parse(rawData);
+    let formattedData = JSON.parse(rawData);
     if (!Array.isArray(formattedData)) {
       formattedData = [formattedData];
     }
@@ -111,19 +111,53 @@ var data = {
       var pathsChecked = {};
 
       for (header in this.map.headers) {
-        let individualValue = accessValue(
-          this.jsonData[i],
-          this.map.headers[header].headerPath
-        );
+        let individualValue = undefined;
 
         let requiredItem =
           this.map.headers[header].path[
             this.map.headers[header].path.length - 1
           ].required || false;
 
-        if (individualValue === undefined && requiredItem) {
-          this.addError(i, header, "valueMissing");
-        } else if (individualValue) {
+        if (this.map.headers[header].logic) {
+          const filterLogic = (e, logic) => {
+            switch(logic.operator) {
+              case 'eq':
+                return e[logic.logicKey] === logic.logicCondition
+              case 'gt':
+                return e[logic.logicKey] > logic.logicCondition
+              case 'lt':
+                return e[logic.logicKey] < logic.logicCondition
+              default:
+                return true                
+            }
+          }
+
+          const relevantValues = accessValue(
+            this.jsonData[i],
+            this.map.headers[header].logic.headerPath
+          );
+         
+          const filteredValue = relevantValues.filter(el => filterLogic(el, this.map.headers[header].logic))
+
+          try {
+            individualValue = filteredValue[0][this.map.headers[header].logic.selectKey]
+          } catch {
+            if (requiredItem) {
+              this.addError(i, header, "invalidLogicPath")  
+            }           
+          }
+
+        } else {
+          individualValue = accessValue(
+            this.jsonData[i],
+            this.map.headers[header].headerPath
+          );
+          if (individualValue === undefined && requiredItem) {
+            this.addError(i, header, "valueMissing");
+          }          
+        }
+
+        if (individualValue) {
           let tempValue = {
             valueType: this.map.headers[header].valueType,
             value: individualValue,
@@ -351,7 +385,7 @@ const populateResponse = () => {
 
 const accessValue = (tempObj, path) => {
   try {
-    if (path.length == 1) {
+    if (path.length === 1) {
       return tempObj[path[0]];
     } else {
       return accessValue(tempObj[path[0]], path.slice(1));

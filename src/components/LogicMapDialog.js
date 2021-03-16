@@ -22,7 +22,7 @@ const generateUid = () => {
   const UID_LENGTH = 6;
   let uid = CHARACTERS[Math.trunc(Math.random() * (CHARACTERS.length - 11))];
 
-  for (let i = 1; i < UID_LENGTH; i +=1 ) {
+  for (let i = 1; i < UID_LENGTH; i += 1) {
     uid += CHARACTERS[Math.trunc(Math.random() * (CHARACTERS.length - 1))];
   }
   return uid;
@@ -41,7 +41,7 @@ const extractKeys = (items) => {
   return Object.keys(keys);
 };
 
-const LogicMapDialog = ({ handleClose, handleSave, node }) => {
+const LogicMapDialog = ({ currentHeaders, handleClose, handleSave, node }) => {
   const [logicKey, setLogicKey] = useState("");
   const [logicOperation, setLogicOperation] = useState("");
   const [logicCondition, setlogicCondition] = useState("");
@@ -80,6 +80,7 @@ const LogicMapDialog = ({ handleClose, handleSave, node }) => {
         logicOperation,
         selectKey
       ),
+      headerPath: node.path,
       itemPath: node.itemPath,
       id: generateUid(),
     });
@@ -92,7 +93,10 @@ const LogicMapDialog = ({ handleClose, handleSave, node }) => {
       logicKey !== "" &&
       selectKey !== ""
     ) {
-      return checkForInputError(logicCondition, logicOperation);
+      return (
+        checkForInputError(logicCondition, logicOperation) ||
+        currentHeaders.indexOf(alias) >= 0
+      );
     }
     return true;
   };
@@ -176,7 +180,10 @@ const LogicMapDialog = ({ handleClose, handleSave, node }) => {
             </div>
             <TextField
               id="alias_text_field"
-              className={classes.aliasInput}
+              error={currentHeaders.indexOf(alias) > -1}
+              helperText={
+                currentHeaders.indexOf(alias) > -1 ? "name already used" : null
+              }
               value={alias}
               onChange={(el) => setAlias(el.target.value)}
             />
@@ -204,6 +211,7 @@ const LogicMapDialog = ({ handleClose, handleSave, node }) => {
 };
 
 LogicMapDialog.propTypes = {
+  currentHeaders: PropTypes.arrayOf(PropTypes.string).isRequired,
   node: PropTypes.objectOf(PropTypes.object).isRequired,
   handleClose: PropTypes.func.isRequired,
   handleSave: PropTypes.func.isRequired,

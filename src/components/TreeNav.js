@@ -24,7 +24,9 @@ const LeafItem = ({ cHeaders, node }) => (
       <Chip
         label={node.key}
         style={
-          cHeaders[node.id].path ? stylesObj.mappedChip : stylesObj.unmappedChip
+          cHeaders[node.id] && cHeaders[node.id].path
+            ? stylesObj.mappedChip
+            : stylesObj.unmappedChip
         }
       />
     </div>
@@ -46,10 +48,7 @@ const LogicLeafItem = ({
     <Tooltip
       title={(
         <div>
-          <p>
-            Logic for
-            <strong>{parentKey}</strong>
-          </p>
+          <p>Logic for <strong>{parentKey}</strong></p>
           <p>{logic.fhirPath}</p>
         </div>
       )}
@@ -104,7 +103,7 @@ BranchItem.propTypes = {
 };
 
 const renderTree = (node, cHeaders, handleDeleteLogicLeaf, setNode) => {
-  if (node.logic) {
+  if (node.logic && node.logic.length) {
     return (
       <li>
         <BranchItem
