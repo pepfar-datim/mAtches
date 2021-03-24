@@ -16,7 +16,7 @@ mAtches is part of PEPFAR's Data Aggregation Service for Health (DASH) architect
 
 The below gif shows the basic functionality of the mAtches app and shows how a csv file can be mapped to an questionnaire which defines data requirements. Demo shows some basic error handling by showing what happens if you forget to map one of the values where the questionnaire anticipates a limited number of options.
 
-![](documentation/github-matches.gif)
+![](public/images/github-matches.gif)
 
 ## Documentation
 
