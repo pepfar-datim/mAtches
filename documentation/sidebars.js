@@ -16,7 +16,9 @@ module.exports = {
       type: 'category',
       label: 'End User',
       items: [
-        'end_user/endUserDoc',
+        'end_user/endUser-dashboard',
+        'end_user/endUser-edit',
+        'end_user/endUser-transform',
       ],
     },
     {

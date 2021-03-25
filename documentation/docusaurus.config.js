@@ -41,7 +41,7 @@ module.exports = {
             },
             {
               label: 'End User',
-              href: '/docs/end_user/endUserDoc',
+              href: '/docs/end_user/endUser-dashboard',
               type: 'doc',             
               activeSidebarClassName: 'navbar__link--active',              
             },
