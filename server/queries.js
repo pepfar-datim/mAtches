@@ -150,8 +150,11 @@ const getSpecificResource = (request, response) => {
   }
   readResource(`${config.persistencyLocation + type}/${request.params.id}.json`)
     .then((data) => {
-      if (data.data) response.status(200).json(data.data);
-      response.status(400).end("problem accessing resource");
+      if (data.data) {
+        response.status(200).json(data.data)
+      } else {
+        response.status(400).end("problem accessing resource");
+      }
     })
     .catch(() => {
       response.status(404).end("not found");
