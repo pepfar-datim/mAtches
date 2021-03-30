@@ -111,73 +111,76 @@ var data = {
       var pathsChecked = {};
 
       for (header in this.map.headers) {
-        let individualValue = undefined;
+        if (this.map.headers[header].path) {
 
-        let requiredItem =
-          this.map.headers[header].path[
-            this.map.headers[header].path.length - 1
-          ].required || false;
+          let individualValue = undefined;
 
-        if (this.map.headers[header].logic) {
-          const filterLogic = (e, logic) => {
-            switch(logic.operator) {
-              case 'eq':
-                return e[logic.logicKey] === logic.logicCondition
-              case 'gt':
-                return e[logic.logicKey] > logic.logicCondition
-              case 'lt':
-                return e[logic.logicKey] < logic.logicCondition
-              default:
-                return true                
+          let requiredItem =
+            this.map.headers[header].path[
+              this.map.headers[header].path.length - 1
+            ].required || false;
+
+          if (this.map.headers[header].logic) {
+            const filterLogic = (e, logic) => {
+              switch(logic.operator) {
+                case 'eq':
+                  return e[logic.logicKey] === logic.logicCondition
+                case 'gt':
+                  return e[logic.logicKey] > logic.logicCondition
+                case 'lt':
+                  return e[logic.logicKey] < logic.logicCondition
+                default:
+                  return true                
+              }
             }
-          }
 
-          const relevantValues = accessValue(
-            this.jsonData[i],
-            this.map.headers[header].logic.headerPath
-          );
-         
-          const filteredValue = relevantValues.filter(el => filterLogic(el, this.map.headers[header].logic))
-
-          try {
-            individualValue = filteredValue[0][this.map.headers[header].logic.selectKey]
-          } catch {
-            if (requiredItem) {
-              this.addError(i, header, "invalidLogicPath")  
-            }           
-          }
-
-        } else {
-          individualValue = accessValue(
-            this.jsonData[i],
-            this.map.headers[header].headerPath
-          );
-          if (individualValue === undefined && requiredItem) {
-            this.addError(i, header, "valueMissing");
-          }          
-        }
-
-        if (individualValue) {
-          let tempValue = {
-            valueType: this.map.headers[header].valueType,
-            value: individualValue,
-          };
-          tempValue = this.prepareTempValue(
-            this.map.headers[header].valueType,
-            tempValue,
-            i,
-            header,
-            individualValue
-          );
-          if (tempValue) {
-            this.addQRItems(
-              QR.item,
-              this.map.headers[header].path,
-              pathsChecked,
-              tempValue.value,
-              tempValue.valueType.charAt(0).toUpperCase() +
-                tempValue.valueType.slice(1)
+            const relevantValues = accessValue(
+              this.jsonData[i],
+              this.map.headers[header].logic.headerPath
             );
+           
+            const filteredValue = relevantValues.filter(el => filterLogic(el, this.map.headers[header].logic))
+
+            try {
+              individualValue = filteredValue[0][this.map.headers[header].logic.selectKey]
+            } catch {
+              if (requiredItem) {
+                this.addError(i, header, "invalidLogicPath")  
+              }           
+            }
+
+          } else {
+            individualValue = accessValue(
+              this.jsonData[i],
+              this.map.headers[header].headerPath
+            );
+            if (individualValue === undefined && requiredItem) {
+              this.addError(i, header, "valueMissing");
+            }          
+          }
+
+          if (individualValue) {
+            let tempValue = {
+              valueType: this.map.headers[header].valueType,
+              value: individualValue,
+            };
+            tempValue = this.prepareTempValue(
+              this.map.headers[header].valueType,
+              tempValue,
+              i,
+              header,
+              individualValue
+            );
+            if (tempValue) {
+              this.addQRItems(
+                QR.item,
+                this.map.headers[header].path,
+                pathsChecked,
+                tempValue.value,
+                tempValue.valueType.charAt(0).toUpperCase() +
+                  tempValue.valueType.slice(1)
+              );
+            }
           }
         }
       }
