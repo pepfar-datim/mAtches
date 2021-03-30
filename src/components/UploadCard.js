@@ -21,6 +21,7 @@ class UploadCard extends React.Component {
     super(props);
     this.state = {
       fileName: "",
+      readyToLoad: true,
       destination: "internal",
       externalURL: "",
     };
@@ -39,6 +40,7 @@ class UploadCard extends React.Component {
   setInitialState() {
     this.setState({
       finishedUploading: false,
+      readyToLoad: true,
       data: { resourceType: undefined },
       errors: {},
       invalidHeaders: [],
@@ -48,6 +50,7 @@ class UploadCard extends React.Component {
   }
 
   uploadCallback(dataFile) {
+    this.setState({readyToLoad: false})
     const { map } = this.props;
     const { destination, externalURL } = this.state;
     let dataSummary = {};
@@ -96,6 +99,7 @@ class UploadCard extends React.Component {
         missingHeaders: dataSummary.missingHeaders,
       });
     }
+    this.setState({ readyToLoad: true });
   }
 
   upload(e) {
@@ -150,18 +154,23 @@ class UploadCard extends React.Component {
             >
               <PublishIcon />
             </IconButton>
-            <form style={stylesObj.hidden}>
-              <input
-                type="file"
-                accept={`.${map.fileType || "csv"}`}
-                ref={(form) => {
-                  targetForm = form;
-                }}
-                onChange={(ev) => {
-                  this.upload(ev);
-                }}
-              />
-            </form>
+            {this.state.readyToLoad &&
+              (
+              <form style={stylesObj.hidden}>
+                <input
+                  type="file"
+                  accept={`.${map.fileType || "csv"}`}
+                  ref={(form) => {
+                    targetForm = form;
+                  }}
+                  name={this.state.fileName}
+                  onChange={(ev) => {
+                    this.upload(ev);
+                  }}
+                />
+              </form>
+              )
+            }
             {finishedUploading && (
               <ValidationCard
                 errors={errors}
