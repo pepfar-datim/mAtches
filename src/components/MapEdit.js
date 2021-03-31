@@ -418,7 +418,11 @@ class MapEdit extends Component {
       currentAssociation !== event.target.value
     ) {
       tempMap.map.headers[currentAssociation] = {};
-      tempUnmappedHeaders[currentAssociation] = {};
+      // only move currentAssociation to unmapped if csv
+      if (!tempMap.fileType || tempMap.fileType === 'csv') {
+        tempUnmappedHeaders[currentAssociation] = {};  
+      }
+      
     }
 
     // clear out assocation in flat questionnaire
@@ -435,8 +439,10 @@ class MapEdit extends Component {
       tempCheck.flatQuestionnaire[event.target.name].valueType;
     delete tempUnmappedHeaders[event.target.value];
     let mapValidity = false; // assume false until proven otherwise
+    console.log('time to check map validity?', Object.keys(tempUnmappedHeaders))
     if (Object.keys(tempUnmappedHeaders).length === 0) {
       mapValidity = checkValidity(tempCheck.flatQuestionnaire, tempMap.map);
+      console.log(mapValidity)
     }
     this.setState({
       mapCheck: tempCheck,
