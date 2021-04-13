@@ -10,7 +10,7 @@ module.exports = {
   organizationName: 'pepfar-datim', // Usually your GitHub org/user name.
   projectName: 'mAtches', // Usually your repo name.
   url: 'https://pepfar-datim.github.io',
-  baseUrl: '/mAtches/documentation/',
+  baseUrl: '/mAtches/',
   themeConfig: {
     colorMode: {
       defaultMode: 'light',

@@ -9,3 +9,7 @@ mAtches is written in JavaScript and currently uses a React-based front end and 
 mAtches also interacts with a FHIR Server which stores relevant FHIR Questionnaires and with [Open Concept Lab](https://www.openconceptlab.org/) (OCL) which is used to store finalized maps and make them accessible to downstream processes.
 
 The current setup of the interaction between locations and resources can be summarized with the below simplified sequence diagram:
+
+![](/img/technical/technical-architecture/current-sequence-diagram.png)
+
+Communications with OCL are currently limited to pushing finalized maps. We are exploring ways of further integrating with OCL and determining whether that integration should be optional or standard. Based on the decisions here, mAtches' interaction with OCL would be expanded to provide more robust and reliable communication with OCL.

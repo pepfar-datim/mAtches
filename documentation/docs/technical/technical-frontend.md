@@ -17,6 +17,10 @@ There are two main views for a user to interact
 
 A dashboard/main page where users can see list of current maps and add new maps for available questionnaires:
 
+![](/img/technical/technical-frontend/dashboard-view.png)
+
 An Individual Map Edit page where users create/edit their mappings:
+
+![](/img/technical/technical-frontend/edit-view.png)
 
 mAtches is intended to be accessible to users with limited technical expertise and as such implements visual messaging through a variety of approaches including warning messages, color coding, and tooltips to provide additional explanation. As a proof-of-concept project, design principles have not been developed, nor have accessibility guidelines been followed.

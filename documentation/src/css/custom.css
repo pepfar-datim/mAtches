@@ -28,29 +28,3 @@
   background-color: var(--ifm-color-primary-light);
   border: 0px;
 }
-/*
-.navbar {
-  background-color: var(--ifm-color-primary);
-  box-shadow: 0px;
-}
-
-.navbar a {
-  color: white;
-}
-
-.navbar a:hover {
-  color: black;
-}
-
-.dropdown__menu a {
-  color: var(--ifm-color-primary);
-}
-
-.dropdown__menu a:hover {
-  color: black;
-}
-
-.navbar__link a {
-  color: black !important;
-}
-*/
