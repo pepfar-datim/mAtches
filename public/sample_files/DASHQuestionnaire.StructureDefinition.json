@@ -1,0 +1,88 @@
+{
+  "resourceType": "StructureDefinition",
+  "url": "http://example.org/fhir/StructureDefinition/DASHQuestionnaire",
+  "name": "DASHQuestionnaire",
+  "status": "draft",
+  "fhirVersion": "4.0.1",
+  "mapping": [
+    {
+      "identity": "workflow",
+      "uri": "http://hl7.org/fhir/workflow",
+      "name": "Workflow Pattern"
+    },
+    {
+      "identity": "rim",
+      "uri": "http://hl7.org/v3",
+      "name": "RIM Mapping"
+    },
+    {
+      "identity": "w5",
+      "uri": "http://hl7.org/fhir/fivews",
+      "name": "FiveWs Pattern Mapping"
+    },
+    {
+      "identity": "objimpl",
+      "uri": "http://hl7.org/fhir/object-implementation",
+      "name": "Object Implementation Information"
+    },
+    {
+      "identity": "v2",
+      "uri": "http://hl7.org/v2",
+      "name": "HL7 v2 Mapping"
+    }
+  ],
+  "kind": "resource",
+  "abstract": false,
+  "type": "Questionnaire",
+  "baseDefinition": "http://hl7.org/fhir/StructureDefinition/Questionnaire",
+  "derivation": "constraint",
+  "differential": {
+    "element": [
+      {
+        "id": "Questionnaire.name",
+        "path": "Questionnaire.name",
+        "min": 1
+      },
+      {
+        "id": "Questionnaire.item",
+        "path": "Questionnaire.item",
+        "min": 1
+      },
+      {
+        "id": "Questionnaire.item.text",
+        "path": "Questionnaire.item.text",
+        "min": 1
+      },
+      {
+        "id": "Questionnaire.item.enableWhen",
+        "path": "Questionnaire.item.enableWhen",
+        "max": "0"
+      },
+      {
+        "id": "Questionnaire.item.enableBehavior",
+        "path": "Questionnaire.item.enableBehavior",
+        "max": "0"
+      },
+      {
+        "id": "Questionnaire.item.repeats",
+        "path": "Questionnaire.item.repeats",
+        "max": "0"
+      },
+      {
+        "id": "Questionnaire.item.readOnly",
+        "path": "Questionnaire.item.readOnly",
+        "max": "0"
+      },
+      {
+        "id": "Questionnaire.item.maxLength",
+        "path": "Questionnaire.item.maxLength",
+        "max": "0"
+      },
+      {
+        "id": "Questionnaire.item.initial",
+        "path": "Questionnaire.item.initial",
+        "max": "0"
+      }
+    ]
+  }
+}
