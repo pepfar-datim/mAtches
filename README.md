@@ -20,7 +20,7 @@ The below gif shows the basic functionality of the mAtches app and shows how a c
 
 ## Documentation
 
-We are currently working on consolidating existing technical and user documentation; we have as a goal to release this to the community by end of March 2021. Concurrently, we are working on writing a FHIR ImplementationGuide.
+Documentation, both technical and end-user, is available at: https://pepfar-datim.github.io/mAtches/. We are currently working on writing a FHIR ImplementationGuide, which will detail use of FHIR resources and also include technical documentation.
 
 ## Roadmap
 
