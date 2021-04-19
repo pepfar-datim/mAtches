@@ -3,12 +3,11 @@ module.exports = {
   title: 'mAtches',
   tagline: 'Your data. On FHIR.',
   url: 'https://github.com/pepfar-datim/mAtches',
-  baseUrl: '/',
   onBrokenLinks: 'throw',
   onBrokenMarkdownLinks: 'warn',
   favicon: 'img/match_color.png',
-  organizationName: 'pepfar-datim', // Usually your GitHub org/user name.
-  projectName: 'mAtches', // Usually your repo name.
+  organizationName: 'pepfar-datim',
+  projectName: 'mAtches',
   url: 'https://pepfar-datim.github.io',
   baseUrl: '/mAtches/',
   themeConfig: {
@@ -113,13 +112,11 @@ module.exports = {
       {
         docs: {
           sidebarPath: require.resolve('./sidebars.js'),
-          // Please change this to your repo.
           editUrl:
             'https://github.com/pepfar-datim/mAtches/edit/master/documentation/',
         },
         blog: {
           showReadingTime: true,
-          // Please change this to your repo.
           editUrl:
             'https://github.com/pepfar-datim/mAtches/edit/master/documentation/blog/',
         },
