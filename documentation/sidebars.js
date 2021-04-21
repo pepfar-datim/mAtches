@@ -5,9 +5,10 @@ module.exports = {
       label: 'Technical',
       items: [
         'technical/technical-architecture',
-        'technical/technical-resources',
         'technical/technical-frontend',
         'technical/technical-backend',
+        'technical/technical-resources',
+        'technical/technical-map-file',
         'technical/technical-usermanagement',
         'technical/technical-deployment',
       ],
