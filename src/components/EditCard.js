@@ -241,7 +241,7 @@ class EditCard extends React.Component {
 
     const mapUnchanged = JSON.stringify(submittedMap) === JSON.stringify(map);
     const buttonDisabled =
-      Object.keys(unmappedHeaders).length > 0 ||
+      (Object.keys(unmappedHeaders).length > 0 && map.fileType !== "json") ||
       !mapValidity ||
       buttonDelay ||
       mapUnchanged;
