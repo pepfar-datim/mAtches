@@ -217,6 +217,7 @@ class MapEdit extends Component {
       headerUsed: false,
       fileError: false,
       logicMapNode: {},
+      failedToLoad: false,
     };
     this.checkMapName = this.checkMapName.bind(this);
     this.clearJSON = this.clearJSON.bind(this);
@@ -792,7 +793,7 @@ class MapEdit extends Component {
           <>
             {failedToLoad ? (
               <>
-                <Typography>{failedToLoad}</Typography>
+                <Typography>The requested map was not found</Typography>
               </>
             ) : (
               <>
