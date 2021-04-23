@@ -1,77 +1,79 @@
 {
-  "name": "mAtches",
-  "version": "0.5.0",
-  "buildDate": "2020-09-04T12:18:22.173Z",
-  "description": "proof of concept for mAppr",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/pepfar-datim/mAtches"
-  },
-  "author": {
-    "name": "Thomas Zemp",
-    "email": "tzemp@baosystems.com"
-  },
-  "contributors": [
-    {
-      "name": "Vlad Shioshvili",
-      "email": "Vladimer.Shioshvili@icf.com"
-    }
-  ],
-  "main": "index.js",
-  "dependencies": {
-    "@material-ui/core": "^4.11.2",
-    "@material-ui/icons": "^4.2.1",
-    "@material-ui/lab": "^4.0.0-alpha.57",
-    "@material-ui/system": "^4.3.3",
-    "csv": "^5.3.2",
-    "date-fns": "^2.0.0-beta.3",
-    "express": "^4.17.1",
-    "file-loader": "^5.0.2",
-    "lodash": "^4.17.21",
-    "material-table": "^1.50.0",
-    "material-ui-chip-input": "^2.0.0-beta.1",
-    "moment": "^2.24.0",
-    "node-fetch": "^2.6.0",
-    "path": "^0.12.7",
-    "pg": "^7.12.1",
-    "prop-types": "^15.7.2",
-    "query-string": "^6.14.0",
-    "react": "^16.9.0",
-    "react-debounce-input": "^3.2.2",
-    "react-dom": "^16.9.0",
-    "react-router-dom": "^5.0.1"
-  },
-  "scripts": {
-    "start": "npm-run-all --parallel watch:server watch:build",
-    "watch:build": "webpack --mode development --watch",
-    "watch:server": "nodemon ./server/server.js",
-    "dev": "webpack --mode development && nodemon ./server/server.js",
-    "build": "webpack --mode production",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "devDependencies": {
-    "@babel/core": "^7.5.5",
-    "@babel/preset-env": "^7.5.5",
-    "@babel/preset-react": "^7.0.0",
-    "babel-eslint": "^10.1.0",
-    "babel-loader": "^8.0.6",
-    "css-loader": "^5.1.1",
-    "cypress": "^3.8.3",
-    "eslint": "^7.2.0",
-    "eslint-config-airbnb": "^18.2.1",
-    "eslint-config-prettier": "^7.0.0",
-    "eslint-loader": "^4.0.2",
-    "eslint-plugin-import": "^2.22.1",
-    "eslint-plugin-jsx-a11y": "^6.4.1",
-    "eslint-plugin-prettier": "^3.3.0",
-    "eslint-plugin-react": "^7.21.5",
-    "eslint-plugin-react-hooks": "^4.0.0",
-    "html-webpack-plugin": "^3.2.0",
-    "nodemon": "^1.19.1",
-    "npm-run-all": "^4.1.5",
-    "prettier": "2.2.1",
-    "style-loader": "^2.0.0",
-    "webpack": "^4.39.2",
-    "webpack-cli": "^3.3.6"
-  }
+   "name": "mAtches",
+   "version": "0.5.0",
+   "buildDate": "2021-04-23T15:21:17.883Z",
+   "description": "proof of concept for mAppr",
+   "repository": {
+      "type": "git",
+      "url": "https://github.com/pepfar-datim/mAtches"
+   },
+   "author": {
+      "name": "Thomas Zemp",
+      "email": "tzemp@baosystems.com"
+   },
+   "contributors": [
+      {
+         "name": "Vlad Shioshvili",
+         "email": "Vladimer.Shioshvili@icf.com"
+      }
+   ],
+   "main": "index.js",
+   "dependencies": {
+      "@material-ui/core": "^4.11.2",
+      "@material-ui/icons": "^4.2.1",
+      "@material-ui/lab": "^4.0.0-alpha.57",
+      "@material-ui/system": "^4.3.3",
+      "csv": "^5.3.2",
+      "date-fns": "^2.0.0-beta.3",
+      "express": "^4.17.1",
+      "file-loader": "^5.0.2",
+      "lodash": "^4.17.21",
+      "material-table": "^1.50.0",
+      "material-ui-chip-input": "^2.0.0-beta.1",
+      "moment": "^2.24.0",
+      "node-fetch": "^2.6.0",
+      "path": "^0.12.7",
+      "pg": "^7.12.1",
+      "prop-types": "^15.7.2",
+      "query-string": "^6.14.0",
+      "react": "^16.9.0",
+      "react-debounce-input": "^3.2.2",
+      "react-dom": "^16.9.0",
+      "react-router-dom": "^5.0.1"
+   },
+   "scripts": {
+      "start": "npm-run-all --parallel watch:server watch:build",
+      "watch:build": "webpack --mode development --watch",
+      "watch:server": "nodemon ./server/server.js",
+      "dev": "webpack --mode development && nodemon ./server/server.js",
+      "build": "npm run updateCommit && webpack --mode production",
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "updateCommit": "node scripts/updateCommit.js"
+   },
+   "devDependencies": {
+      "@babel/core": "^7.5.5",
+      "@babel/preset-env": "^7.5.5",
+      "@babel/preset-react": "^7.0.0",
+      "babel-eslint": "^10.1.0",
+      "babel-loader": "^8.0.6",
+      "css-loader": "^5.1.1",
+      "cypress": "^3.8.3",
+      "eslint": "^7.2.0",
+      "eslint-config-airbnb": "^18.2.1",
+      "eslint-config-prettier": "^7.0.0",
+      "eslint-loader": "^4.0.2",
+      "eslint-plugin-import": "^2.22.1",
+      "eslint-plugin-jsx-a11y": "^6.4.1",
+      "eslint-plugin-prettier": "^3.3.0",
+      "eslint-plugin-react": "^7.21.5",
+      "eslint-plugin-react-hooks": "^4.0.0",
+      "html-webpack-plugin": "^3.2.0",
+      "nodemon": "^1.19.1",
+      "npm-run-all": "^4.1.5",
+      "prettier": "2.2.1",
+      "style-loader": "^2.0.0",
+      "webpack": "^4.39.2",
+      "webpack-cli": "^3.3.6"
+   },
+   "commitHash": "1999eebe"
 }

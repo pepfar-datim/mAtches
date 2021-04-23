@@ -64,6 +64,7 @@ const getAbout = (request, response) => {
   const aboutInfo = {
     appName: aboutPackage.name,
     version: aboutPackage.version,
+    commit: aboutPackage.commitHash,
     buildDate: aboutPackage.buildDate,
     repository: aboutPackage.repository,
   };
