@@ -666,7 +666,7 @@ class MapEdit extends Component {
                         <Card style={stylesObj.sideCard} wrap="wrap">
                           <div style={stylesObj.themePadding}>
                             <Typography variant="h6">
-                              <span style={stylesObj.textBold}>Map name: </span>
+                              <span style={stylesObj.textBold}>Map Name: </span>
 
                               {!editingName && (
                                 <>
@@ -721,7 +721,7 @@ class MapEdit extends Component {
                               style={stylesObj.mapTextEnd}
                             >
                               <span style={stylesObj.textBold}>
-                                file type:&nbsp;
+                                File Type:&nbsp;
                               </span>
                               {map.fileType}
                             </Typography>

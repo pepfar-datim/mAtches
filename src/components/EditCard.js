@@ -65,6 +65,7 @@ const formatQuestions = (
 ) =>
   Object.keys(mapCheck.flatQuestionnaire).map((k) => {
     // let mappedToConstant = !!((Object.keys(mapCheck.flatQuestionnaire[k].constant) || '').length);
+    console.log(mapCheck.flatQuestionnaire)
     const mappedToConstant = !!Object.keys(
       mapCheck.flatQuestionnaire[k].constant || {}
     ).length;
@@ -84,10 +85,19 @@ const formatQuestions = (
                   : stylesObj.incompleteQuestion
               }
             >
-              <strong>
-                {mapCheck.flatQuestionnaire[k].required && "* "}
-                {mapCheck.flatQuestionnaire[k].text}
-              </strong>
+              <Tooltip arrow title={
+                <React.Fragment>
+                  <p><b>Name:</b> {mapCheck.flatQuestionnaire[k].text}</p>
+                  <p><b>Value Type:</b> {mapCheck.flatQuestionnaire[k].valueType}</p>
+                  <p><b>Required:</b> {mapCheck.flatQuestionnaire[k].required ? "True" : "False"}</p>
+                  <p><b>Mapped:</b> {mapCheck.flatQuestionnaire[k].header}</p>
+                </React.Fragment>
+              }>
+                <strong>
+                  {mapCheck.flatQuestionnaire[k].required && "* "}
+                  {mapCheck.flatQuestionnaire[k].text}
+                </strong>
+              </Tooltip>
               {!mappedToConstant && (
                 <Tooltip title="Replace this item with a constant value">
                   <IconButton
@@ -227,6 +237,7 @@ class EditCard extends React.Component {
       onValueMap,
       unmappedHeaders,
     } = this.props;
+
     const {
       buttonDelay,
       constantDialogOpen,
@@ -255,8 +266,8 @@ class EditCard extends React.Component {
             <strong>Map Source Headers to Target Questions</strong>
           </Typography>
           <Typography variant="body1" style={stylesObj.marginQuarterBottom}>
-            <strong>*</strong>
-            denotes required item
+            <strong>*&nbsp;</strong>
+            Denotes Required Item
           </Typography>
 
           <RequiredNonRequiredSelector
@@ -275,7 +286,8 @@ class EditCard extends React.Component {
                   constantChange,
                   this.setConstantDialogOpen,
                   itemVisibility
-                )}
+                )
+                }
               </div>
             )}
           </div>
