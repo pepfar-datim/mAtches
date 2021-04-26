@@ -65,6 +65,7 @@ const formatQuestions = (
 ) =>
   Object.keys(mapCheck.flatQuestionnaire).map((k) => {
     // let mappedToConstant = !!((Object.keys(mapCheck.flatQuestionnaire[k].constant) || '').length);
+    console.log(mapCheck.flatQuestionnaire)
     const mappedToConstant = !!Object.keys(
       mapCheck.flatQuestionnaire[k].constant || {}
     ).length;
@@ -84,7 +85,14 @@ const formatQuestions = (
                   : stylesObj.incompleteQuestion
               }
             >
-              <Tooltip title="Some Details">
+              <Tooltip title={
+                <React.Fragment>
+                  <p><b>Name:</b> {mapCheck.flatQuestionnaire[k].text}</p>
+                  <p><b>Value Type:</b> {mapCheck.flatQuestionnaire[k].valueType}</p>
+                  <p><b>Required:</b> {mapCheck.flatQuestionnaire[k].required ? "True" : "False"}</p>
+                  <p><b>Mapped:</b> {mapCheck.flatQuestionnaire[k].header ? mapCheck.flatQuestionnaire[k].header : mapCheck.flatQuestionnaire[k].constant}</p>
+                </React.Fragment>
+              }>
                 <strong>
                   {mapCheck.flatQuestionnaire[k].required && "* "}
                   {mapCheck.flatQuestionnaire[k].text}
