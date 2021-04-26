@@ -85,12 +85,12 @@ const formatQuestions = (
                   : stylesObj.incompleteQuestion
               }
             >
-              <Tooltip title={
+              <Tooltip arrow title={
                 <React.Fragment>
                   <p><b>Name:</b> {mapCheck.flatQuestionnaire[k].text}</p>
                   <p><b>Value Type:</b> {mapCheck.flatQuestionnaire[k].valueType}</p>
                   <p><b>Required:</b> {mapCheck.flatQuestionnaire[k].required ? "True" : "False"}</p>
-                  <p><b>Mapped:</b> {mapCheck.flatQuestionnaire[k].header ? mapCheck.flatQuestionnaire[k].header : mapCheck.flatQuestionnaire[k].constant}</p>
+                  <p><b>Mapped:</b> {mapCheck.flatQuestionnaire[k].header}</p>
                 </React.Fragment>
               }>
                 <strong>
