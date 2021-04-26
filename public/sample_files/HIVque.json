@@ -10,8 +10,8 @@
 		"meta": {
 			"profile": ["http://hl7.org/fhir/uv/sdc/StructureDefinition/sdc-questionnaire-extract"]
 		},
-		"name": "PLM HIV Questionnaire",
-		"title": "PLM Questionnaire - HIV",
+		"name": "PLMHIVQuestionnaire",
+		"title": "PLM Prototype Questionnaire - HIV",
 		"status": "active",
 		"item": [{
 			"linkId": "/Patient",

@@ -84,10 +84,12 @@ const formatQuestions = (
                   : stylesObj.incompleteQuestion
               }
             >
-              <strong>
-                {mapCheck.flatQuestionnaire[k].required && "* "}
-                {mapCheck.flatQuestionnaire[k].text}
-              </strong>
+              <Tooltip title="Some Details">
+                <strong>
+                  {mapCheck.flatQuestionnaire[k].required && "* "}
+                  {mapCheck.flatQuestionnaire[k].text}
+                </strong>
+              </Tooltip>
               {!mappedToConstant && (
                 <Tooltip title="Replace this item with a constant value">
                   <IconButton
@@ -227,6 +229,7 @@ class EditCard extends React.Component {
       onValueMap,
       unmappedHeaders,
     } = this.props;
+
     const {
       buttonDelay,
       constantDialogOpen,
@@ -255,8 +258,8 @@ class EditCard extends React.Component {
             <strong>Map Source Headers to Target Questions</strong>
           </Typography>
           <Typography variant="body1" style={stylesObj.marginQuarterBottom}>
-            <strong>*</strong>
-            denotes required item
+            <strong>*&nbsp;</strong>
+            Denotes Required Item
           </Typography>
 
           <RequiredNonRequiredSelector
@@ -275,7 +278,8 @@ class EditCard extends React.Component {
                   constantChange,
                   this.setConstantDialogOpen,
                   itemVisibility
-                )}
+                )
+                }
               </div>
             )}
           </div>
