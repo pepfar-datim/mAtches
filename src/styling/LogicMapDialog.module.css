@@ -1,0 +1,43 @@
+.aliasSubheader {
+	display: flex;
+	padding-top: 32px;
+	padding-bottom: 8px;
+}
+
+.aliasInput {
+	width: 300px;
+	padding-left: 16px;
+}
+
+.logicDialogContent {
+	color: dimGrey;
+}
+
+.logicSelectorContainer {
+	display: flex;
+	padding-bottom: 32px;
+}
+
+.logicSelectorSubheader {
+	display: flex;
+	padding-bottom: 8px;
+}
+
+.logicSelectorText {
+	align-self: center;
+	margin-right: 16px;
+}
+
+.logicSelectorSelect {
+	width: 200px;
+}
+
+.logicSelectorInput {
+	width: 200px;
+	padding-left: 16px;
+}
+
+.saveButton {
+	text-transform: "none";
+    background-color: steelBlue;
+}

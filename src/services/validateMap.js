@@ -1,5 +1,4 @@
 function validateMap(map, questionnaire) {
-  console.log(JSON.stringify(questionnaire));
   let flatQuestionnaire = {};
   const path = [];
   flatQuestionnaire = generateFlatQuestionnaire(

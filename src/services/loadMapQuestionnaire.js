@@ -18,6 +18,10 @@ function getSpecificMap(id, _this) {
     })
     .then((questionnaireUID) => {
       getSpecificQuestionnaire(questionnaireUID, _this);
+    })
+
+    .catch((e) => {
+      _this.setState({ failedToLoad: true, loading: false });
     });
 }
 

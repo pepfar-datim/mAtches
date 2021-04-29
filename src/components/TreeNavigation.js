@@ -21,12 +21,31 @@ export default function TreeNavigation(props) {
   const { currentHeaders, data } = props;
   const classes = useStyles();
 
-  const renderTree = (nodes, cHeaders) =>
-    nodes.items ? (
-      <TreeItem key={nodes.key} nodeId={nodes.id} label={`${nodes.key}_logic`}>
-        {nodes.items.map((node) => renderTree(node, cHeaders))}
-      </TreeItem>
-    ) : (
+  const renderTree = (nodes, cHeaders) => {
+    if (nodes.logic) {
+      console.log('logic here!' + JSON.stringify(nodes))
+      return (
+        <div>
+          <Chip
+            label='logic node'
+            style={
+              cHeaders[nodes.id].path
+                ? stylesObj.mappedChip
+                : stylesObj.unmappedChip
+            }
+          />
+        </div>
+      )
+    
+    }
+    if (nodes.items) {
+      return (
+        <TreeItem key={nodes.key} nodeId={nodes.id} label={`${nodes.key}`}>
+          {nodes.items.map((node) => renderTree(node, cHeaders))}
+        </TreeItem>
+      )
+    }
+    return (
       <div>
         <Chip
           label={nodes.key}
@@ -37,7 +56,8 @@ export default function TreeNavigation(props) {
           }
         />
       </div>
-    );
+    )
+  }
 
   return (
     <TreeView

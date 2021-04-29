@@ -1,0 +1,5 @@
+.jsonStructurePresentation {
+	display: flex;
+	flex-direction: column;
+	align-self: right;
+}

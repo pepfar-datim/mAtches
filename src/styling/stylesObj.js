@@ -9,6 +9,7 @@ var themeColors = {
   success: "darkSeaGreen",
   warning: "lightYellow",
   white: "white",
+  black: "black",
 };
 
 var themeSettings = {
@@ -102,6 +103,21 @@ var stylesObj = {
     marginLeft: "50%",
     marginTop: "20%",
   },
+  logicSaveButton: {
+    textTransform: "none",
+    backgroundColor: themeColors.primaryDark,
+    color: themeColors.white,
+  },
+  logicSaveButtonDisabled: {
+    textTransform: "none",
+    backgroundColor: themeColors.secondaryDark,
+    color: themeColors.white,
+  },  
+  logicCancelButton: {
+    textTransform: "none",
+    backgroundColor: themeColors.white,
+    border: "1px solid darkGrey"
+  },  
   mainCard: {
     backgroundColor: "lightGrey",
     height: "100%",

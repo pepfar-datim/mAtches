@@ -23,6 +23,11 @@ function formatErrors(errors) {
           {errors[key].invalidValueType.join(", ")}
         </Typography>
       )}
+      {errors[key].invalidLogicPath && (
+        <Typography variant="body1" style={stylesObj.validationErrorText}>
+          Specified logic did not return any values
+        </Typography>
+      )}
     </div>
   ));
 }

@@ -12,6 +12,15 @@ function checkFQ(flatQuestionnaire, path, linkid) {
   return validity;
 }
 
+function checkAssignedToConstant(newMap, linkid) {
+  // could also use optional chaining with update to babel configuration
+  if (!newMap.map.constants) {
+    return false
+  }
+  return !!newMap.map.constants[linkid]
+
+}
+
 function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {
   const returnObj = {};
   for (const header in baseMap.map.headers) {
@@ -28,7 +37,9 @@ function loadMapFromMap(flatQuestionnaire, baseMap, newMap, unmappedHeaders) {
         linkid
       );
 
-      if (match) {
+      const assignedToConstant = checkAssignedToConstant(newMap, linkid);
+
+      if (match && !assignedToConstant) {
         // if there is a match to Questionnaire, copy properties from Base Map and make association
         const propertiesToCopy = ["path", "valueType", "choiceMap"];
         for (let i = 0; i < propertiesToCopy.length; i++) {
