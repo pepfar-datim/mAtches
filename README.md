@@ -34,7 +34,7 @@ Documentation, both technical and end-user, is available at: https://pepfar-dati
 
 ## Running mAtches locally
 
-A. Clone repo
+A. Clone repo.
 mAtches App is configured to run on port 5001, to change this, edit [line 10 of config.json](config.json#L10) file
 
 B.1 Update config.json file
@@ -75,9 +75,9 @@ C. Set up and start frontend
 4. Confirm mAtches app has started properly by
 
    - 4.1 Confirm the terminal is showing a similar message `App running on port 5001`.
-   - 4.2 Open a browser and search for http://localhost:5001/maps/
+   - 4.2 Open a browser and search for `base:port` by default that would be http://localhost:5001/
    ![](public/images/matchesWelcomePage.png)
-   - 4.3 Confirm if step B2 is setup properly By clicking on mAtches logo or the home icon if the link reloads the above page, the setup is successful. If not, make sure 
+   - 4.3 Confirm if step B2 is setup properly by clicking on mAtches logo or the home icon if the link reloads the above page, the setup is successful.
 
 
 
