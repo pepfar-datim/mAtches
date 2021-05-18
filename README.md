@@ -87,19 +87,19 @@ D. Troubleshooting
 - `file not readable` Error - 
 If you see an error similar to the following in the terminal. Please make sure you setup step `B.2` properly.
         
-      ```
-      [Error: ENOENT: no such file or directory, open '/usr/local/mAtches/data/maps.json'] {
-         errno: -2,
-         code: 'ENOENT',
-         syscall: 'open',
-         path: '/usr/local/mAtches/data/maps.json'
-         }
-         /mAtches/server/queries.js:34
-         reject(new Error("file not readable"));
-                  ^
-      Error: file not readable
-      at ReadFileContext.callback (/mAtches/server/queries.js:34:16)
-      at FSReqCallback.readFileAfterOpen [as oncomplete] (node:fs:284:13)
-      [nodemon] app crashed - waiting for file changes before starting...
+   ```
+   [Error: ENOENT: no such file or directory, open '/usr/local/mAtches/data/maps.json'] {
+      errno: -2,
+      code: 'ENOENT',
+      syscall: 'open',
+      path: '/usr/local/mAtches/data/maps.json'
+      }
+      /mAtches/server/queries.js:34
+      reject(new Error("file not readable"));
+               ^
+   Error: file not readable
+   at ReadFileContext.callback (/mAtches/server/queries.js:34:16)
+   at FSReqCallback.readFileAfterOpen [as oncomplete] (node:fs:284:13)
+   [nodemon] app crashed - waiting for file changes before starting...
 
-      ``` 
+   ``` 
