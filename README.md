@@ -34,10 +34,10 @@ Documentation, both technical and end-user, is available at: https://pepfar-dati
 
 ## Running mAtches locally
 
-A. Fork repo
-App is configured to run on port 5001, to change this, edit line 10 of the [config.json](config.json) file
+A. Clone repo.
+mAtches App is configured to run on port 5001, to change this, edit [line 10 of config.json](config.json#L10) file
 
-B. Update config.json file
+B.1 Update config.json file
 Change any settings (organization name, appName, FHIR Server) in the [config.json](config.json) file. A summary of configuration options is provided below:
 
 - _base_: If this is "/", mAtches will run at http://localhost:5001/. If this is "/some/other/extension/", mAtches will run at http://localhost:5001/some/other/extension/. Should end in `/`.
@@ -49,11 +49,14 @@ Change any settings (organization name, appName, FHIR Server) in the [config.jso
 - _fhirServer_: FHIR server where questionnaires are stored. Should end in `/`. Should end in `/`. You can use the default here for sandbox testing.
 - _persistencyLocation_: Where maps are persisted locally before they are submitted to external location. Should end in `/`. See notes below for further details on configuring this.
 
-Note on persistency location: the default here is `/usr/local/mAtches/data/`. Regardless of whether you use this default persistency location, or if you choose to configure another location, **you must create a `maps` subdirectory within this location and initiate an empty maps.json file within that `maps` subdirectory.**
+B.2 Create `maps` folder and an empty json file `maps/maps.json` in _persistencyLocation_ : 
+
+The default location of _persistencyLocation_ in [config.json](config.json#L9) is `/usr/local/mAtches/data/`. Regardless of whether you use this default persistency location, or if you choose to configure another location, **you must create a `maps` subdirectory within this location and initiate an empty maps.json file within that `maps` subdirectory.**
 
 If you are using a Unix machine, the following commands can be used to set up the persistency storage (assuming you already have a `/usr/local` directory and wish to use the default location). Note that depending on your settings you may need to run some or all of these commands with `sudo ` before the beginning of the command.
 
-```cd /usr/local/ #go to /usr/local/
+```bash
+cd /usr/local/ #go to /usr/local/
 mkdir mAtches && cd $_ #create mAtches directory and go there
 mkdir data && cd $_ #create data subdirectory and go there
 mkdir maps #create maps subdirectory
@@ -64,8 +67,39 @@ echo "{}" > maps/maps.json #create empty maps.json file
 C. Set up and start frontend
 <br/>
 
-1. Install dependencies
-   `npm install`
+1. Make sure you are in the root directory of mAtches repo you have cloned in `Step A`
+2. Install dependencies `npm install`
 
-2. Run app
-   `npm start`
+3. Run app `npm start`
+
+4. Confirm mAtches app has started properly by
+
+   - 4.1 Confirm the terminal is showing a similar message `App running on port 5001`.
+   - 4.2 Open a browser and search for `base:port` by default that would be http://localhost:5001/
+   ![](public/images/matchesWelcomePage.png)
+   - 4.3 Confirm if step B2 is setup properly by clicking on mAtches logo or the home icon if the link reloads the above page, the setup is successful.
+
+
+
+
+D. Troubleshooting
+
+- `file not readable` Error - 
+If you see an error similar to the following in the terminal. Please make sure you setup step `B.2` properly.
+        
+   ```
+   [Error: ENOENT: no such file or directory, open '/usr/local/mAtches/data/maps.json'] {
+      errno: -2,
+      code: 'ENOENT',
+      syscall: 'open',
+      path: '/usr/local/mAtches/data/maps.json'
+      }
+      /mAtches/server/queries.js:34
+      reject(new Error("file not readable"));
+               ^
+   Error: file not readable
+   at ReadFileContext.callback (/mAtches/server/queries.js:34:16)
+   at FSReqCallback.readFileAfterOpen [as oncomplete] (node:fs:284:13)
+   [nodemon] app crashed - waiting for file changes before starting...
+
+   ``` 
